@@ -1,0 +1,2 @@
+include ':app', ':cv42sdk'
+rootProject.name='Opencv42Demo'

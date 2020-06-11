@@ -12,8 +12,12 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.demo.cv42.view.CustomJavaCameraView;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -49,6 +53,13 @@ public class CustomCameraActivity extends Activity {
         ((TextView) findViewById(R.id.textView)).setText("Opencv版本:" + OpenCVLoader.OPENCV_VERSION);
         javaCameraView = findViewById(R.id.cameraView);
 
+        ((CheckBox) findViewById(R.id.checkboxFull)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                javaCameraView.setAutoFullScreen(isChecked);
+            }
+        });
+
         Configuration mConfiguration = this.getResources().getConfiguration(); //获取设置的配置信息
         int ori = mConfiguration.orientation; //获取屏幕方向
         if (ori == mConfiguration.ORIENTATION_LANDSCAPE) {
@@ -59,8 +70,7 @@ public class CustomCameraActivity extends Activity {
             javaCameraView.setPortrait(true);
         }
 
-
-//        javaCameraView.setCameraIndex(1);
+//      javaCameraView.setCameraIndex(1);
         javaCameraView.setOnFrameReadCallBack(new CustomJavaCameraView.OnFrameReadCallBack() {
             @Override
             public void OnFrameRead(final Bitmap bitmap) {
@@ -77,7 +87,7 @@ public class CustomCameraActivity extends Activity {
 
         requestPermission();
 
-        ((TextView) findViewById(R.id.textViewTitleDesc)).setText("自定义照相机");
+        ((TextView) findViewById(R.id.textViewTitleDesc)).setText("自定义(解决，全屏，横竖屏切换，前后摄像头切换)");
         buttonSwitchCamera = findViewById(R.id.buttonSwitchCamera);
         buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
             @Override

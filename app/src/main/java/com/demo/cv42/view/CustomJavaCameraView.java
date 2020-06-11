@@ -1,4 +1,4 @@
-package com.demo.cv42;
+package com.demo.cv42.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,6 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
+import android.util.Log;
+
+import com.demo.cv42.App;
 
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.Utils;
@@ -14,25 +17,31 @@ import org.opencv.core.Mat;
 
 import java.util.List;
 
+/**
+ * 自定义JavaCamera View
+ */
 public class CustomJavaCameraView extends JavaCameraView {
 
     //是否使用前置摄像头
     private boolean useFrontCamera = false;
-    //是否使用原生的view来绘制
-    private boolean drawInThisView = false;
+
+    //是否使用opencv自己的方式绘制来绘制
+    private boolean drawUseDefaultMethod = false;
+
     //显示Mat用的Bitmap
-    private Bitmap customCacheBitmapPor;
-    private Bitmap customCacheBitmapLad;
+    private Bitmap customCacheBitmap = null;
+
     //当前是否竖屏
     private boolean isPortrait = true;
-    private OnFrameReadCallBack onFrameReadCallBack;
 
-    private int lastWidth, lastHeight;
+    //自动缩放到全屏取中间部分绘制
+    private boolean autoFullScreen=true;
+
+    //接受Bitmap回调，可以在其他的地方显示
+    private OnFrameReadCallBack onFrameReadCallBack;
 
     public CustomJavaCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        useFrontCamera = true;
-        mCameraIndex = useFrontCamera ? CAMERA_ID_FRONT : CAMERA_ID_BACK;
     }
 
     public void swithCamera(boolean useFront) {
@@ -42,91 +51,87 @@ public class CustomJavaCameraView extends JavaCameraView {
         connectCamera(getWidth(), getHeight());
     }
 
-
     @Override
     protected void deliverAndDrawFrame(CvCameraViewFrame frame) {
         int width = getWidth();
         int height = getHeight();
-
-        if (drawInThisView) {
+        if (drawUseDefaultMethod) {
             super.deliverAndDrawFrame(frame);
         } else {
             //使用自定义绘制方法
-            Mat modified = frame.rgba();
+            Mat srcMat = frame.rgba();
             Mat rotatedMat = null;
 
-
-            if(isPortrait){
-             //竖屏
+            if (isPortrait) {
+                //竖屏
                 if (useFrontCamera) {
-                    Core.flip(modified, modified, 1);//使用了前置摄像头，又设置了drawSource=false,需要翻转左右，不然旋转90度之后会有问题
-                    rotatedMat = new Mat(modified.cols(), modified.rows(), modified.type());
-                    Core.rotate(modified, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-                    modified = rotatedMat;
-                }else{
-                    rotatedMat = new Mat(modified.cols(), modified.rows(), modified.type());
-                    Core.rotate(modified, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-                    modified = rotatedMat;
+                    Core.flip(srcMat, srcMat, 1);//使用了前置摄像头，需要翻转左右，不然旋转90度之后会有问题
+                    rotatedMat = new Mat(srcMat.cols(), srcMat.rows(), srcMat.type());
+                    Core.rotate(srcMat, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
+                    srcMat.release();
+                    srcMat = rotatedMat;
+                } else {
+                    rotatedMat = new Mat(srcMat.cols(), srcMat.rows(), srcMat.type());
+                    Core.rotate(srcMat, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
+                    srcMat.release();
+                    srcMat = rotatedMat;
                 }
 
-            }else{
-             //横屏
+            } else {
+                //横屏则不需要处理
                 if (useFrontCamera) {
-//                    Core.flip(modified, modified, 1);//使用了前置摄像头，又设置了drawSource=false,需要翻转左右，不然旋转90度之后会有问题
-//                    rotatedMat = new Mat(modified.cols(), modified.rows(), modified.type());
-//                    Core.rotate(modified, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-//                    modified = rotatedMat;
 
-                }else{
-//                    rotatedMat = new Mat(modified.cols(), modified.rows(), modified.type());
-//                    Core.rotate(modified, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-//                    modified = rotatedMat;
+                } else {
+
                 }
             }
 
-            Bitmap customCacheBitmap = null;
-            if ((isPortrait == true && null == customCacheBitmapPor) || (modified.rows() != lastHeight || modified.cols() != lastWidth)) {
-                if (null != customCacheBitmapPor && !customCacheBitmapPor.isRecycled()) {
-                    customCacheBitmapPor.recycle();
+            //经过上述步骤得到正确方向的Mat信息
+            if (null == customCacheBitmap || (customCacheBitmap.getWidth() != srcMat.cols() || customCacheBitmap.getHeight() != srcMat.rows())) {
+                if (null != customCacheBitmap && !customCacheBitmap.isRecycled()) {
+                    customCacheBitmap.recycle();
                 }
-
-                customCacheBitmapPor = Bitmap.createBitmap(modified.cols(), modified.rows(), Bitmap.Config.ARGB_8888);
-                lastWidth = customCacheBitmapPor.getWidth();
-                lastHeight = customCacheBitmapPor.getHeight();
-
-            } else if ((isPortrait == false && null == customCacheBitmapLad) || (modified.rows() != lastHeight || modified.cols() != lastWidth)) {
-                if (null != customCacheBitmapLad && !customCacheBitmapLad.isRecycled()) {
-                    customCacheBitmapLad.recycle();
-                }
-
-                customCacheBitmapLad = Bitmap.createBitmap(modified.cols(), modified.rows(), Bitmap.Config.ARGB_8888);
-                lastWidth = customCacheBitmapLad.getWidth();
-                lastHeight = customCacheBitmapLad.getHeight();
+                customCacheBitmap = Bitmap.createBitmap(srcMat.cols(), srcMat.rows(), Bitmap.Config.ARGB_8888);
             }
-            customCacheBitmap = isPortrait ? customCacheBitmapPor : customCacheBitmapLad;
+
+            //自动缩放到全屏，原生的Opencv mscale 参数自动计算出来有缺点不能自动铺满屏幕
+            if(autoFullScreen){
+                if(srcMat.cols()<width || srcMat.rows()<height){
+
+                    float scaleWidth=width*1.0f/srcMat.cols();
+                    float scaleHeight=height*1.0f/srcMat.rows();
+                    float maxScale=Math.max(scaleHeight,scaleWidth);
+
+                    mScale=maxScale;//用自带的缩放系数（当然也可以自己来缩放Mat 或者bitmap达到同样的效果）
+                }else {
+                    mScale=1.0f;
+                }
+            }else {
+                mScale=1.0f;
+            }
+
 
             boolean bmpValid = true;
-            if (modified != null) {
+            if (srcMat != null) {
                 try {
-                    Utils.matToBitmap(modified, customCacheBitmap);
+                    Utils.matToBitmap(srcMat, customCacheBitmap);//这一步骤很容易出错，每次根据Mat的实际大小创建Bitmap缓存，但是太浪费时间，所以要事先创建好
                 } catch (Exception e) {
-                    e.printStackTrace();
                     bmpValid = false;
                 }
             }
 
-
             if (null != onFrameReadCallBack) {
-                onFrameReadCallBack.OnFrameRead(customCacheBitmap);
+                onFrameReadCallBack.OnFrameRead(customCacheBitmap);//别的地方获Bitmap可以在别的地方显示
             }
 
-
+            //如果屏蔽下面的代码不会绘制
             if (bmpValid && customCacheBitmap != null && !customCacheBitmap.isRecycled()) {
-
                 Canvas canvas = getHolder().lockCanvas();
 
                 if (canvas != null) {
                     canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+                    Log.e(App.tag,"mscale"+mScale);
+
 
                     if (mScale != 0) {
                         canvas.drawBitmap(customCacheBitmap, new Rect(0, 0, customCacheBitmap.getWidth(), customCacheBitmap.getHeight()),
@@ -142,7 +147,9 @@ public class CustomJavaCameraView extends JavaCameraView {
                                         (canvas.getHeight() - customCacheBitmap.getHeight()) / 2 + customCacheBitmap.getHeight()), null);
                     }
 
+
                     if (mFpsMeter != null) {
+                        mFpsMeter.setResolution(srcMat.width(),srcMat.height());//使用真实的图片分辨率
                         mFpsMeter.measure();
                         mFpsMeter.draw(canvas, 20, 30);
                     }
@@ -155,12 +162,8 @@ public class CustomJavaCameraView extends JavaCameraView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (null != customCacheBitmapPor && !customCacheBitmapPor.isRecycled()) {
-            customCacheBitmapPor.recycle();
-        }
-
-        if (null != customCacheBitmapLad && !customCacheBitmapLad.isRecycled()) {
-            customCacheBitmapLad.recycle();
+        if (null != customCacheBitmap && !customCacheBitmap.isRecycled()) {
+            customCacheBitmap.recycle();
         }
     }
 
@@ -171,7 +174,7 @@ public class CustomJavaCameraView extends JavaCameraView {
         connectCamera(getWidth(), getHeight());
     }
 
-    public void restartCamera(){
+    public void restartCamera() {
         disconnectCamera();
         connectCamera(getWidth(), getHeight());
     }
@@ -193,12 +196,12 @@ public class CustomJavaCameraView extends JavaCameraView {
         return useFrontCamera;
     }
 
-    public boolean isDrawInThisView() {
-        return drawInThisView;
+    public boolean isDrawUseDefaultMethod() {
+        return drawUseDefaultMethod;
     }
 
-    public void setDrawInThisView(boolean drawInThisView) {
-        this.drawInThisView = drawInThisView;
+    public void setDrawUseDefaultMethod(boolean drawUseDefaultMethod) {
+        this.drawUseDefaultMethod = drawUseDefaultMethod;
     }
 
     public boolean isPortrait() {
@@ -220,5 +223,13 @@ public class CustomJavaCameraView extends JavaCameraView {
 
     public void setOnFrameReadCallBack(OnFrameReadCallBack onFrameReadCallBack) {
         this.onFrameReadCallBack = onFrameReadCallBack;
+    }
+
+    public boolean isAutoFullScreen() {
+        return autoFullScreen;
+    }
+
+    public void setAutoFullScreen(boolean autoFullScreen) {
+        this.autoFullScreen = autoFullScreen;
     }
 }

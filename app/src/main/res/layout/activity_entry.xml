@@ -67,7 +67,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:onClick="onClickCustomCamera"
-        android:text="切换摄像头预览(自定义)"
+        android:text="自定义(解决全屏,前后摄像头切换,横竖屏切换)"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/buttonPortriatFrontFullScreen" />

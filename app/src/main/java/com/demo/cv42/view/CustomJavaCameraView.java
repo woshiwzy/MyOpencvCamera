@@ -35,7 +35,7 @@ public class CustomJavaCameraView extends JavaCameraView {
     private boolean isPortrait = true;
 
     //自动缩放到全屏取中间部分绘制
-    private boolean autoFullScreen=true;
+    private boolean autoFullScreen = true;
 
     //接受Bitmap回调，可以在其他的地方显示
     private OnFrameReadCallBack onFrameReadCallBack;
@@ -59,6 +59,14 @@ public class CustomJavaCameraView extends JavaCameraView {
             super.deliverAndDrawFrame(frame);
         } else {
             //使用自定义绘制方法
+
+            //如果需要CvLisenter 回调方法，可以在此自定义或者反射获取父类的listener
+//            if (mListener != null) {
+//                modified = mListener.onCameraFrame(frame);
+//            } else {
+//                modified = frame.rgba();
+//            }
+
             Mat srcMat = frame.rgba();
             Mat rotatedMat = null;
 
@@ -95,19 +103,19 @@ public class CustomJavaCameraView extends JavaCameraView {
             }
 
             //自动缩放到全屏，原生的Opencv mscale 参数自动计算出来有缺点不能自动铺满屏幕
-            if(autoFullScreen){
-                if(srcMat.cols()<width || srcMat.rows()<height){
+            if (autoFullScreen) {
+                if (srcMat.cols() < width || srcMat.rows() < height) {
 
-                    float scaleWidth=width*1.0f/srcMat.cols();
-                    float scaleHeight=height*1.0f/srcMat.rows();
-                    float maxScale=Math.max(scaleHeight,scaleWidth);
+                    float scaleWidth = width * 1.0f / srcMat.cols();
+                    float scaleHeight = height * 1.0f / srcMat.rows();
+                    float maxScale = Math.max(scaleHeight, scaleWidth);
 
-                    mScale=maxScale;//用自带的缩放系数（当然也可以自己来缩放Mat 或者bitmap达到同样的效果）
-                }else {
-                    mScale=1.0f;
+                    mScale = maxScale;//用自带的缩放系数（当然也可以自己来缩放Mat 或者bitmap达到同样的效果）
+                } else {
+                    mScale = 1.0f;
                 }
-            }else {
-                mScale=1.0f;
+            } else {
+                mScale = 1.0f;
             }
 
 
@@ -130,7 +138,7 @@ public class CustomJavaCameraView extends JavaCameraView {
 
                 if (canvas != null) {
                     canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-                    Log.e(App.tag,"mscale"+mScale);
+                    Log.e(App.tag, "mscale" + mScale);
 
 
                     if (mScale != 0) {
@@ -149,7 +157,7 @@ public class CustomJavaCameraView extends JavaCameraView {
 
 
                     if (mFpsMeter != null) {
-                        mFpsMeter.setResolution(srcMat.width(),srcMat.height());//使用真实的图片分辨率
+                        mFpsMeter.setResolution(srcMat.width(), srcMat.height());//使用真实的图片分辨率
                         mFpsMeter.measure();
                         mFpsMeter.draw(canvas, 20, 30);
                     }

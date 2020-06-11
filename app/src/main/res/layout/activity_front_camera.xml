@@ -4,23 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
-    tools:context=".MainActivity">
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Hello World!" />
-
-    </LinearLayout>
+    tools:context=".CameraActivity">
 
 
     <org.opencv.android.JavaCamera2View
@@ -30,5 +14,30 @@
         opencv:camera_id="any"
         opencv:show_fps="false"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top|right"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/holo_red_dark"
+            android:gravity="center"
+            android:text="Hello World!" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/textViewTitleDesc"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:textColor="#bbffaa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EntryActivity">
+
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="cameraPreviewBack,cameraPreviewHead" />
+
+    <Button
+        android:id="@+id/cameraPreviewBack"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClickBack"
+        android:text="后置摄像头预览(原生)"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/cameraPreviewHead"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/cameraPreviewHead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClickBackLand"
+        android:text="后置横屏(原生)"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/cameraPreviewBack"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/buttonLandFront"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickFrontCamera"
+        android:text="前置摄像头横屏(原生)"
+        app:layout_constraintTop_toBottomOf="@id/cameraPreviewHead" />
+
+    <Button
+        android:id="@+id/buttonPortriatFront"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickPortriatCamera"
+        android:text="前置摄像头竖屏(原生-默认不能铺满屏幕)"
+        app:layout_constraintTop_toBottomOf="@id/buttonLandFront" />
+
+    <Button
+        android:id="@+id/buttonPortriatFrontFullScreen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickPortriatFullCamera"
+        android:text="前置摄像头竖屏(原生-自定义铺满屏幕)"
+        app:layout_constraintTop_toBottomOf="@id/buttonPortriatFront" />
+
+
+    <Button
+        android:id="@+id/switchPreviewHead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClickCustomCamera"
+        android:text="切换摄像头预览(自定义)"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/buttonPortriatFrontFullScreen" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

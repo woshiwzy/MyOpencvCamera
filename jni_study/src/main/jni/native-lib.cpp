@@ -25,7 +25,8 @@ using namespace cv;
 extern "C"
 {
 
-JNIEXPORT jstring JNICALL Java_com_demo_study_MainActivity_getCVVersion(JNIEnv *env,jobject /* this */) {
+JNIEXPORT jstring JNICALL
+Java_com_demo_study_MainActivity_getCVVersion(JNIEnv *env, jobject /* this */) {
 
     LOGD("测试LOG IN JNI");
 
@@ -36,7 +37,9 @@ JNIEXPORT jstring JNICALL Java_com_demo_study_MainActivity_getCVVersion(JNIEnv *
 }
 
 
-JNIEXPORT jintArray JNICALL Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEnv *env, jclass claz, jintArray pixels,jint w, jint h) {
+JNIEXPORT jintArray JNICALL
+Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEnv *env, jclass claz, jintArray pixels, jint w,
+                                               jint h) {
 
     jint *cur_array;
 
@@ -57,6 +60,38 @@ JNIEXPORT jintArray JNICALL Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEn
     env->SetIntArrayRegion(result, 0, size, (jint *) img.data);
     env->ReleaseIntArrayElements(pixels, cur_array, 0);
     return result;
+}
+
+
+/**
+ * Java调用System.loadLibrary()加载一个库的时候，会首先在库中搜索JNI_OnLoad()函数，如果该函数存在，则执行它
+ * @param jvm
+ * @param reserved
+ * @return
+ */
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
+    JNIEnv *env = NULL;
+    jint result = -1;
+
+    LOGD("测试LOG IN JNI JNI_OnLoad");
+
+    if (jvm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {
+        return -1;
+    }
+
+    result = JNI_VERSION_1_4;
+    return result;
+}
+
+/**
+ * 根据JNI文档的描述，当GC回收了加载这个库的ClassLoader时，该函数被调用
+ * @param vm
+ * @param reserved
+ */
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
+
+
+    LOGD("测试LOG IN JNI JNI_OnUnload");
 }
 
 

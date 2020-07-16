@@ -1,2 +1,3 @@
-include ':app', ':cv42sdk',':dlib'
+include ':app', ':cv42sdk', ':dlib'
 rootProject.name='MyOpenCvCamera'
+include ':jni_study'

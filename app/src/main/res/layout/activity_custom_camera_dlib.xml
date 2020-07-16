@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CameraActivity">
+
+    <com.demo.cv42.view.CustomJavaCameraView
+        android:id="@+id/cameraView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        opencv:camera_id="any"
+        opencv:show_fps="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/input_item_height"
+        android:gravity="top|right"
+        android:background="#88000000"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:gravity="center"
+            android:text="Opencv 版本"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <CheckBox
+            android:id="@+id/checkboxFull"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:textColor="@android:color/holo_red_dark"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:checked="true"
+            android:text="自动铺满全屏" />
+
+        <Button
+            android:id="@+id/buttonSwitchCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:layout_marginBottom="@dimen/input_item_height"
+            android:text="切换摄像头" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/textViewTitleDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textColor="#bbffaa" />
+
+    <ImageView
+        android:id="@+id/cameraViewImg"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:text="切换摄像头" />
+
+
+
+</RelativeLayout>

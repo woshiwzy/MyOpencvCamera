@@ -92,7 +92,6 @@ public class FrontCameraPortraitActivity extends Activity {
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
-                            Log.e(App.tag, "onCameraViewStarted:" + width + " x " + height);
                             javaCameraView.AllocateCache2(height, width);//注意这里width*height是反的，原因是原生的CameraView 绘制的时候 Mat转Bitmap需要构造旋转后的大小的Bitmap
 //                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);//注意这里width*height是反的，原因是原生的CameraView 绘制的时候 Mat转Bitmap需要构造旋转后的大小的Bitmap
 

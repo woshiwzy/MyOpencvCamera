@@ -8,12 +8,14 @@ import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
 
+
 import com.demo.cv42.App;
 
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
@@ -121,16 +123,22 @@ public class CustomJavaCameraView extends JavaCameraView {
 
             boolean bmpValid = true;
             if (srcMat != null) {
+
                 try {
+                    Imgproc.cvtColor(srcMat,srcMat,Imgproc.COLOR_RGB2RGBA);//需要强制设置一个格式否则dlib无法识别landmark
                     Utils.matToBitmap(srcMat, customCacheBitmap);//这一步骤很容易出错，每次根据Mat的实际大小创建Bitmap缓存，但是太浪费时间，所以要事先创建好
                 } catch (Exception e) {
                     bmpValid = false;
                 }
+
+
+                if (null != onFrameReadCallBack) {
+                    onFrameReadCallBack.OnFrameRead(customCacheBitmap,srcMat);//别的地方获Bitmap可以在别的地方显示
+                }
+                srcMat.release();//用完释放
             }
 
-            if (null != onFrameReadCallBack) {
-                onFrameReadCallBack.OnFrameRead(customCacheBitmap);//别的地方获Bitmap可以在别的地方显示
-            }
+
 
             //如果屏蔽下面的代码不会绘制
             if (bmpValid && customCacheBitmap != null && !customCacheBitmap.isRecycled()) {
@@ -222,7 +230,7 @@ public class CustomJavaCameraView extends JavaCameraView {
 
 
     public static interface OnFrameReadCallBack {
-        public void OnFrameRead(Bitmap bitmap);
+        public void OnFrameRead(Bitmap bitmap,Mat mat);
     }
 
     public OnFrameReadCallBack getOnFrameReadCallBack() {

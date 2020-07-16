@@ -73,7 +73,7 @@ public class CustomCameraActivity extends Activity {
 //      javaCameraView.setCameraIndex(1);
         javaCameraView.setOnFrameReadCallBack(new CustomJavaCameraView.OnFrameReadCallBack() {
             @Override
-            public void OnFrameRead(final Bitmap bitmap) {
+            public void OnFrameRead(final Bitmap bitmap,final Mat mat) {
 
                 runOnUiThread(new Runnable() {
                     @Override

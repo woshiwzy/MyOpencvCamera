@@ -1,13 +1,11 @@
-package com.demo.cv42
+package com.demo.cv42.cv
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import com.tzutalin.dlib.Constants
-import com.tzutalin.dlib.FaceDet
+import com.demo.cv42.R
+import com.demo.cv42.gpu.GPUActivity
 
 class GOActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,5 +55,9 @@ class GOActivity : Activity() {
 
     fun onClickCustomCameraDlib(view: View?) {
         startActivity(Intent(this, CustomCameraDlibActivity::class.java))
+    }
+
+    fun onClickCustomCameraGPU(view: View?) {
+        startActivity(Intent(this, GPUActivity::class.java))
     }
 }

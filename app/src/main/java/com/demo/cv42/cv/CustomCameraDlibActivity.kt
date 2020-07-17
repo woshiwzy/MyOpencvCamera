@@ -1,4 +1,4 @@
-package com.demo.cv42
+package com.demo.cv42.cv
 
 import android.Manifest
 import android.annotation.TargetApi
@@ -16,6 +16,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
+import com.demo.cv42.App
+import com.demo.cv42.R
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
 import com.tzutalin.dlib.Constants

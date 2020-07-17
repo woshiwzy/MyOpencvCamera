@@ -90,7 +90,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
  */
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
 
-
     LOGD("测试LOG IN JNI JNI_OnUnload");
 }
 

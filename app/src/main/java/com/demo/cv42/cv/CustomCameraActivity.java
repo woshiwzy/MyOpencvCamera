@@ -1,4 +1,4 @@
-package com.demo.cv42;
+package com.demo.cv42.cv;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -17,6 +17,8 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.demo.cv42.App;
+import com.demo.cv42.R;
 import com.demo.cv42.view.CustomJavaCameraView;
 
 import org.opencv.android.CameraBridgeViewBase;

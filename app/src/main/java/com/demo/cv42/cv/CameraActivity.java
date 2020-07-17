@@ -1,4 +1,4 @@
-package com.demo.cv42;
+package com.demo.cv42.cv;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -11,6 +11,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.demo.cv42.App;
+import com.demo.cv42.R;
+
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCamera2View;
 import org.opencv.android.OpenCVLoader;
@@ -21,24 +24,38 @@ import org.opencv.imgproc.Imgproc;
 
 import static android.Manifest.permission.CAMERA;
 
-public class SwitchCameraActivity extends Activity {
+public class CameraActivity extends Activity {
 
     private String tag = "cv42demo";
     private JavaCamera2View javaCameraView;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private boolean isInitSuccess=false;
 
+
+//    static {
+//        Log.e(App.tag, "isinit success:" + OpenCVLoader.initDebug());
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Resources resources = getResources();
+
+//        final DisplayMetrics dm = resources.getDisplayMetrics();
+//        float density1 = dm.density;
+//        int width3 = dm.widthPixels;
+//        int height3 = dm.heightPixels;
 
         setContentView(R.layout.activity_camera);
         ((TextView) findViewById(R.id.textView)).setText("Opencv版本:" + OpenCVLoader.OPENCV_VERSION);
         javaCameraView = findViewById(R.id.cameraView);
         javaCameraView.setCameraIndex(0);
+
         requestPermission();
+
+        ((TextView)findViewById(R.id.textViewTitleDesc)).setText("后置能全屏");
     }
 
     private void requestPermission() {
@@ -114,6 +131,7 @@ public class SwitchCameraActivity extends Activity {
 
                             Mat newMat = new Mat(cameraViewHeight, cameraViewWidth, src.type());
                             Imgproc.resize(rotatedMat, newMat, new Size(cameraViewWidth, cameraViewHeight));
+
                             return newMat;
                         }
 

@@ -1,8 +1,9 @@
-package com.demo.cv42;
+package com.demo.cv42.cv;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,20 +11,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.demo.cv42.App;
+import com.demo.cv42.R;
+
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCamera2View;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import static android.Manifest.permission.CAMERA;
 
-public class FrontCameraLandActivity extends Activity {
+public class SwitchCameraActivity extends Activity {
 
     private String tag = "cv42demo";
     private JavaCamera2View javaCameraView;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
-    private boolean isInitSuccess = false;
+    private boolean isInitSuccess=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +37,11 @@ public class FrontCameraLandActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_front_camera);
+        setContentView(R.layout.activity_camera);
         ((TextView) findViewById(R.id.textView)).setText("Opencv版本:" + OpenCVLoader.OPENCV_VERSION);
         javaCameraView = findViewById(R.id.cameraView);
-        javaCameraView.setCameraIndex(1);
+        javaCameraView.setCameraIndex(0);
         requestPermission();
-
-        ((TextView)findViewById(R.id.textViewTitleDesc)).setText("前置横屏");
     }
 
     private void requestPermission() {
@@ -72,7 +76,7 @@ public class FrontCameraLandActivity extends Activity {
 
     private boolean initCamera() {
         Log.e(App.tag, "isinit success:" + isInitSuccess);
-        if (null != javaCameraView) {
+        if (  null != javaCameraView) {
 
             javaCameraView.post(new Runnable() {
                 @Override
@@ -88,7 +92,7 @@ public class FrontCameraLandActivity extends Activity {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
                             Log.e(App.tag, "onCameraViewStarted:" + width + " x " + height);
-//                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);
+                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);
                         }
 
                         @Override
@@ -100,9 +104,20 @@ public class FrontCameraLandActivity extends Activity {
                         public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
                             final Mat src = inputFrame.rgba();
+                            Mat rotatedMat = null;
 
-                            Core.flip(src, src, 1);
-                            return src;
+                        //如果在这里改变了图片的宽度和高度就需要调用javaCameraView.AllocateCache2() 修改缓存图片的大小
+                        ////厂商把后置摄像头映射成前置摄像头了
+                        ////Core.flip(src, src, 1);//使用了前置摄像头，又设置了drawSource=false,需要翻转左右，不然旋转90度之后会有问题
+                            rotatedMat = new Mat(src.cols(), src.rows(), src.type());
+                            Core.rotate(src, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
+                            if (rotatedMat.width() < 0 || rotatedMat.height() < 0) {
+                                return null;
+                            }
+
+                            Mat newMat = new Mat(cameraViewHeight, cameraViewWidth, src.type());
+                            Imgproc.resize(rotatedMat, newMat, new Size(cameraViewWidth, cameraViewHeight));
+                            return newMat;
                         }
 
                     });

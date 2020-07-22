@@ -12,7 +12,7 @@ set_target_properties(libopencv_java4 PROPERTIES IMPORTED_LOCATION
 add_library(
              native-lib
              SHARED
-             native-lib.cpp )
+             native-lib.cpp LogUtils.h )
 
 
 find_library( # Sets the name of the path variable.

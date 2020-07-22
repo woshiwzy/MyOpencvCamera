@@ -7,18 +7,9 @@
 #include <stdio.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
-#include<android/log.h>
-
-
-#ifndef LOG_TAG
-#define LOG_TAG "study"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG ,__VA_ARGS__) // 定义LOGD类型
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG ,__VA_ARGS__) // 定义LOGI类型
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,LOG_TAG ,__VA_ARGS__) // 定义LOGW类型
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG ,__VA_ARGS__) // 定义LOGE类型
-#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,LOG_TAG ,__VA_ARGS__) // 定义LOGF类型
-#endif
-
+#include <android/log.h>
+#include <dirent.h>
+#include "LogUtils.h"
 
 using namespace std;
 using namespace cv;
@@ -63,6 +54,83 @@ Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEnv *env, jclass claz, jintArr
 }
 
 
+
+//
+//jint RegisterNativeMethod(JNIEnv *env) {
+//    jclass clazz = env->FindClass("com/demo/study/NativeLibUtils");
+//    if (clazz == NULL) {
+//        LOGE("con't find class com/demo/study/NativeLibUtils")
+//        return JNI_ERR;
+//    }
+//
+//    JNINativeMethod methods_binds[] = {
+//            {"scanFiles", "(Ljava/lang/String;)V", (void *) scanFilesINNative}
+//    };
+//
+//    return env->RegisterNatives(clazz, methods_binds,
+//                                sizeof(methods_binds) / sizeof(methods_binds[0]));
+//}
+
+
+
+void scanDir(JNIEnv *env, jobject list, jmethodID adId, string dir_name) {
+    if (dir_name.empty()) {
+        LOGE("dir_name is null !");
+        return;
+    }
+    DIR *dir = opendir(dir_name.c_str());
+    // check is dir ?
+    if (NULL == dir) {
+        LOGE("Can not open dir. Check path or permission!");
+        return;
+    }
+    struct dirent *file;
+    // read all the files in dir
+    while ((file = readdir(dir)) != NULL) {
+        // skip "." and ".."
+        if (strcmp(file->d_name, ".") == 0 || strcmp(file->d_name, "..") == 0) {
+            LOGV("ignore . and ..");
+            continue;
+        }
+        if (file->d_type == DT_DIR) {
+            string filePath = dir_name + "/" + file->d_name;
+            scanDir(env, list, adId, filePath); // 递归执行
+        } else {
+            // 如果需要把路径保存到集合中去，就在这里执行 add 的操作
+            char *name = (char *) malloc(strlen(dir_name.c_str()) + strlen(file->d_name));
+            sprintf(name, "%s%s", dir_name.c_str(), file->d_name);
+            env->CallBooleanMethod(list, adId, env->NewStringUTF(name));
+
+//            string path=dir_name+file->d_name;
+//            env->CallBooleanMethod(list,adId,env->NewStringUTF(file->d_name));
+//            LOGI("filePath: %s/%s", dir_name.c_str(), file->d_name);
+//             LOGI(path);
+        }
+    }
+    closedir(dir);
+}
+
+
+JNIEXPORT jobject JNICALL
+Java_com_demo_study_NativeLibUtils_scanFiles(JNIEnv *env, jclass clazz, jstring dir_name) {
+    const char *dirPath = env->GetStringUTFChars(dir_name, 0);
+
+    jclass fileListClas = env->FindClass("java/util/ArrayList");
+    jmethodID construct = env->GetMethodID(fileListClas, "<init>", "()V");
+    jobject obj_list = env->NewObject(fileListClas, construct);
+
+    jmethodID listAddMethodId = env->GetMethodID(fileListClas, "add", "(Ljava/lang/Object;)Z");
+    scanDir(env, obj_list, listAddMethodId, string(dirPath));
+
+//    env->CallBooleanMethod(obj_list, listAddMethodId, env->NewStringUTF("HHHHBBBACC"));
+
+    env->ReleaseStringUTFChars(dir_name, dirPath);
+
+    return obj_list;
+}
+
+
+
 /**
  * Java调用System.loadLibrary()加载一个库的时候，会首先在库中搜索JNI_OnLoad()函数，如果该函数存在，则执行它
  * @param jvm
@@ -72,16 +140,20 @@ Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEnv *env, jclass claz, jintArr
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     JNIEnv *env = NULL;
     jint result = -1;
-
     LOGD("测试LOG IN JNI JNI_OnLoad");
 
     if (jvm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {
         return -1;
     }
 
+
+//    jint ret = RegisterNativeMethod(env);
+
     result = JNI_VERSION_1_4;
     return result;
 }
+
+
 
 /**
  * 根据JNI文档的描述，当GC回收了加载这个库的ClassLoader时，该函数被调用
@@ -90,8 +162,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
  */
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
 
+
     LOGD("测试LOG IN JNI JNI_OnUnload");
 }
-
 
 }

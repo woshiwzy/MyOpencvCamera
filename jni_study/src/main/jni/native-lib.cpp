@@ -1,15 +1,19 @@
 #include <jni.h>
 #include <string>
+#include <iostream>
+#include <stdio.h>
+#include <dirent.h>
+
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
-#include <iostream>
-#include <string>
-#include <stdio.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <android/log.h>
-#include <dirent.h>
+
 #include "LogUtils.h"
+#include "StringUtils.h"
+
 
 using namespace std;
 using namespace cv;
@@ -55,7 +59,7 @@ Java_com_demo_study_NativeLibUtils_bitmap2Gray(JNIEnv *env, jclass claz, jintArr
 
 
 
-//
+//动态注册示例
 //jint RegisterNativeMethod(JNIEnv *env) {
 //    jclass clazz = env->FindClass("com/demo/study/NativeLibUtils");
 //    if (clazz == NULL) {
@@ -97,14 +101,11 @@ void scanDir(JNIEnv *env, jobject list, jmethodID adId, string dir_name) {
             scanDir(env, list, adId, filePath); // 递归执行
         } else {
             // 如果需要把路径保存到集合中去，就在这里执行 add 的操作
-            char *name = (char *) malloc(strlen(dir_name.c_str()) + strlen(file->d_name));
-            sprintf(name, "%s%s", dir_name.c_str(), file->d_name);
-            env->CallBooleanMethod(list, adId, env->NewStringUTF(name));
+//            char *name = (char *) malloc(strlen(dir_name.c_str()) + strlen(file->d_name));
+//            sprintf(name, "%s%s", dir_name.c_str(), file->d_name);
+//            env->CallBooleanMethod(list, adId, env->NewStringUTF(name));
 
-//            string path=dir_name+file->d_name;
-//            env->CallBooleanMethod(list,adId,env->NewStringUTF(file->d_name));
-//            LOGI("filePath: %s/%s", dir_name.c_str(), file->d_name);
-//             LOGI(path);
+            env->CallBooleanMethod(list, adId, env->NewStringUTF(contact(const_cast<char *>(dir_name.c_str()), file->d_name)));
         }
     }
     closedir(dir);
@@ -146,7 +147,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
         return -1;
     }
 
-
+//执行动态注册
 //    jint ret = RegisterNativeMethod(env);
 
     result = JNI_VERSION_1_4;

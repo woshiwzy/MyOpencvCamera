@@ -34,10 +34,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.buttonGo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 textViewVersion.setText(getCVVersion());
                 Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test2);
                 imageViewIcon.setImageBitmap(rgb2Gray(bitmap));
-
 
                 new Thread(new Runnable() {
                     @Override
@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.e(App.tag, "JAVA文件数:" + results.size());
                         Log.e(App.tag, "JNI文件数:" + ret.size());
+
+
 
                     }
                 }).start();

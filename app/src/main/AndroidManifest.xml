@@ -15,7 +15,9 @@
         android:roundIcon="@drawable/cv_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".cv.GOActivity">
+
+
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,44 +26,48 @@
 
 
         <activity
-            android:name=".cv.CameraActivity"
+            android:name=".activity.CameraActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <activity
-            android:name=".cv.BackCameraActivity"
+            android:name=".activity.BackCameraActivity"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
 
 
         <activity
-            android:name=".cv.FrontCameraLandActivity"
+            android:name=".activity.FrontCameraLandActivity"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
 
         <activity
-            android:name=".cv.FrontCameraPortraitActivity"
+            android:name=".activity.FrontCameraPortraitActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
         <activity
-            android:name=".cv.FrontCameraPortraitFullScreenActivity"
+            android:name=".activity.FrontCameraPortraitFullScreenActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
 
         <activity
-            android:name=".cv.CustomCameraActivity"
+            android:name=".activity.CustomCameraActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
 
         <activity
-            android:name=".cv.CustomCameraDlibActivity"
+            android:name=".activity.CustomCameraDlibActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
-
 
         <activity
             android:name=".gpu.GPUActivity"
+            android:configChanges="orientation|screenSize"
+            tools:ignore="LockedOrientationActivity" />
+
+        <activity
+            android:name="com.demo.cv42.activity.SimpleCusCameraActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
 

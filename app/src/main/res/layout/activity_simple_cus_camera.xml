@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.CustomCameraDlibActivity">
+
+    <ImageView
+        android:id="@+id/imageViewPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/checkBoxSwithCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="摄像头切换"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <Button
+            android:id="@+id/button480"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="640X480" />
+
+        <Button
+            android:id="@+id/button1920"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1920X1080" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewTips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#88ffffff"
+        android:gravity="center" />
+
+</RelativeLayout>

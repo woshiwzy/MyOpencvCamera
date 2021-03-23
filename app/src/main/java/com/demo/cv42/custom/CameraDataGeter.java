@@ -286,16 +286,19 @@ public class CameraDataGeter extends CameraDataGeterBase {
         if (mListener != null) {
 
             if (isPortraint()) {//竖屏要旋转，分前后
+
                 center.x = rgba.cols() / 2;
                 center.y = rgba.rows() / 2;
+
                 if (isFrontCamera()) {
-                    Log.e(App.tag, "前置摄像头");
                     wrapMat = Imgproc.getRotationMatrix2D(center, 90, 1);
                 } else {
-                    Log.e(App.tag, "后置置摄像头");
                     wrapMat = Imgproc.getRotationMatrix2D(center, 270, 1);
                 }
-                dstRgb = new Mat(rgba.cols(), rgba.rows(), rgba.type());//接受旋转后的彩色图
+
+                if(null==dstRgb || dstRgb.rows()!=rgba.cols() || dstRgb.cols()!=rgba.rows()){
+                    dstRgb = new Mat(rgba.cols(), rgba.rows(), rgba.type());
+                }
 
                 if (null == size || size.width != rgba.cols() || size.height != rgba.rows()) {
                     size = new Size(rgba.cols(), rgba.rows());

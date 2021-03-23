@@ -17,11 +17,12 @@ import android.widget.TextView;
 
 import com.demo.cv42.App;
 import com.demo.cv42.R;
-import com.demo.cv42.custom.CameraDataGeterBase;
 import com.demo.cv42.custom.CameraDataGeter;
+import com.demo.cv42.custom.CameraDataGeterBase;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 
 import androidx.annotation.NonNull;
 
@@ -34,7 +35,7 @@ public class SimpleCusCameraActivity extends Activity {
     private CameraDataGeter javaCameraView;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private ImageView imageViewPreview;
-    private CheckBox checkBoxSwithCamera;
+    private CheckBox checkBoxSwithCamera, checkBoxSqure;
     private TextView textViewTips;
     private long lastFrameTime = 0;
 
@@ -45,7 +46,7 @@ public class SimpleCusCameraActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_simple_cus_camera);
 
-
+        checkBoxSqure = findViewById(R.id.checkBoxSqure);
         textViewTips = findViewById(R.id.textViewTips);
         checkBoxSwithCamera = findViewById(R.id.checkBoxSwithCamera);
         checkBoxSwithCamera.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -73,21 +74,57 @@ public class SimpleCusCameraActivity extends Activity {
             public Mat onCameraFrame(Mat rgba) {
                 Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
 
-                final Bitmap bitmap = Bitmap.createBitmap(rgba.width(), rgba.height(), Bitmap.Config.RGB_565);
-                Utils.matToBitmap(rgba, bitmap);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        imageViewPreview.setImageBitmap(bitmap);
-                        if (lastFrameTime != 0) {
-                            double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
-                            double f = delta / 2.0f;
-                            textViewTips.setText("fps:" + (int) (1 / f));
-                        }
-                        lastFrameTime = System.currentTimeMillis();
+                if (checkBoxSqure.isChecked()) {
 
-                    }
-                });
+                    int w = rgba.width();
+                    int h = rgba.height();
+
+                    int min = Math.min(w, h);
+
+                    Rect rect = new Rect();
+
+                    rect.x = w / 2 - min / 2;
+                    rect.y = h / 2 - min / 2;
+                    rect.width = min;
+                    rect.height = min;
+
+                    Mat squreMat = new Mat(rgba, rect);
+                    final Bitmap Sqbitmap = Bitmap.createBitmap(squreMat.width(), squreMat.height(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(squreMat, Sqbitmap);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            imageViewPreview.setImageBitmap(Sqbitmap);
+
+                            if (lastFrameTime != 0) {
+                                double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
+                                double f = delta / 2.0f;
+                                textViewTips.setText("fps:" + (int) (1 / f));
+                            }
+                            lastFrameTime = System.currentTimeMillis();
+                        }
+                    });
+
+                }else {
+
+                    final Bitmap bitmap = Bitmap.createBitmap(rgba.width(), rgba.height(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(rgba, bitmap);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            imageViewPreview.setImageBitmap(bitmap);
+                            if (lastFrameTime != 0) {
+                                double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
+                                double f = delta / 2.0f;
+                                textViewTips.setText("fps:" + (int) (1 / f));
+                            }
+                            lastFrameTime = System.currentTimeMillis();
+
+                        }
+                    });
+                }
+
+
                 return rgba;
             }
         });

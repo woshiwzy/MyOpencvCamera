@@ -228,11 +228,9 @@ public abstract class CameraDataGeterBase {
         }
     }
 
-    private void onEnterStoppedState() {
-    }
+    private void onEnterStoppedState() { }
 
-    private void onExitStoppedState() {
-    }
+    private void onExitStoppedState() { }
 
 
     private void onExitStartedState() {
@@ -241,7 +239,10 @@ public abstract class CameraDataGeterBase {
 
     protected void deliverAndDrawFrame(Mat rgbaMat) {
         if (mListener != null) {
-            mListener.onCameraFrame(rgbaMat);
+            Mat mat = mListener.onCameraFrame(rgbaMat);
+            if (null != mat) {
+                mat.release();
+            }
         }
     }
 

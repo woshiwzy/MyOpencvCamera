@@ -19,12 +19,16 @@ import com.demo.cv42.App;
 import com.demo.cv42.R;
 import com.demo.cv42.custom.CameraDataGeter;
 import com.demo.cv42.custom.CameraDataGeterBase;
+import com.demo.cv42.gpu.GPUImageUtil;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 
+import java.util.Random;
+
 import androidx.annotation.NonNull;
+import jp.co.cyberagent.android.gpuimage.GPUImage;
 
 import static android.Manifest.permission.CAMERA;
 
@@ -38,6 +42,10 @@ public class SimpleCusCameraActivity extends Activity {
     private CheckBox checkBoxSwithCamera, checkBoxSqure;
     private TextView textViewTips;
     private long lastFrameTime = 0;
+
+    private GPUImage gpuImage;
+
+    private int flagFilter = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +80,13 @@ public class SimpleCusCameraActivity extends Activity {
 
             @Override
             public Mat onCameraFrame(Mat rgba) {
-                Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
+//                Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
 
                 if (checkBoxSqure.isChecked()) {
 
                     int w = rgba.width();
                     int h = rgba.height();
-
                     int min = Math.min(w, h);
-
                     Rect rect = new Rect();
 
                     rect.x = w / 2 - min / 2;
@@ -91,41 +97,26 @@ public class SimpleCusCameraActivity extends Activity {
                     Mat squreMat = new Mat(rgba, rect);
                     final Bitmap Sqbitmap = Bitmap.createBitmap(squreMat.width(), squreMat.height(), Bitmap.Config.RGB_565);
                     Utils.matToBitmap(squreMat, Sqbitmap);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            imageViewPreview.setImageBitmap(Sqbitmap);
+                    onBitmapGet(Sqbitmap);
 
-                            if (lastFrameTime != 0) {
-                                double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
-                                double f = delta / 2.0f;
-                                textViewTips.setText("fps:" + (int) (1 / f));
-                            }
-                            lastFrameTime = System.currentTimeMillis();
-                        }
-                    });
-
-                }else {
-
+                } else {
                     final Bitmap bitmap = Bitmap.createBitmap(rgba.width(), rgba.height(), Bitmap.Config.RGB_565);
                     Utils.matToBitmap(rgba, bitmap);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            imageViewPreview.setImageBitmap(bitmap);
-                            if (lastFrameTime != 0) {
-                                double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
-                                double f = delta / 2.0f;
-                                textViewTips.setText("fps:" + (int) (1 / f));
-                            }
-                            lastFrameTime = System.currentTimeMillis();
-
-                        }
-                    });
+                    onBitmapGet(bitmap);
                 }
 
-
                 return rgba;
+            }
+        });
+
+
+        findViewById(R.id.buttonRandFilter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Random random = new Random();
+                flagFilter = random.nextInt(43);
+                Log.e(App.tag, "tag filter:" + flagFilter);
+                textViewTips.setText("滤镜序号:" + flagFilter);
             }
         });
 
@@ -146,6 +137,27 @@ public class SimpleCusCameraActivity extends Activity {
         requestPermission();
     }
 
+
+    private void onBitmapGet(final Bitmap bitmap) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (-1 != flagFilter) {
+                    Bitmap resultBitmap = GPUImageUtil.bitmpFilter(SimpleCusCameraActivity.this, bitmap, flagFilter);
+                    imageViewPreview.setImageBitmap(resultBitmap);
+                } else {
+                    imageViewPreview.setImageBitmap(bitmap);
+                    if (lastFrameTime != 0) {
+                        double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
+                        double f = delta / 2.0f;
+                        textViewTips.setText("fps:" + (int) (1 / f));
+                    }
+                    lastFrameTime = System.currentTimeMillis();
+                }
+            }
+        });
+
+    }
 
     private void requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

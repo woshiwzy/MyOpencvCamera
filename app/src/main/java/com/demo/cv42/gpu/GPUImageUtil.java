@@ -230,6 +230,16 @@ public class GPUImageUtil {
         return bitmap;
     }
 
+    public static Bitmap bitmpFilter(Context context, Bitmap bitmap, int FilterFlag){
+        // 使用GPUImage处理图像
+        GPUImage   gpuImage = new GPUImage(context);
+        gpuImage.setImage(bitmap);
+        gpuImage.setFilter(getFilter(FilterFlag));
+        bitmap = gpuImage.getBitmapWithFilterApplied();
+        return bitmap;
+    }
+
+
     /**
      * 从网络中获取图片
      * @param url

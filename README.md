@@ -111,11 +111,17 @@ org.opencv.android.CameraBridgeViewBase#calculateCameraFrameSize
 ## 问题5.裁剪相机定制
 
  1.做到随意定制相机API(最后就是Camera2的API)
+
  2.前后摄像头任意切换
+
  3.横竖屏任意切换
+
  4.增加GPU实时滤镜
+
  5.使用自己的UI组件渲染(脱离Opencv束缚)更灵活
+
  6.分辨率自由切换支持
+
  7.正方形相机预览
 
 

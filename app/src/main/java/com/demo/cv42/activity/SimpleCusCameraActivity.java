@@ -43,7 +43,6 @@ public class SimpleCusCameraActivity extends Activity {
     private TextView textViewTips;
     private long lastFrameTime = 0;
 
-    private GPUImage gpuImage;
 
     private int flagFilter = -1;
 

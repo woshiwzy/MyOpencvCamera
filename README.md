@@ -108,8 +108,15 @@ org.opencv.android.CameraBridgeViewBase#calculateCameraFrameSize
 这个方法是计算出一个最合适的输出分辨率，但是这个方法会有个bug，有可能会计算出一个相机硬件不支持的分辨率（），这会导致相机无法启动，直接崩溃，看不到任何日志，需要debug跟踪才能发现问题。所有的相机分辨率应该在API返回的列表中（mCamera.getParameters().getSupportedPreviewSizes()）才行。
 
 
+## 问题5.裁剪相机定制
 
-
+ 1.做到随意定制相机API(最后就是Camera2的API)
+ 2.前后摄像头任意切换
+ 3.横竖屏任意切换
+ 4.增加GPU实时滤镜
+ 5.使用自己的UI组件渲染(脱离Opencv束缚)更灵活
+ 6.分辨率自由切换支持
+ 7.正方形相机预览
 
 
 

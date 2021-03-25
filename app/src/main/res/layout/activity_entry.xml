@@ -100,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="onClickGotoCustomCameraView"
-                android:text="相机API裁剪(只留下自定义相机部分)" />
+                android:text="相机API裁剪+自定义+实时滤镜" />
 
         </LinearLayout>
     </ScrollView>

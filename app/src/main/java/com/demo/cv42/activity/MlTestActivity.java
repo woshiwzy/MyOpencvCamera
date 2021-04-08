@@ -16,6 +16,9 @@ import org.opencv.ml.TrainData;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * 机器学习测试页面
+ */
 public class MlTestActivity extends AppCompatActivity {
 
 

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CV摄像头Demo集</string>
+    <string name="InvalidPermissionText">权限异常</string>
 </resources>

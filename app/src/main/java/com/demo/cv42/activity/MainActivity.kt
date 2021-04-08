@@ -56,6 +56,9 @@ class MainActivity : Activity() {
     fun onClickCustomCameraDlib(view: View?) {
         startActivity(Intent(this, CustomCameraDlibActivity::class.java))
     }
+    fun onClickCustomCameraDlib2(view: View?) {
+        startActivity(Intent(this, CustomCameraDlibActivity2::class.java))
+    }
 
     fun onClickCustomCameraGPU(view: View?) {
         startActivity(Intent(this, GPUActivity::class.java))

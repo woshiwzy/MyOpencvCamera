@@ -545,7 +545,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             calcHeight = accessor.getHeight(size);
         }
 
-        return new Size(calcWidth, calcHeight);
-//        return new Size(480, 320);
+//        return new Size(calcWidth, calcHeight);
+        return new Size(640, 480);
     }
 }

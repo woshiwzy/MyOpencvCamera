@@ -107,7 +107,6 @@ open class CustomCameraDlibActivity : Activity() {
 
     fun initFaceDet() {
         GlobalScope.launch(Dispatchers.IO) {
-
             if (!File(Constants.getFaceShapeModelPath()).exists()) {
                 FileUtils.copyFileFromRawToOthers(this@CustomCameraDlibActivity, R.raw.shape_predictor_68_face_landmarks, Constants.getFaceShapeModelPath())
             }

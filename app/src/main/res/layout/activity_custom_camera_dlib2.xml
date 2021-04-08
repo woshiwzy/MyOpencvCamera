@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.CustomCameraDlibActivity2">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentTop="true"
+        android:gravity="center_horizontal|top"
+        android:orientation="horizontal">
+
+
+
+        <ImageView
+            android:id="@+id/cameraViewImgPreview"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+
+        <com.demo.cv42.view.CustomJavaCameraView
+            android:id="@+id/cameraView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            opencv:camera_id="front"
+            opencv:show_fps="true" />
+
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/input_item_height"
+        android:background="#88000000"
+        android:gravity="top|right"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:gravity="center"
+            android:text="Opencv 版本"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <CheckBox
+            android:id="@+id/checkboxFull"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:checked="true"
+            android:gravity="center"
+            android:text="自动铺满全屏"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <Button
+            android:id="@+id/buttonSwitchCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_item_height"
+            android:layout_marginBottom="@dimen/input_item_height"
+            android:text="切换摄像头" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewTitleDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textColor="#bbffaa" />
+
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right">
+
+
+            <Button
+                android:id="@+id/buttonTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test" />
+
+
+
+            <EditText
+                android:id="@+id/editTextName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:hint="输入登机姓名"
+                android:minWidth="120dp" />
+
+            <CheckBox
+                android:id="@+id/checkBoxRecord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:layout_toLeftOf="@id/buttonTest"
+                android:text="登记" />
+
+            <Button
+                android:id="@+id/buttonList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="登记列表" />
+
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+
+</RelativeLayout>

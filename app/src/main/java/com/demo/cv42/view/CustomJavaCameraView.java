@@ -107,11 +107,9 @@ public class CustomJavaCameraView extends JavaCameraView {
             //自动缩放到全屏，原生的Opencv mscale 参数自动计算出来有缺点不能自动铺满屏幕
             if (autoFullScreen) {
                 if (srcMat.cols() < width || srcMat.rows() < height) {
-
                     float scaleWidth = width * 1.0f / srcMat.cols();
                     float scaleHeight = height * 1.0f / srcMat.rows();
                     float maxScale = Math.max(scaleHeight, scaleWidth);
-
                     mScale = maxScale;//用自带的缩放系数（当然也可以自己来缩放Mat 或者bitmap达到同样的效果）
                 } else {
                     mScale = 1.0f;
@@ -125,7 +123,8 @@ public class CustomJavaCameraView extends JavaCameraView {
             if (srcMat != null) {
 
                 try {
-                    Imgproc.cvtColor(srcMat,srcMat,Imgproc.COLOR_RGB2RGBA);//需要强制设置一个格式否则dlib无法识别landmark
+//                    Imgproc.cvtColor(srcMat,srcMat,Imgproc.COLOR_RGB2RGBA);//需要强制设置一个格式否则dlib无法识别landmark
+                    Core.flip(srcMat,srcMat,1);
                     Utils.matToBitmap(srcMat, customCacheBitmap);//这一步骤很容易出错，每次根据Mat的实际大小创建Bitmap缓存，但是太浪费时间，所以要事先创建好
                 } catch (Exception e) {
                     bmpValid = false;
@@ -146,8 +145,7 @@ public class CustomJavaCameraView extends JavaCameraView {
 
                 if (canvas != null) {
                     canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-                    Log.e(App.tag, "mscale" + mScale);
-
+//                    Log.e(App.tag, "mscale" + mScale);
 
                     if (mScale != 0) {
                         canvas.drawBitmap(customCacheBitmap, new Rect(0, 0, customCacheBitmap.getWidth(), customCacheBitmap.getHeight()),

@@ -12,12 +12,25 @@
         android:allowBackup="true"
         android:icon="@drawable/cv_icon"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@drawable/cv_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
 
+        <activity android:name=".activity.MlTestActivity">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+
+
+        <activity android:name=".activity.DataGalleryActivity" />
+
+
         <activity android:name=".activity.MainActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,44 +46,43 @@
             android:name=".activity.BackCameraActivity"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
-
-
         <activity
             android:name=".activity.FrontCameraLandActivity"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
-
         <activity
             android:name=".activity.FrontCameraPortraitActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-
         <activity
             android:name=".activity.FrontCameraPortraitFullScreenActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-
-
         <activity
             android:name=".activity.CustomCameraActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
-
+        <activity
+            android:name=".activity.CustomCameraDlibActivity2"
+            android:configChanges="orientation|screenSize"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".activity.CustomCameraDlibActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
-
         <activity
             android:name=".gpu.GPUActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
-
         <activity
-            android:name="com.demo.cv42.activity.SimpleCusCameraActivity"
+            android:name=".activity.SimpleCusCameraActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
-
+        <activity
+            android:name=".activity.RecordListActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            tools:ignore="LockedOrientationActivity" />
     </application>
 
 </manifest>

@@ -89,6 +89,14 @@
                 app:layout_constraintBottom_toTopOf="@id/scrollView" />
 
             <Button
+                android:id="@+id/buttonDlib2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickCustomCameraDlib2"
+                android:text="Dlib人脸识别和登记"
+                app:layout_constraintBottom_toTopOf="@id/scrollView" />
+
+            <Button
                 android:id="@+id/buttonGPUImg"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

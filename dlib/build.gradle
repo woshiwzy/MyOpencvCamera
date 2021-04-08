@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 android {
     compileSdkVersion 29
@@ -46,10 +46,13 @@ configurations {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'org.greenrobot:greendao:3.3.0'
+    implementation 'io.github.yuweiguocn:GreenDaoUpgradeHelper:v2.2.1'
 }
 
 buildscript {
     repositories {
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
 }

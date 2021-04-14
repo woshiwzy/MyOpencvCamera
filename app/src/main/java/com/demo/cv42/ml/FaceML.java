@@ -35,18 +35,16 @@ public class FaceML {
     private KNearest kNearest;
 
     private FaceML() {
-        this.kNearest = KNearest.create();
-        this.kNearest.setDefaultK(1);
-        this.kNearest.setIsClassifier(true);
+
         this.loadData();
     }
 
-    public void reload(){
+    public void reload() {
         peoplesMap.clear();
         loadData();
     }
 
-    public int getSampleSize(){
+    public int getSampleSize() {
         return peoplesMap.size();
     }
 
@@ -58,6 +56,10 @@ public class FaceML {
 
 
         List<People> peoples = DbController.getInstance(App.Companion.getApp()).getSession().getPeopleDao().loadAll();
+
+        this.kNearest = KNearest.create();
+        this.kNearest.setDefaultK(1);
+        this.kNearest.setIsClassifier(true);
 
 
         Mat responseMat = new Mat(peoples.size(), 1, CvType.CV_32F);//label mat
@@ -111,16 +113,19 @@ public class FaceML {
 
         Mat result = new Mat();
         Mat input = matOfFloat.reshape(0, 1);
-        long responId = (long) this.kNearest.predict(input, result);
 
-        Log.e(App.tag, "结果矩阵:" + result.cols() + " x " + result.rows() + "   ==> id:" + responId);
+        long responId= (long) this.kNearest.findNearest(input,1,result);
+
+//        long responId = (long) this.kNearest.predict(input, result);
+
+//        Log.e(App.tag, "结果矩阵:" + result.cols() + " x " + result.rows() + "   ==> id:" + responId);
 
         return peoplesMap.get(responId);
 
     }
 
-    public long predicate(VisionDetRet visionDetRet,Mat faceMat) {
-        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet,faceMat);
+    public long predicate(VisionDetRet visionDetRet, Mat faceMat) {
+        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet, faceMat);
         MatOfFloat matOfFloat = new MatOfFloat();
         matOfFloat.fromList(vec);
         Mat preInputMat = matOfFloat.reshape(0, 1);
@@ -128,5 +133,6 @@ public class FaceML {
         float responId = this.kNearest.predict(preInputMat, result);
         return (long) responId;
     }
+
 
 }

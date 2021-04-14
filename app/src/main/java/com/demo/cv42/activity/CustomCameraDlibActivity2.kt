@@ -96,36 +96,43 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                     rect.height = it.bottom - it.top
 
 
+                    try {
 
-                    var faceMat = Mat(mat, rect);
-                    //如果是登记模式
-                    if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
-                        var featurs = FeatureUtils.comptuteFeature2(it, faceMat)
-                        GlobalScope.launch(Dispatchers.Main) {
-                            var name = editTextName.text.toString()
-                            var peop = People()
-                            peop.name = name
-                            peop.feature = featurs
-                            DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
-                            checkBoxRecord.isChecked = false
-                        }
-                    } else {
-
-                        if (faceMl.sampleSize <= 1) {
-                            Log.e(App.tag, "样本数不够");
+                        var faceMat = Mat(mat, rect)//rect 必须小于mat大小，否则会崩溃
+                        //如果是登记模式
+                        if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
+                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)
+                            GlobalScope.launch(Dispatchers.Main) {
+                                var name = editTextName.text.toString()
+                                var peop = People()
+                                peop.name = name
+                                peop.feature = featurs
+                                DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
+                                checkBoxRecord.isChecked = false
+                            }
                         } else {
-                            var featurs = FeatureUtils.comptuteFeature(it, faceMat)
-                            if (null != faceMl) {
-                                var people = faceMl.predicate2(featurs)
-                                if (null != people) {
-                                    Log.e(App.tag, "find people:" + people.name)
-                                    Imgproc.putText(mat, people.name, rect.tl(), 1, 2.0, scalarName)
+                            if (faceMl.sampleSize <= 1) {
+                                Log.e(App.tag, "样本数不够");
+                            } else {
+
+                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
+
+                                if (null != faceMl) {
+                                    var people = faceMl.predicate2(featurs)
+                                    if (null != people) {
+                                        var percentDistance = FeatureUtils.computeDistancePercent(featurs, people)
+                                        Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
+                                        Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
+                                    }
                                 }
+
+
                             }
                         }
-
-
+                    } catch (e: Exception) {
+                        Log.e(App.tag, "可能是rect 超出边界：" + e.localizedMessage)
                     }
+
 
                     Imgproc.rectangle(mat, rect, scalar, 2)
 
@@ -156,10 +163,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         }
 
         buttonReloadModule.setOnClickListener {
-
-           faceMl.reload()
+            faceMl.reload()
         }
-
         requestPermission()
 
     }

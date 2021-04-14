@@ -1,12 +1,13 @@
 package com.wangzy.face;
 
-import android.graphics.Color;
 import android.graphics.Point;
 import android.util.Log;
 
 import com.tzutalin.dlib.VisionDetRet;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ public class FeatureUtils {
 
     public static final String tag = "ff";
 
-    public static void comptuteFeature(List<VisionDetRet> visionDetRets,Mat faceMat) {
+    public static void comptuteFeature(List<VisionDetRet> visionDetRets, Mat faceMat) {
         if (null != visionDetRets) {
             for (int i = 0, isize = visionDetRets.size(); i < isize; i++) {
-                comptuteFeature(visionDetRets.get(i),faceMat);
+                comptuteFeature(visionDetRets.get(i), faceMat);
             }
         }
     }
@@ -50,7 +51,7 @@ public class FeatureUtils {
         return null;
     }
 
-    public static String comptuteFeature2(VisionDetRet visionDetRet,Mat faceMat) {
+    public static String comptuteFeature2(VisionDetRet visionDetRet, Mat faceMat) {
         if (null != visionDetRet && null != visionDetRet.getFaceLandmarks()) {
             ArrayList<Point> marks = visionDetRet.getFaceLandmarks();
             //1.第0点到其他67个点的距离
@@ -75,15 +76,31 @@ public class FeatureUtils {
     }
 
 
-    private static float computeMean(Mat mat){
-        if(mat.channels()==3){
-            Imgproc.cvtColor(mat,mat, Imgproc.COLOR_BGR2GRAY);
+    private static float computeMean(Mat mat) {
+        int chnnel = mat.channels();
+        if (chnnel != 1) {
+            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
         }
-        return (float) mat.get(0,0)[0];
+        Scalar scalar = Core.mean(mat);
+        float result = (float) scalar.val[0];
+        return result;
     }
 
     private static float distance(Point p1, Point p2) {
         return (float) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
+
+    public static float computeDistancePercent(ArrayList<Float> inputFeature, People inPutPeople) {
+        List<Float> inputPeopleFeatures = inPutPeople.getVector();
+        float peopleTotalFeature = 0;
+        float distanceTotal = 0;
+        for (int i = 0, isize = inputPeopleFeatures.size(); i < isize; i++) {
+            peopleTotalFeature += inPutPeople.getVector().get(i);
+            distanceTotal+=Math.sqrt(Math.pow(inPutPeople.getVector().get(i)-inputFeature.get(i),2));
+        }
+        float distancePercent=distanceTotal/peopleTotalFeature;
+        return 1-distancePercent;
+    }
+
 
 }

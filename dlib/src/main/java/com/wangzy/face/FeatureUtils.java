@@ -1,9 +1,13 @@
 package com.wangzy.face;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.util.Log;
 
 import com.tzutalin.dlib.VisionDetRet;
+
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +17,15 @@ public class FeatureUtils {
 
     public static final String tag = "ff";
 
-    public static void comptuteFeature(List<VisionDetRet> visionDetRets) {
+    public static void comptuteFeature(List<VisionDetRet> visionDetRets,Mat faceMat) {
         if (null != visionDetRets) {
             for (int i = 0, isize = visionDetRets.size(); i < isize; i++) {
-                comptuteFeature(visionDetRets.get(i));
+                comptuteFeature(visionDetRets.get(i),faceMat);
             }
         }
     }
 
-    public static ArrayList<Float> comptuteFeature(VisionDetRet visionDetRet) {
+    public static ArrayList<Float> comptuteFeature(VisionDetRet visionDetRet, Mat faceMat) {
         if (null != visionDetRet && null != visionDetRet.getFaceLandmarks()) {
             ArrayList<Point> marks = visionDetRet.getFaceLandmarks();
             //1.第0点到其他67个点的距离
@@ -39,12 +43,14 @@ public class FeatureUtils {
                 ratioDistance.add(rateX);
             }
             Log.e(tag, "第二波得到的特征距离比:" + ratioDistance.size());
+
+            ratioDistance.add(computeMean(faceMat));
             return ratioDistance;
         }
         return null;
     }
 
-    public static String comptuteFeature2(VisionDetRet visionDetRet) {
+    public static String comptuteFeature2(VisionDetRet visionDetRet,Mat faceMat) {
         if (null != visionDetRet && null != visionDetRet.getFaceLandmarks()) {
             ArrayList<Point> marks = visionDetRet.getFaceLandmarks();
             //1.第0点到其他67个点的距离
@@ -61,10 +67,19 @@ public class FeatureUtils {
                 float rateX = dises.get(x) * 1.0f / dises.get(x + 1);
                 sbf.append(rateX + ",");
             }
+            sbf.append(computeMean(faceMat));
             String rest = sbf.toString();
-            return rest.substring(0, rest.length() - 1);
+            return rest;
         }
         return null;
+    }
+
+
+    private static float computeMean(Mat mat){
+        if(mat.channels()==3){
+            Imgproc.cvtColor(mat,mat, Imgproc.COLOR_BGR2GRAY);
+        }
+        return (float) mat.get(0,0)[0];
     }
 
     private static float distance(Point p1, Point p2) {

@@ -41,6 +41,15 @@ public class FaceML {
         this.loadData();
     }
 
+    public void reload(){
+        peoplesMap.clear();
+        loadData();
+    }
+
+    public int getSampleSize(){
+        return peoplesMap.size();
+    }
+
     public void loadData() {
         if (null == peoplesMap) {
             peoplesMap = new HashMap<>();
@@ -86,15 +95,15 @@ public class FaceML {
         this.kNearest.train(trainData);
     }
 
-    public long predicate(VisionDetRet visionDetRet) {
-        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet);
-        MatOfFloat matOfFloat = new MatOfFloat();
-        matOfFloat.fromList(vec);
-        Mat preInputMat = matOfFloat.reshape(0, 1);
-        Mat result = new Mat();
-        float responId = this.kNearest.predict(preInputMat, result);
-        return (long) responId;
-    }
+//    public long predicate(VisionDetRet visionDetRet) {
+//        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet);
+//        MatOfFloat matOfFloat = new MatOfFloat();
+//        matOfFloat.fromList(vec);
+//        Mat preInputMat = matOfFloat.reshape(0, 1);
+//        Mat result = new Mat();
+//        float responId = this.kNearest.predict(preInputMat, result);
+//        return (long) responId;
+//    }
 
     public People predicate2(ArrayList<Float> vec) {
         MatOfFloat matOfFloat = new MatOfFloat();
@@ -108,6 +117,16 @@ public class FaceML {
 
         return peoplesMap.get(responId);
 
+    }
+
+    public long predicate(VisionDetRet visionDetRet,Mat faceMat) {
+        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet,faceMat);
+        MatOfFloat matOfFloat = new MatOfFloat();
+        matOfFloat.fromList(vec);
+        Mat preInputMat = matOfFloat.reshape(0, 1);
+        Mat result = new Mat();
+        float responId = this.kNearest.predict(preInputMat, result);
+        return (long) responId;
     }
 
 }

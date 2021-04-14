@@ -15,7 +15,6 @@
         android:orientation="horizontal">
 
 
-
         <ImageView
             android:id="@+id/cameraViewImgPreview"
             android:layout_width="0dp"
@@ -91,10 +90,10 @@
 
 
             <Button
-                android:id="@+id/buttonTest"
+                android:id="@+id/buttonReloadModule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Test" />
+                android:text="重新加载模型" />
 
 
 
@@ -111,7 +110,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
-                android:layout_toLeftOf="@id/buttonTest"
                 android:text="登记" />
 
             <Button

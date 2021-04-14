@@ -3,8 +3,10 @@ package com.demo.cv42.activity
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.listener.OnItemChildClickListener
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.demo.cv42.App
 import com.demo.cv42.App.Companion.app
@@ -13,17 +15,34 @@ import com.wangzy.face.DbController
 import com.wangzy.face.People
 import kotlinx.android.synthetic.main.activity_record_list.*
 
+
 class RecordListActivity : Activity() {
+
+    lateinit var allPeople: MutableList<People?>
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record_list)
 
-        val allPeople = DbController.getInstance(app).session.peopleDao.loadAll()
+        allPeople = DbController.getInstance(app).session.peopleDao.loadAll()
         Log.e(App.tag, "allcount:" + allPeople.size)
         val peopleAdapter = PeopleAdapter(R.layout.item_people, allPeople)
         recylerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recylerView.adapter = peopleAdapter
+        peopleAdapter.addChildClickViewIds(R.id.buttonDelete)
 
+        peopleAdapter.setOnItemChildClickListener(object : OnItemChildClickListener {
+
+            override fun onItemChildClick(adapter: BaseQuickAdapter<*, *>, view: View, position: Int) {
+                DbController.getInstance(App.app).session.delete(allPeople[position])
+                allPeople.removeAt(position)
+                peopleAdapter.notifyDataSetChanged()
+
+            }
+        })
     }
 
     internal inner class PeopleAdapter(layoutResId: Int, data: MutableList<People?>?) : BaseQuickAdapter<People?, BaseViewHolder>(layoutResId, data) {

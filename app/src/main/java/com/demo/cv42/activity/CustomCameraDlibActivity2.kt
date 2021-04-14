@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -97,9 +96,11 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                     rect.height = it.bottom - it.top
 
 
+
+                    var faceMat = Mat(mat, rect);
                     //如果是登记模式
                     if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
-                        var featurs = FeatureUtils.comptuteFeature2(it)
+                        var featurs = FeatureUtils.comptuteFeature2(it, faceMat)
                         GlobalScope.launch(Dispatchers.Main) {
                             var name = editTextName.text.toString()
                             var peop = People()
@@ -109,14 +110,21 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             checkBoxRecord.isChecked = false
                         }
                     } else {
-                        var featurs = FeatureUtils.comptuteFeature(it)
-                        if (null != faceMl) {
-                            var people = faceMl.predicate2(featurs)
-                            if (null != people) {
-                                Log.e(App.tag, "find people:" + people.name)
-                                Imgproc.putText(mat, people.name, rect.tl(), 1, 2.0, scalarName)
+
+                        if (faceMl.sampleSize <= 1) {
+                            Log.e(App.tag, "样本数不够");
+                        } else {
+                            var featurs = FeatureUtils.comptuteFeature(it, faceMat)
+                            if (null != faceMl) {
+                                var people = faceMl.predicate2(featurs)
+                                if (null != people) {
+                                    Log.e(App.tag, "find people:" + people.name)
+                                    Imgproc.putText(mat, people.name, rect.tl(), 1, 2.0, scalarName)
+                                }
                             }
                         }
+
+
                     }
 
                     Imgproc.rectangle(mat, rect, scalar, 2)
@@ -141,18 +149,15 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
             javaCameraView?.swithCamera(!javaCameraView?.isUseFrontCamera!!)
         }
 
-        buttonTest.setOnClickListener {
-            var testmap = BitmapFactory.decodeFile("/sdcard/ldh.jpg");
-            var rets = faceDet?.detect(testmap)
-            FeatureUtils.comptuteFeature(rets)
-            rets?.forEach { it ->
-                Log.e(App.tag, " land mark size ======>>> " + it.faceLandmarks.size)
-            }
-        }
 
         buttonList.setOnClickListener {
             var intent = Intent(this, RecordListActivity::class.java)
             startActivity(intent)
+        }
+
+        buttonReloadModule.setOnClickListener {
+
+           faceMl.reload()
         }
 
         requestPermission()

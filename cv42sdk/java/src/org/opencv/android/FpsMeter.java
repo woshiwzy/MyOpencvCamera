@@ -30,8 +30,8 @@ public class FpsMeter {
         mStrfps = "";
 
         mPaint = new Paint();
-        mPaint.setColor(Color.BLUE);
-        mPaint.setTextSize(20);
+        mPaint.setColor(Color.YELLOW);
+        mPaint.setTextSize(30);
     }
 
     public void measure() {

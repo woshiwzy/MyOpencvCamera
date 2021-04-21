@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
 import com.demo.cv42.ml.FaceML
+import com.demo.cv42.ml.MyMl
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
 import com.tzutalin.dlib.Constants
@@ -114,18 +115,19 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             if (faceMl.sampleSize <= 1) {
                                 Log.e(App.tag, "样本数不够");
                             } else {
-
                                 var featurs = FeatureUtils.comptuteFeature(it, faceMat)
-
-                                if (null != faceMl) {
+                                if (radioButtonCv.isChecked) {
                                     var people = faceMl.predicate2(featurs)
                                     if (null != people) {
                                         var percentDistance = FeatureUtils.computeDistancePercent(featurs, people)
-                                        Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
+//                                        Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
                                         Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
                                     }
+                                } else {
+                                    var ret = MyMl.getInstance(App.app).findNears(1, featurs).get(1)!!
+//                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
+                                    Imgproc.putText(mat, ret.people.name  + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
                                 }
-
 
                             }
                         }

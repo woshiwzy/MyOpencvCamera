@@ -89,12 +89,33 @@
             android:gravity="center_vertical|right">
 
 
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioButtonCv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="cv引擎" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonCus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义引擎" />
+
+
+            </RadioGroup>
+
+
             <Button
                 android:id="@+id/buttonReloadModule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="重新加载模型" />
-
 
 
             <EditText

@@ -3,6 +3,7 @@ package com.wangzy.face;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Transient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class People {
     private Long id;
     private String name;
     private String feature;
+
 
     @Generated(hash = 772505674)
     public People(Long id, String name, String feature) {
@@ -51,6 +53,7 @@ public class People {
     public void setId(Long id) {
         this.id = id;
     }
+
 
     public List<Float> getVector() {
         String[] vecs = feature.split(",");

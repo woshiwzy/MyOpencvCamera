@@ -1,5 +1,6 @@
 package com.demo.cv42.hog;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.Size;
@@ -10,8 +11,8 @@ import java.util.List;
 
 public class FaceHogTool {
 
-    public final static int normal_width = 100, normal_height = 100;
-    public static HOGDescriptor hogDescriptor;
+    private final static int normal_width = 100, normal_height = 100;
+    private static HOGDescriptor hogDescriptor;
 
     static {
         Size windowSize = new Size(normal_width, normal_width);
@@ -27,11 +28,22 @@ public class FaceHogTool {
     }
 
     public static List<Float> compte(Mat input) {
-        Mat dstMat = new Mat(normal_width, normal_height, input.type());//
+
+        Mat dstMat = new Mat(normal_width, normal_height, CvType.CV_8UC3);//
         Imgproc.resize(input, dstMat, new Size(normal_width, normal_height));//归一化，把所有的图片大小调整成一样大，得到的特征值才会是一样的
+
+        Imgproc.cvtColor(dstMat, dstMat, Imgproc.COLOR_BGR2GRAY);
+
         MatOfFloat matf = new MatOfFloat();
         getHogDescriptor().compute(dstMat, matf);//计算特征
-        List<Float> vectors = matf.toList();
-        return vectors;
+        return matf.toList();
+
+//        StringBuffer sbf = new StringBuffer();
+//        for (float v : vectors) {
+//            sbf.append("" + v + ",");
+//        }
+//
+//        String rest = sbf.toString().substring(0, sbf.length() - 1);
+//        return rest;
     }
 }

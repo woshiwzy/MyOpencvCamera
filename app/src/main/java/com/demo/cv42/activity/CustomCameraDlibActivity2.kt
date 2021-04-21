@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
+import com.demo.cv42.hog.FaceHogTool
 import com.demo.cv42.ml.FaceML
 import com.demo.cv42.ml.MyMl
 import com.demo.cv42.view.CustomJavaCameraView
@@ -98,18 +99,25 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                     rect.width = it.right - it.left
                     rect.height = it.bottom - it.top
 
-
                     try {
 
                         var faceMat = Mat(mat, rect)//rect 必须小于mat大小，否则会崩溃
+                        var hogFaceFeatures = FaceHogTool.compte(faceMat)
+                        var sbf = StringBuffer();
+                        hogFaceFeatures.forEach {
+                            sbf.append("$it,")
+                        }
+                        var hogFeatureString = sbf.toString().substring(0, sbf.length - 1);
+
                         //如果是登记模式
                         if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
                             var featurs = FeatureUtils.comptuteFeature2(it, faceMat)
+
                             GlobalScope.launch(Dispatchers.Main) {
                                 var name = editTextName.text.toString()
                                 var peop = People()
                                 peop.name = name
-                                peop.feature = featurs
+                                peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
                                 DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
                                 checkBoxRecord.isChecked = false
                                 Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
@@ -119,6 +127,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                 Log.e(App.tag, "样本数不够");
                             } else {
                                 var featurs = FeatureUtils.comptuteFeature(it, faceMat)
+                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
+
                                 if (radioButtonCv.isChecked) {
                                     var people = faceMl.predicate2(featurs)
                                     if (null != people) {
@@ -127,10 +137,11 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                         Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
                                     }
                                 } else {
-                                    var ret = MyMl.getInstance(App.app).findNears(1, featurs).get(1)!!
+                                    var ret = MyMl.getInstance(App.app).findNears(1, featurs)[1]!!
 //                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
                                     Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
                                 }
+
 
                             }
                         }
@@ -141,7 +152,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
                     Imgproc.rectangle(mat, rect, scalar, 2)
 
-                    var showPoint30 = true
+                    var showPoint30 = false
                     if (showPoint30) {
 
                         var p = it.faceLandmarks[30]

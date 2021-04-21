@@ -53,6 +53,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
     private val scalar = Scalar(0.0, 0.0, 200.0)
     private val scalarName = Scalar(200.0, 0.0, 0.0)
     private var rect = Rect()
+    private var rectCenterFace = Rect()
 
     private lateinit var faceMl: FaceML
 
@@ -126,7 +127,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                 } else {
                                     var ret = MyMl.getInstance(App.app).findNears(1, featurs).get(1)!!
 //                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
-                                    Imgproc.putText(mat, ret.people.name  + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
+                                    Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
                                 }
 
                             }
@@ -138,11 +139,31 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
                     Imgproc.rectangle(mat, rect, scalar, 2)
 
-                    for ((index, p) in it.faceLandmarks.withIndex()) {
-                        Imgproc.putText(mat, index.toString(), Point(p.x.toDouble(), p.y.toDouble()), 1, 1.0, scalar)
-                        Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
-                    }
+                    var showPoint30 = true
+                    if (showPoint30) {
 
+
+                        var p = it.faceLandmarks[30]
+                        Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
+
+                        var tw = rect.width / 2
+                        var th = rect.height / 2
+
+                        rectCenterFace.x = p.x - tw / 2
+                        rectCenterFace.y = p.y - th / 2
+
+                        rectCenterFace.width = tw;
+                        rectCenterFace.height = th;
+
+                        Imgproc.rectangle(mat, rectCenterFace, scalar, 3)
+
+
+                    } else {
+                        for ((index, p) in it.faceLandmarks.withIndex()) {
+                            Imgproc.putText(mat, index.toString(), Point(p.x.toDouble(), p.y.toDouble()), 1, 1.0, scalar)
+                            Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
+                        }
+                    }
                 }
                 if (null == bmpCanny) {
                     bmpCanny = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.RGB_565)
@@ -197,6 +218,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
     private fun initCamera(): Boolean {
         Log.e(App.tag, "isinit success:$isInitSuccess")
         if (null != javaCameraView) {
+
             javaCameraView!!.post {
                 //1.拷贝模型文件
                 if (!File(Constants.getFaceShapeModelPath()).exists()) {

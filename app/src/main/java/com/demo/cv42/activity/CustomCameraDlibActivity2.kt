@@ -142,7 +142,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                     var showPoint30 = true
                     if (showPoint30) {
 
-
                         var p = it.faceLandmarks[30]
                         Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
 
@@ -156,7 +155,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                         rectCenterFace.height = th;
 
                         Imgproc.rectangle(mat, rectCenterFace, scalar, 3)
-
 
                     } else {
                         for ((index, p) in it.faceLandmarks.withIndex()) {

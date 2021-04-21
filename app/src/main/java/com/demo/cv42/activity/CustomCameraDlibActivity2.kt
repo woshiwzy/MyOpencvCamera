@@ -15,6 +15,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
@@ -111,6 +112,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                 peop.feature = featurs
                                 DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
                                 checkBoxRecord.isChecked = false
+                                Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             if (faceMl.sampleSize <= 1) {

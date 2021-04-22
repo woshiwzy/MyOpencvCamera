@@ -62,10 +62,13 @@ public class FaceML {
         this.kNearest.setIsClassifier(true);
 
 
-        Mat responseMat = new Mat(peoples.size(), 1, CvType.CV_32F);//label mat
-        Mat samplesMat = new Mat(0, 66, CvType.CV_32F);//sample
+        int col=peoples.get(0).getVector().size();
+        Log.e(App.tag, "找到已经登记的人脸数据:" + peoples.size()+" 纬度："+col);
 
-        Log.e(App.tag, "找到已经登记的人脸数据:" + peoples.size());
+        Mat responseMat = new Mat(peoples.size(), 1, CvType.CV_32F);//label mat
+        Mat samplesMat = new Mat(0,col , CvType.CV_32F);//sample
+
+
 
         for (int i = 0, isize = peoples.size(); i < isize; i++) {
             People people = peoples.get(i);

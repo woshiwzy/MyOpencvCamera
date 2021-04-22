@@ -53,9 +53,11 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
     private lateinit var mat: Mat
 
     private val scalar = Scalar(0.0, 0.0, 200.0)
+    private val scalarHog = Scalar(255.0, 0.0, 200.0)
     private val scalarName = Scalar(200.0, 0.0, 0.0)
     private var rect = Rect()
     private var rectCenterFace = Rect()
+    private var rectHog = Rect()
 
     private lateinit var faceMl: FaceML
 
@@ -89,6 +91,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         javaCameraView?.onFrameReadCallBack = OnFrameReadCallBack { bitmap, srcMat ->
             runOnUiThread {
 //                Log.e(App.tag,"image size:"+bitmap.width+","+bitmap.height)
+
                 Utils.bitmapToMat(bitmap, mat)
                 var visiRets = faceDet?.detect(bitmap)
 
@@ -101,8 +104,27 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
                     try {
 
-                        var faceMat = Mat(mat, rect)//rect 必须小于mat大小，否则会崩溃
+                        var lx = it.faceLandmarks.get(0).x
+                        var ly = it.faceLandmarks.get(19).y
+
+                        var rx = it.faceLandmarks.get(15).x
+                        var ry = it.faceLandmarks.get(8).y
+
+
+                        var hogWidth = rx - lx
+                        var hogHeight = ry - ly
+
+
+                        rectHog.x = lx
+                        rectHog.y = ly
+
+                        rectHog.width = hogWidth
+                        rectHog.height = hogHeight
+
+
+                        var faceMat = Mat(mat, rectHog)//rect 必须小于mat大小，否则会崩溃
                         var hogFaceFeatures = FaceHogTool.compte(faceMat)
+
                         var sbf = StringBuffer();
                         hogFaceFeatures.forEach {
                             sbf.append("$it,")
@@ -111,13 +133,14 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
                         //如果是登记模式
                         if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
-                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)
+//                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)//利用
 
                             GlobalScope.launch(Dispatchers.Main) {
                                 var name = editTextName.text.toString()
                                 var peop = People()
                                 peop.name = name
-                                peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
+//                                peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
+                                peop.feature = hogFeatureString//只用hog特征
                                 DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
                                 checkBoxRecord.isChecked = false
                                 Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
@@ -126,8 +149,9 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             if (faceMl.sampleSize <= 1) {
                                 Log.e(App.tag, "样本数不够");
                             } else {
-                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
-                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
+//                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
+//                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
+                                var featurs = hogFaceFeatures//只用hog特征
 
                                 if (radioButtonCv.isChecked) {
                                     var people = faceMl.predicate2(featurs)
@@ -146,9 +170,9 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             }
                         }
                     } catch (e: Exception) {
+                        e.printStackTrace()
                         Log.e(App.tag, "可能是rect 超出边界：" + e.localizedMessage)
                     }
-
 
                     Imgproc.rectangle(mat, rect, scalar, 2)
 
@@ -164,17 +188,23 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                         rectCenterFace.x = p.x - tw / 2
                         rectCenterFace.y = p.y - th / 2
 
-                        rectCenterFace.width = tw;
-                        rectCenterFace.height = th;
+                        rectCenterFace.width = tw
+                        rectCenterFace.height = th
 
                         Imgproc.rectangle(mat, rectCenterFace, scalar, 3)
+                    }
 
-                    } else {
+                    var showAllPoint = false
+                    if (showAllPoint) {
                         for ((index, p) in it.faceLandmarks.withIndex()) {
                             Imgproc.putText(mat, index.toString(), Point(p.x.toDouble(), p.y.toDouble()), 1, 1.0, scalar)
                             Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
                         }
                     }
+
+
+                    Imgproc.rectangle(mat, rectHog, scalarHog, 2)
+
                 }
                 if (null == bmpCanny) {
                     bmpCanny = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.RGB_565)

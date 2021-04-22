@@ -7,11 +7,12 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.HOGDescriptor;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class FaceHogTool {
 
-    private final static int normal_width = 100, normal_height = 100;
+    private final static int normal_width = 120, normal_height = 120;
+
     private static HOGDescriptor hogDescriptor;
 
     static {
@@ -27,7 +28,7 @@ public class FaceHogTool {
         return hogDescriptor;
     }
 
-    public static List<Float> compte(Mat input) {
+    public static ArrayList<Float> compte(Mat input) {
 
         Mat dstMat = new Mat(normal_width, normal_height, CvType.CV_8UC3);//
         Imgproc.resize(input, dstMat, new Size(normal_width, normal_height));//归一化，把所有的图片大小调整成一样大，得到的特征值才会是一样的
@@ -36,7 +37,11 @@ public class FaceHogTool {
 
         MatOfFloat matf = new MatOfFloat();
         getHogDescriptor().compute(dstMat, matf);//计算特征
-        return matf.toList();
+
+        ArrayList<Float> vecs = new ArrayList<>(matf.toList());
+
+//        Log.e(App.tag, "hong 特征:" + vecs.size());
+        return vecs;
 
 //        StringBuffer sbf = new StringBuffer();
 //        for (float v : vectors) {

@@ -9,12 +9,11 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
@@ -61,6 +60,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
     private lateinit var faceMl: FaceML
 
+    private var throld = 0.9f;
+
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 200
     }
@@ -72,7 +73,9 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_custom_camera_dlib2)
         cameraViewImgPreview = findViewById(R.id.cameraViewImgPreview)
-        (findViewById<View>(R.id.textView) as TextView).text = "Opencv版本:" + OpenCVLoader.OPENCV_VERSION
+
+        CustomJavaCameraView.setDefaultPreviewSize(640, 480);
+
         javaCameraView = findViewById(R.id.cameraView)
         javaCameraView?.isDrawUseDefaultMethod = false
         javaCameraView?.isUseFrontCamera = true
@@ -88,7 +91,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         var bmpCanny: Bitmap? = null
         javaCameraView?.onFrameReadCallBack = OnFrameReadCallBack { bitmap, srcMat ->
             runOnUiThread {
-//                Log.e(App.tag,"image size:"+bitmap.width+","+bitmap.height)
 
                 Utils.bitmapToMat(bitmap, mat)
                 var visiRets = faceDet?.detect(bitmap)
@@ -154,13 +156,18 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                     var people = faceMl.predicate2(featurs)
                                     if (null != people) {
                                         var percentDistance = VectorTool.computeSimilarity2(featurs, people.vector);
-//                                        Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
-                                        Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
+                                        if (percentDistance > throld) {
+//                                            Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
+                                            Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
+                                        }
                                     }
                                 } else {
                                     var ret = MyMl.getInstance(App.app).findNears(1, featurs)[1]!!
-//                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
-                                    Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
+                                    if (ret.distance > throld) {
+                                        //                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
+                                        Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
+                                    }
+
                                 }
 
                             }
@@ -199,7 +206,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                     }
                     Imgproc.rectangle(mat, rectHog, scalarHog, 2)
                 }
-                if (null == bmpCanny) {
+                if (null == bmpCanny || bmpCanny?.width != mat.cols() || bmpCanny?.height != mat.height()) {
                     bmpCanny = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.RGB_565)
                 }
                 Utils.matToBitmap(mat, bmpCanny)
@@ -222,6 +229,30 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         buttonReloadModule.setOnClickListener {
             faceMl.reload()
         }
+
+        button240.setOnClickListener {
+            javaCameraView?.setResolution2(320, 240)
+        }
+
+        button480.setOnClickListener {
+            javaCameraView?.setResolution2(640, 480)
+        }
+
+
+        seekbarThreshold.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+
+                throld = ((progress * 1.0 / seekbarThreshold.max).toFloat());
+                textViewThreshold.text = "阀值：$throld"
+
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+        })
+
         requestPermission()
 
     }
@@ -311,5 +342,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
             initCamera()
         }
     }
+
 
 }

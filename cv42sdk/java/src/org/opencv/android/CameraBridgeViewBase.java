@@ -42,8 +42,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
     protected int mFrameWidth;
     protected int mFrameHeight;
-    protected int mMaxHeight;
-    protected int mMaxWidth;
+
+    protected static int mMaxHeight;
+    protected static int mMaxWidth;
+
+
     protected float mScale = 0;
     protected int mPreviewFormat = RGBA;
     protected int mCameraIndex = CAMERA_ID_ANY;
@@ -56,6 +59,15 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int CAMERA_ID_FRONT = 98;
     public static final int RGBA = 1;
     public static final int GRAY = 2;
+
+
+    private static int defaultWidth = 0;
+    private static int defaultHeight = 0;
+
+    public static void setDefaultPreviewSize(int width, int height) {
+        mMaxWidth = width;
+        mMaxHeight = height;
+    }
 
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
@@ -489,7 +501,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     /**
      * 如果onCameraFrame 中对图片进行了跳转，比如旋转什么的，改变了图片的宽高，需要在显示图片之前调用这个方法，修改Mat转bitmap的缓存
      *
-     * @param mFrameWidth 这个width 需要和 onCameraFrame 方法返回的Mat 的width 相等
+     * @param mFrameWidth  这个width 需要和 onCameraFrame 方法返回的Mat 的width 相等
      * @param mFrameHeight 这个width 需要和 onCameraFrame 方法返回的Mat 的height 相等
      */
     public void AllocateCache2(int mFrameWidth, int mFrameHeight) {
@@ -520,6 +532,10 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
      * @return optimal frame size
      */
     protected Size calculateCameraFrameSize(List<?> supportedSizes, ListItemAccessor accessor, int surfaceWidth, int surfaceHeight) {
+        if (mMaxWidth * mMaxHeight != 0) {
+            return new Size(mMaxWidth, mMaxHeight);
+        }
+
         int calcWidth = 0;
         int calcHeight = 0;
 
@@ -545,7 +561,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             calcHeight = accessor.getHeight(size);
         }
 
-//        return new Size(calcWidth, calcHeight);
-        return new Size(640, 480);
+        return new Size(calcWidth, calcHeight);
+//        return new Size(640, 480);
     }
 }

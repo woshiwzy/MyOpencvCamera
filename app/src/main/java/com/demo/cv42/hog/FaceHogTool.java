@@ -21,7 +21,7 @@ public class FaceHogTool {
 
     static {
         Size windowSize = new Size(normal_width, normal_width);
-        Size blockSize = new Size(normal_width / 2, normal_height / 2);
+        Size blockSize = new Size(normal_width / 4, normal_height / 4);
         Size _blockStride = new Size(blockSize.width / 2, blockSize.height / 2);
         Size _cellSize = _blockStride;
         int _nbins = 4;
@@ -43,6 +43,8 @@ public class FaceHogTool {
         getHogDescriptor().compute(dstMat, matf);//计算特征
 
         ArrayList<Float> vecs = new ArrayList<>(matf.toList());
+
+        Log.e(App.tag, "特征纬度:" + vecs.size());
 
         return vecs;
 

@@ -142,7 +142,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="连续登记20帧" />
+                android:tag="10"
+                android:text="连续登记10帧" />
 
             <Button
                 android:id="@+id/buttonList"
@@ -180,6 +181,7 @@
                 android:layout_margin="10dp"
                 android:max="100"
                 android:minWidth="200dp"
+                android:progress="90"
                 android:tooltipText="阀值" />
 
 

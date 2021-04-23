@@ -60,7 +60,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
     private lateinit var faceMl: FaceML
 
-    private var throld = 0.9f;
+    private var throld = 0.9f//人脸识别阀值
+    private var recordCout = 0
 
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 200
@@ -132,18 +133,29 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                         var hogFeatureString = sbf.toString().substring(0, sbf.length - 1);
 
                         //如果是登记模式
-                        if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
+                        if ((checkBoxRecord.isChecked && !editTextName.text.isEmpty()) || (checkBoxRepeat.isChecked && !editTextName.text.isEmpty())) {
+
+                            var name = editTextName.text.toString()
+                            if (checkBoxRecord.isChecked) {//单次登记
 //                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)//利用
-                            GlobalScope.launch(Dispatchers.Main) {
-                                var name = editTextName.text.toString()
-                                var peop = People()
-                                peop.name = name
-//                                peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
-                                peop.feature = hogFeatureString//只用hog特征
-                                DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
-                                checkBoxRecord.isChecked = false
-                                Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
+                                GlobalScope.launch(Dispatchers.Main) {
+                                    recordPerson(name, hogFeatureString)
+                                    checkBoxRecord.isChecked = false
+                                    Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {//连续登记
+
+                                var rc = checkBoxRepeat.tag.toString().toInt()
+                                recordPerson(name, hogFeatureString)
+                                recordCout++
+                                if (recordCout == rc) {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
+                                    }
+                                    checkBoxRepeat.isChecked = false
+                                }
                             }
+
                         } else {
                             if (faceMl.sampleSize <= 1) {
                                 Log.e(App.tag, "样本数不够，请勾选登记")
@@ -239,18 +251,17 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         }
 
 
+        checkBoxRepeat.setOnCheckedChangeListener { buttonView, isChecked -> recordCout = 0 }
+
         seekbarThreshold.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-
                 throld = ((progress * 1.0 / seekbarThreshold.max).toFloat());
                 textViewThreshold.text = "阀值：$throld"
-
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-
         })
 
         requestPermission()
@@ -305,6 +316,15 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
             }
         }
         return isInitSuccess
+    }
+
+
+    private fun recordPerson(name: String, hogFeatureString: String) {
+        var peop = People()
+        peop.name = name
+//                                  peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
+        peop.feature = hogFeatureString//只用hog特征
+        DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
     }
 
     @TargetApi(Build.VERSION_CODES.M)

@@ -11,6 +11,7 @@ import org.opencv.android.JavaCameraView;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class CustomJavaCameraView extends JavaCameraView {
 
     //自动缩放到全屏取中间部分绘制
     private boolean autoFullScreen = true;
+
+    private boolean useGray = false;
 
     //接受Bitmap回调，可以在其他的地方显示
     private OnFrameReadCallBack onFrameReadCallBack;
@@ -113,11 +116,12 @@ public class CustomJavaCameraView extends JavaCameraView {
                 mScale = 1.0f;
             }
 
-
             boolean bmpValid = true;
             if (srcMat != null) {
-
                 try {
+                    if (useGray) {
+                        Imgproc.cvtColor(srcMat, srcMat, Imgproc.COLOR_BGR2GRAY);
+                    }
 //                    Imgproc.cvtColor(srcMat,srcMat,Imgproc.COLOR_RGB2RGBA);//需要强制设置一个格式否则dlib无法识别landmark
                     Utils.matToBitmap(srcMat, customCacheBitmap);//这一步骤很容易出错，每次根据Mat的实际大小创建Bitmap缓存，但是太浪费时间，所以要事先创建好
                 } catch (Exception e) {
@@ -242,5 +246,13 @@ public class CustomJavaCameraView extends JavaCameraView {
 
     public void setAutoFullScreen(boolean autoFullScreen) {
         this.autoFullScreen = autoFullScreen;
+    }
+
+    public boolean isUseGray() {
+        return useGray;
+    }
+
+    public void setUseGray(boolean useGray) {
+        this.useGray = useGray;
     }
 }

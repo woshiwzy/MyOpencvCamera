@@ -76,6 +76,9 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         javaCameraView = findViewById(R.id.cameraView)
         javaCameraView?.isDrawUseDefaultMethod = false
         javaCameraView?.isUseFrontCamera = true
+        javaCameraView?.isUseGray = checkBoxGray.isChecked
+
+        checkBoxGray.setOnCheckedChangeListener { buttonView, isChecked -> javaCameraView?.isUseGray = isChecked }
 
         val mConfiguration = this.resources.configuration //获取设置的配置信息
         val ori = mConfiguration.orientation //获取屏幕方向
@@ -141,7 +144,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             }
                         } else {
                             if (faceMl.sampleSize <= 1) {
-                                Log.e(App.tag, "样本数不够")
+                                Log.e(App.tag, "样本数不够，请勾选登记")
                             } else {
 //                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
 //                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
@@ -194,10 +197,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             Imgproc.circle(mat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
                         }
                     }
-
-
                     Imgproc.rectangle(mat, rectHog, scalarHog, 2)
-
                 }
                 if (null == bmpCanny) {
                     bmpCanny = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.RGB_565)

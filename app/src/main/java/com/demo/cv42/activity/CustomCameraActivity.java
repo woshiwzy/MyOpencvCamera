@@ -49,6 +49,8 @@ public class CustomCameraActivity extends Activity {
         ((TextView) findViewById(R.id.textView)).setText("Opencv版本:" + OpenCVLoader.OPENCV_VERSION);
         javaCameraView = findViewById(R.id.cameraView);
 
+        javaCameraView.setDrawUseDefaultMethod(true);
+
         ((CheckBox) findViewById(R.id.checkboxFull)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -58,18 +60,11 @@ public class CustomCameraActivity extends Activity {
 
         Configuration mConfiguration = this.getResources().getConfiguration(); //获取设置的配置信息
         int ori = mConfiguration.orientation; //获取屏幕方向
-        if (ori == mConfiguration.ORIENTATION_LANDSCAPE) {
-            javaCameraView.setPortrait(false);
-            //横屏
-        } else if (ori == mConfiguration.ORIENTATION_PORTRAIT) {
-            //竖屏
-            javaCameraView.setPortrait(true);
-        }
+        javaCameraView.setPortrait(ori == mConfiguration.ORIENTATION_PORTRAIT);
 
-//      javaCameraView.setCameraIndex(1);
         javaCameraView.setOnFrameReadCallBack(new CustomJavaCameraView.OnFrameReadCallBack() {
             @Override
-            public void OnFrameRead(final Bitmap bitmap,final Mat mat) {
+            public void OnFrameRead(final Bitmap bitmap, final Mat mat) {
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -77,18 +72,15 @@ public class CustomCameraActivity extends Activity {
                         cameraViewImg.setImageBitmap(bitmap);
                     }
                 });
-
             }
         });
 
         requestPermission();
-
         ((TextView) findViewById(R.id.textViewTitleDesc)).setText("自定义(解决，全屏，横竖屏切换，前后摄像头切换)");
         buttonSwitchCamera = findViewById(R.id.buttonSwitchCamera);
         buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 javaCameraView.swithCamera(!javaCameraView.isUseFrontCamera());
             }
         });
@@ -100,13 +92,7 @@ public class CustomCameraActivity extends Activity {
 
         Configuration mConfiguration = this.getResources().getConfiguration(); //获取设置的配置信息
         int ori = mConfiguration.orientation; //获取屏幕方向
-        if (ori == mConfiguration.ORIENTATION_LANDSCAPE) {
-            javaCameraView.setPortrait(false);
-            //横屏
-        } else if (ori == mConfiguration.ORIENTATION_PORTRAIT) {
-            //竖屏
-            javaCameraView.setPortrait(true);
-        }
+        javaCameraView.setPortrait(ori == mConfiguration.ORIENTATION_PORTRAIT);
         javaCameraView.restartCamera();
 
     }

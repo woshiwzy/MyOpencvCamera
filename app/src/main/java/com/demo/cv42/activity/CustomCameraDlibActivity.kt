@@ -64,6 +64,8 @@ open class CustomCameraDlibActivity : Activity() {
             javaCameraView?.isPortrait = true
         }
 
+        javaCameraView?.isDrawUseDefaultMethod=true
+
         val scalar = Scalar(200.0, 200.0, 200.0)
         var rect = Rect()
         var bmpCanny: Bitmap? = null

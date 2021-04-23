@@ -55,9 +55,7 @@ public class CustomJavaCameraView extends JavaCameraView {
     protected void deliverAndDrawFrame(CvCameraViewFrame frame) {
         int width = getWidth();
         int height = getHeight();
-        if (drawUseDefaultMethod) {
-            super.deliverAndDrawFrame(frame);
-        } else {
+
             //使用自定义绘制方法
 
             //如果需要CvLisenter 回调方法，可以在此自定义或者反射获取父类的listener
@@ -138,6 +136,7 @@ public class CustomJavaCameraView extends JavaCameraView {
 
             //如果屏蔽下面的代码不会绘制
             if (bmpValid && customCacheBitmap != null && !customCacheBitmap.isRecycled() && isDrawUseDefaultMethod()) {
+
                 Canvas canvas = getHolder().lockCanvas();
 
                 if (canvas != null) {
@@ -166,7 +165,6 @@ public class CustomJavaCameraView extends JavaCameraView {
                     }
                     getHolder().unlockCanvasAndPost(canvas);
                 }
-            }
         }
     }
 

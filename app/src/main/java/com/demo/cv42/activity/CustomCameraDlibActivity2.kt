@@ -22,13 +22,13 @@ import com.demo.cv42.R
 import com.demo.cv42.hog.FaceHogTool
 import com.demo.cv42.ml.FaceML
 import com.demo.cv42.ml.MyMl
+import com.demo.cv42.ml.VectorTool
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
 import com.wangzy.face.DbController
-import com.wangzy.face.FeatureUtils
 import com.wangzy.face.People
 import kotlinx.android.synthetic.main.activity_custom_camera_dlib2.*
 import kotlinx.coroutines.Dispatchers
@@ -74,20 +74,15 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         cameraViewImgPreview = findViewById(R.id.cameraViewImgPreview)
         (findViewById<View>(R.id.textView) as TextView).text = "Opencv版本:" + OpenCVLoader.OPENCV_VERSION
         javaCameraView = findViewById(R.id.cameraView)
+        javaCameraView?.isDrawUseDefaultMethod = false
+        javaCameraView?.isUseFrontCamera = true
 
         val mConfiguration = this.resources.configuration //获取设置的配置信息
         val ori = mConfiguration.orientation //获取屏幕方向
-        if (ori == Configuration.ORIENTATION_LANDSCAPE) {
-            javaCameraView?.isPortrait = false
-            //横屏
-        } else if (ori == Configuration.ORIENTATION_PORTRAIT) {
-            //竖屏
-            javaCameraView?.isPortrait = true
-        }
 
+        javaCameraView?.isPortrait = Configuration.ORIENTATION_LANDSCAPE != ori
 
         var bmpCanny: Bitmap? = null
-
         javaCameraView?.onFrameReadCallBack = OnFrameReadCallBack { bitmap, srcMat ->
             runOnUiThread {
 //                Log.e(App.tag,"image size:"+bitmap.width+","+bitmap.height)
@@ -134,7 +129,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                         //如果是登记模式
                         if (checkBoxRecord.isChecked && !editTextName.text.isEmpty()) {
 //                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)//利用
-
                             GlobalScope.launch(Dispatchers.Main) {
                                 var name = editTextName.text.toString()
                                 var peop = People()
@@ -147,7 +141,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             }
                         } else {
                             if (faceMl.sampleSize <= 1) {
-                                Log.e(App.tag, "样本数不够");
+                                Log.e(App.tag, "样本数不够")
                             } else {
 //                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
 //                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
@@ -156,7 +150,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                                 if (radioButtonCv.isChecked) {
                                     var people = faceMl.predicate2(featurs)
                                     if (null != people) {
-                                        var percentDistance = FeatureUtils.computeDistancePercent(featurs, people)
+                                        var percentDistance = VectorTool.computeSimilarity2(featurs, people.vector);
 //                                        Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
                                         Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
                                     }
@@ -165,7 +159,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 //                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
                                     Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
                                 }
-
 
                             }
                         }

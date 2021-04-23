@@ -23,26 +23,24 @@ class RecordListActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record_list)
 
         allPeople = DbController.getInstance(app).session.peopleDao.loadAll()
+        textViewDataItemCount.text = "样本数量:" + allPeople.size
+
         Log.e(App.tag, "allcount:" + allPeople.size)
         val peopleAdapter = PeopleAdapter(R.layout.item_people, allPeople)
         recylerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recylerView.adapter = peopleAdapter
         peopleAdapter.addChildClickViewIds(R.id.buttonDelete)
 
-        peopleAdapter.setOnItemChildClickListener(object : OnItemChildClickListener {
-
-            override fun onItemChildClick(adapter: BaseQuickAdapter<*, *>, view: View, position: Int) {
-                DbController.getInstance(App.app).session.delete(allPeople[position])
-                allPeople.removeAt(position)
-                peopleAdapter.notifyDataSetChanged()
-
-            }
-        })
+        peopleAdapter.setOnItemChildClickListener { adapter, view, position ->
+            DbController.getInstance(App.app).session.delete(allPeople[position])
+            allPeople.removeAt(position)
+            peopleAdapter.notifyDataSetChanged()
+            textViewDataItemCount.text = "样本数量:" + allPeople.size
+        }
     }
 
     internal inner class PeopleAdapter(layoutResId: Int, data: MutableList<People?>?) : BaseQuickAdapter<People?, BaseViewHolder>(layoutResId, data) {

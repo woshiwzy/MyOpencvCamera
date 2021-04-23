@@ -1,5 +1,9 @@
 package com.demo.cv42.hog;
 
+import android.util.Log;
+
+import com.demo.cv42.App;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
@@ -40,7 +44,6 @@ public class FaceHogTool {
 
         ArrayList<Float> vecs = new ArrayList<>(matf.toList());
 
-//        Log.e(App.tag, "hong 特征:" + vecs.size());
         return vecs;
 
 //        StringBuffer sbf = new StringBuffer();

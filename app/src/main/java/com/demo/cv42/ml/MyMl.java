@@ -7,7 +7,6 @@ import com.wangzy.face.People;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by wangzy on 4/14/21
@@ -18,9 +17,9 @@ public class MyMl {
 
     private static MyMl ml;
 
-    public static MyMl getInstance(Context context){
-        if(null==ml){
-            ml=new MyMl(context);
+    public static MyMl getInstance(Context context) {
+        if (null == ml) {
+            ml = new MyMl(context);
         }
         return ml;
     }
@@ -31,10 +30,11 @@ public class MyMl {
 
     public MyMl(Context context) {
         this.peoples = new ArrayList<>();
-        this.context=context;
+        this.context = context;
         loadData(context);
     }
-    public void reload(){
+
+    public void reload() {
         loadData(this.context);
     }
 
@@ -48,13 +48,13 @@ public class MyMl {
         HashMap<Integer, RecResult> nearPeoples = new HashMap<>(n);
 
         for (People people : this.peoples) {
-            float totalDistance = computeDistancePercent(inputVectors, people);
+            float totalDistance = VectorTool.computeSimilarity2(inputVectors, people.getVector());
             if (nearPeoples.containsKey(1)) {
-                if (totalDistance < nearPeoples.get(1).distance) {
-                    nearPeoples.put(1,new RecResult(people,totalDistance));
+                if (totalDistance > nearPeoples.get(1).distance) {
+                    nearPeoples.put(1, new RecResult(people, totalDistance));
                 }
-            }else {
-                nearPeoples.put(1,new RecResult(people,totalDistance));
+            } else {
+                nearPeoples.put(1, new RecResult(people, totalDistance));
             }
         }
         return nearPeoples;
@@ -65,15 +65,4 @@ public class MyMl {
         return peoples.size();
     }
 
-
-    public static float computeDistancePercent(ArrayList<Float> inputFeature, People inPutPeople) {
-        List<Float> inputPeopleFeatures = inPutPeople.getVector();
-        float peopleTotalFeature = 0;
-        float distanceTotal = 0;
-        for (int i = 0, isize = inputPeopleFeatures.size(); i < isize; i++) {
-            peopleTotalFeature += inPutPeople.getVector().get(i);
-            distanceTotal += Math.sqrt(Math.pow(inPutPeople.getVector().get(i) - inputFeature.get(i), 2));
-        }
-        return distanceTotal;
-    }
 }

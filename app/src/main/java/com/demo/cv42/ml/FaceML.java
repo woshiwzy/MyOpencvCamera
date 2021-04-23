@@ -57,17 +57,20 @@ public class FaceML {
 
         List<People> peoples = DbController.getInstance(App.Companion.getApp()).getSession().getPeopleDao().loadAll();
 
+        if (peoples.isEmpty()) {
+            return;
+        }
+
         this.kNearest = KNearest.create();
         this.kNearest.setDefaultK(1);
         this.kNearest.setIsClassifier(true);
 
 
-        int col=peoples.get(0).getVector().size();
-        Log.e(App.tag, "找到已经登记的人脸数据:" + peoples.size()+" 纬度："+col);
+        int col = peoples.get(0).getVector().size();
+        Log.e(App.tag, "找到已经登记的人脸数据:" + peoples.size() + " 纬度：" + col);
 
         Mat responseMat = new Mat(peoples.size(), 1, CvType.CV_32F);//label mat
-        Mat samplesMat = new Mat(0,col , CvType.CV_32F);//sample
-
+        Mat samplesMat = new Mat(0, col, CvType.CV_32F);//sample
 
 
         for (int i = 0, isize = peoples.size(); i < isize; i++) {
@@ -117,7 +120,7 @@ public class FaceML {
         Mat result = new Mat();
         Mat input = matOfFloat.reshape(0, 1);
 
-        long responId= (long) this.kNearest.findNearest(input,1,result);
+        long responId = (long) this.kNearest.findNearest(input, 1, result);
 
 //        long responId = (long) this.kNearest.predict(input, result);
 

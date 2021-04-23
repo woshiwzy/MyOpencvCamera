@@ -64,7 +64,7 @@
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".activity.CustomCameraDlibActivity2"
-            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".activity.CustomCameraDlibActivity"
@@ -81,7 +81,7 @@
         <activity
             android:name=".activity.RecordListActivity"
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
     </application>
 

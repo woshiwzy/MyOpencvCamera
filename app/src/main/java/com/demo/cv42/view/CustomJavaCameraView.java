@@ -185,6 +185,7 @@ public class CustomJavaCameraView extends JavaCameraView {
     }
 
     public void setResolution2(int width, int height) {
+        useMaxPreview = false;
         disconnectCamera();
         mMaxHeight = height;
         mMaxWidth = width;

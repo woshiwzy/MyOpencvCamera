@@ -297,6 +297,16 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         mCameraFrameReady = false;
     }
 
+
+    public Size getMaxPervieSize(){
+        if(null!=mCamera){
+            Camera.Size obj = mCamera.getParameters().getSupportedPreviewSizes().get(0);
+            return new Size(obj.width,obj.height);
+        }
+
+        return  null;
+    }
+
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
         if (BuildConfig.DEBUG)

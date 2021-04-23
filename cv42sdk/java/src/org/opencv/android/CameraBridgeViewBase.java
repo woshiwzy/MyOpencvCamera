@@ -43,9 +43,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected int mFrameWidth;
     protected int mFrameHeight;
 
-    protected static int mMaxHeight;
-    protected static int mMaxWidth;
+    protected static int mMaxHeight = 0;
+    protected static int mMaxWidth = 0;
 
+
+    protected boolean useMaxPreview = false;
 
     protected float mScale = 0;
     protected int mPreviewFormat = RGBA;
@@ -63,6 +65,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
     private static int defaultWidth = 0;
     private static int defaultHeight = 0;
+
 
     public static void setDefaultPreviewSize(int width, int height) {
         mMaxWidth = width;
@@ -532,7 +535,17 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
      * @return optimal frame size
      */
     protected Size calculateCameraFrameSize(List<?> supportedSizes, ListItemAccessor accessor, int surfaceWidth, int surfaceHeight) {
-        if (mMaxWidth * mMaxHeight != 0) {
+
+        if (useMaxPreview) {
+            Object maxObj = supportedSizes.get(0);
+            int maxWidth = accessor.getWidth(maxObj);
+            int maxHeight = accessor.getHeight(maxObj);
+            Log.d("cv4", "使用最大分辨率: " + maxWidth + " x " + maxHeight);
+            return new Size(maxWidth, maxHeight);
+
+        }
+
+        if ((mMaxWidth * mMaxHeight != 0) && (mMaxWidth * mMaxHeight != 1)) {
             return new Size(mMaxWidth, mMaxHeight);
         }
 
@@ -561,7 +574,16 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             calcHeight = accessor.getHeight(size);
         }
 
+
         return new Size(calcWidth, calcHeight);
 //        return new Size(640, 480);
+    }
+
+    public boolean isUseMaxPreview() {
+        return useMaxPreview;
+    }
+
+    public void setUseMaxPreview(boolean useMaxPreview) {
+        this.useMaxPreview = useMaxPreview;
     }
 }

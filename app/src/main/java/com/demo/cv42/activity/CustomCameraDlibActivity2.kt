@@ -30,9 +30,7 @@ import com.tzutalin.dlib.FileUtils
 import com.wangzy.face.DbController
 import com.wangzy.face.People
 import kotlinx.android.synthetic.main.activity_custom_camera_dlib2.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
 import org.opencv.core.Mat
@@ -75,11 +73,11 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         setContentView(R.layout.activity_custom_camera_dlib2)
         cameraViewImgPreview = findViewById(R.id.cameraViewImgPreview)
 
-        CustomJavaCameraView.setDefaultPreviewSize(640, 480);
+//        CustomJavaCameraView.setDefaultPreviewSize(640, 480);
 
         javaCameraView = findViewById(R.id.cameraView)
         javaCameraView?.isDrawUseDefaultMethod = false
-        javaCameraView?.isUseFrontCamera = true
+//        javaCameraView?.isUseFrontCamera = false
         javaCameraView?.isUseGray = checkBoxGray.isChecked
 
         checkBoxGray.setOnCheckedChangeListener { buttonView, isChecked -> javaCameraView?.isUseGray = isChecked }
@@ -91,7 +89,10 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
         var bmpCanny: Bitmap? = null
         javaCameraView?.onFrameReadCallBack = OnFrameReadCallBack { bitmap, srcMat ->
+
             runOnUiThread {
+
+                textViewPicSize.text = "图片大小:" + bitmap.width + "," + bitmap.height
 
                 Utils.bitmapToMat(bitmap, mat)
                 var visiRets = faceDet?.detect(bitmap)
@@ -138,20 +139,16 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             var name = editTextName.text.toString()
                             if (checkBoxRecord.isChecked) {//单次登记
 //                            var featurs = FeatureUtils.comptuteFeature2(it, faceMat)//利用
-                                GlobalScope.launch(Dispatchers.Main) {
-                                    recordPerson(name, hogFeatureString)
-                                    checkBoxRecord.isChecked = false
-                                    Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
-                                }
+                                recordPerson(name, hogFeatureString)
+                                checkBoxRecord.isChecked = false
+                                Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
                             } else {//连续登记
 
                                 var rc = checkBoxRepeat.tag.toString().toInt()
                                 recordPerson(name, hogFeatureString)
                                 recordCout++
                                 if (recordCout == rc) {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
-                                    }
+                                    Toast.makeText(App.app, "登记成功", Toast.LENGTH_SHORT).show();
                                     checkBoxRepeat.isChecked = false
                                 }
                             }
@@ -250,6 +247,16 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
             javaCameraView?.setResolution2(640, 480)
         }
 
+        button1080.setOnClickListener {
+            javaCameraView?.setResolution2(1920, 1080)
+        }
+
+        checkBoxMax.setOnCheckedChangeListener { buttonView, isChecked ->
+
+            javaCameraView?.isUseMaxPreview = isChecked
+            javaCameraView?.restartCamera()
+
+        }
 
         checkBoxRepeat.setOnCheckedChangeListener { buttonView, isChecked -> recordCout = 0 }
 
@@ -263,9 +270,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
-
         requestPermission()
-
     }
 
 
@@ -311,6 +316,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                 javaCameraView!!.setCameraPermissionGranted() //需要已经授权可以使用摄像头再调用这个方法
                 javaCameraView!!.enableView()
                 javaCameraView!!.enableFpsMeter()
+
+                checkBoxMax.text = "最大分辨率:" + javaCameraView?.maxPervieSize.toString()
 
                 initFaceML()
             }

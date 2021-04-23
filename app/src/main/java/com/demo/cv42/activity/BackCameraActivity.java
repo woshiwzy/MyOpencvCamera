@@ -25,7 +25,7 @@ public class BackCameraActivity extends Activity {
     private String tag = "cv42demo";
     private JavaCamera2View javaCameraView;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
-    private boolean isInitSuccess=false;
+    private boolean isInitSuccess = false;
 
 
 //    static {
@@ -44,7 +44,7 @@ public class BackCameraActivity extends Activity {
         javaCameraView.setCameraIndex(0);
         requestPermission();
 
-        ((TextView)findViewById(R.id.textViewTitleDesc)).setText("后置横屏");
+        ((TextView) findViewById(R.id.textViewTitleDesc)).setText("后置横屏");
     }
 
     private void requestPermission() {
@@ -79,7 +79,7 @@ public class BackCameraActivity extends Activity {
 
     private boolean initCamera() {
         Log.e(App.tag, "isinit success:" + isInitSuccess);
-        if (  null != javaCameraView) {
+        if (null != javaCameraView) {
 
             javaCameraView.post(new Runnable() {
                 @Override
@@ -94,7 +94,7 @@ public class BackCameraActivity extends Activity {
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
-                            Log.e(App.tag, "onCameraViewStarted:" + width + " x " + height);
+                            Log.e(App.tag, "原生后置图片大小:" + width + " x " + height);
 //                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);
                         }
 
@@ -105,9 +105,8 @@ public class BackCameraActivity extends Activity {
 
                         @Override
                         public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-
                             final Mat src = inputFrame.rgba();
-
+                            Log.e(App.tag, "原生后置图片大小:" + src.width() + " x " + src.height());
                             return src;
                         }
 

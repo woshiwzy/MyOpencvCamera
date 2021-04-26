@@ -66,6 +66,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
     }
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -281,20 +282,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        val mConfiguration = this.resources.configuration //获取设置的配置信息
-        val ori = mConfiguration.orientation //获取屏幕方向
-        if (ori == Configuration.ORIENTATION_LANDSCAPE) {
-            javaCameraView!!.isPortrait = false
-            //横屏
-        } else if (ori == Configuration.ORIENTATION_PORTRAIT) {
-            //竖屏
-            javaCameraView!!.isPortrait = true
-        }
-        javaCameraView!!.restartCamera()
-    }
-
 
     private fun initCamera(): Boolean {
         Log.e(App.tag, "isinit success:$isInitSuccess")
@@ -356,6 +343,13 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val mConfiguration = this.resources.configuration //获取设置的配置信息
+        val ori = mConfiguration.orientation //获取屏幕方向
+        javaCameraView!!.isPortrait = ori == Configuration.ORIENTATION_PORTRAIT
+        javaCameraView!!.restartCamera()
+    }
 
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

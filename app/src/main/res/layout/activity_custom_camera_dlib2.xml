@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
-                android:text="使用灰度" />
+                android:text="灰度" />
 
             <CheckBox
                 android:id="@+id/checkBoxMax"
@@ -134,7 +134,7 @@
                 android:id="@+id/buttonReloadModule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="重新加载模型" />
+                android:text="刷新模型" />
 
             <EditText
                 android:id="@+id/editTextName"

@@ -97,6 +97,25 @@
                 app:layout_constraintBottom_toTopOf="@id/scrollView" />
 
             <Button
+                android:id="@+id/buttonCamera2dlib"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onClickGotoCustom2CameraView"
+                android:text="Dlib Camer2人脸识别和登记(华为内存泄露)"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/scrollView" />
+
+
+            <Button
+                android:id="@+id/buttonCameraX"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickGotoCameraX"
+                android:text="Camerax"
+                app:layout_constraintBottom_toTopOf="@id/scrollView" />
+
+            <Button
                 android:id="@+id/buttonGPUImg"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

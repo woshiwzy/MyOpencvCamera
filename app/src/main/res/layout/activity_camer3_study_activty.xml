@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.Camer2StudyActivty">
+
+
+
+    <ImageView
+        android:id="@+id/imageViewPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/input_item_height"
+        android:background="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_item_height"
+            android:gravity="top|left"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/buttonSwitchCamera"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="切换摄像头" />
+
+            <CheckBox
+                android:id="@+id/checkBoxGray"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="灰度" />
+
+            <CheckBox
+                android:id="@+id/checkBoxMax"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="最大分辨率" />
+
+            <Button
+                android:id="@+id/button240"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="240X320" />
+
+            <Button
+                android:id="@+id/button480"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="480X640" />
+
+            <Button
+                android:id="@+id/button1080"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="1080X1920" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+</RelativeLayout>

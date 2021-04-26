@@ -16,28 +16,22 @@
         android:roundIcon="@drawable/cv_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-
+        <activity android:name=".activity.CameraXActivity"></activity>
         <activity android:name=".activity.MlTestActivity">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
-
-
         <activity android:name=".activity.DataGalleryActivity" />
-
-
         <activity android:name=".activity.MainActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
         <activity
             android:name=".activity.CameraActivity"
             android:screenOrientation="portrait"
@@ -83,6 +77,9 @@
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".activity.Camer2StudyActivty"
+            android:configChanges="orientation|screenSize" />
     </application>
 
 </manifest>

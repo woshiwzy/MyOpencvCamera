@@ -67,4 +67,11 @@ class MainActivity : Activity() {
     fun onClickGotoCustomCameraView(view: View?){
         startActivity(Intent(this, SimpleCusCameraActivity::class.java))
     }
+
+    fun onClickGotoCustom2CameraView(view: View?){
+        startActivity(Intent(this, Camer2StudyActivty::class.java))
+    }
+    fun onClickGotoCameraX(view: View?){
+        startActivity(Intent(this, CameraXActivity::class.java))
+    }
 }

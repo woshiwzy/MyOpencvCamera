@@ -1,4 +1,4 @@
-package com.demo.cv42.ml;
+package com.demo.cv42.face;
 
 import android.util.Log;
 
@@ -45,7 +45,6 @@ public class FaceHogTool {
         MatOfFloat matf = new MatOfFloat();
         getHogDescriptor().compute(dstMat, matf);//计算特征
         ArrayList<Float> vecs = new ArrayList<>(matf.toList());
-        Log.e(App.tag, "特征纬度:" + vecs.size());
 
         return vecs;
 

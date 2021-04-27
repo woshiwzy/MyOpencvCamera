@@ -1,6 +1,4 @@
-package com.demo.cv42.ml;
-
-import android.util.Log;
+package com.demo.cv42.face;
 
 import com.demo.cv42.App;
 import com.tzutalin.dlib.VisionDetRet;

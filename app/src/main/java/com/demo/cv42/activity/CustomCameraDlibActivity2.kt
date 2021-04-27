@@ -18,10 +18,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
-import com.demo.cv42.ml.FaceHogTool
-import com.demo.cv42.ml.FaceML
-import com.demo.cv42.ml.MyMl
-import com.demo.cv42.ml.VectorTool
+import com.demo.cv42.face.FaceHogTool
+import com.demo.cv42.face.FaceML
+import com.demo.cv42.face.MyMl
+import com.demo.cv42.face.VectorTool
 import com.demo.cv42.utils.recordPerson
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack

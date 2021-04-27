@@ -13,15 +13,12 @@ import com.demo.cv42.R
 import com.demo.cv42.custom.Camera2DataGeter
 import com.demo.cv42.custom.CameraDataGeterBase
 import com.demo.cv42.custom.CvCameraViewListener2Adapter
-import com.demo.cv42.ml.FaceML
+import com.demo.cv42.face.FaceML
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
 import kotlinx.android.synthetic.main.activity_camer3_study_activty.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.opencv.android.Utils
 import org.opencv.core.Mat
 import java.io.File
 

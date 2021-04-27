@@ -18,10 +18,10 @@ import com.demo.cv42.R
 import com.demo.cv42.custom.CameraDataGeter
 import com.demo.cv42.custom.CameraDataGeterBase
 import com.demo.cv42.custom.CvCameraViewListener2Adapter
-import com.demo.cv42.ml.FaceHogTool
-import com.demo.cv42.ml.FaceML
-import com.demo.cv42.ml.MyMl
-import com.demo.cv42.ml.VectorTool
+import com.demo.cv42.face.FaceHogTool
+import com.demo.cv42.face.FaceML
+import com.demo.cv42.face.MyMl
+import com.demo.cv42.face.VectorTool
 import com.demo.cv42.utils.recordPerson
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet

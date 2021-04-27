@@ -18,7 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
-import com.demo.cv42.hog.FaceHogTool
+import com.demo.cv42.ml.FaceHogTool
 import com.demo.cv42.ml.FaceML
 import com.demo.cv42.ml.MyMl
 import com.demo.cv42.ml.VectorTool
@@ -39,6 +39,9 @@ import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 import java.io.File
 
+/**
+ * 人脸识别和注册
+ */
 open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
     private var javaCameraView: CustomJavaCameraView? = null
@@ -313,7 +316,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE && grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
             initCamera()
         }
     }

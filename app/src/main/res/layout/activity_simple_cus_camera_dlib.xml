@@ -3,62 +3,124 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
     tools:context=".activity.CustomCameraDlibActivity">
 
     <ImageView
         android:id="@+id/imageViewPreview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:background="#bbffaa"
         android:padding="0dp"
         android:scaleType="fitCenter" />
 
+    <LinearLayout
+        android:id="@+id/linearLayoutTopOperates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonSwitchCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="摄像头切换"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <Button
+            android:id="@+id/button480"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="640X480" />
+
+        <Button
+            android:id="@+id/button1920"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1920X1080" />
+
+
+        <CheckBox
+            android:id="@+id/checkBoxGray"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="灰度" />
+
+
+
+    </LinearLayout>
 
     <HorizontalScrollView
+        android:id="@+id/hscBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
-        android:background="@android:color/darker_gray">
+        android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/buttonSwitchCamera"
+            <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="摄像头切换"
-                android:textColor="@color/colorPrimaryDark" />
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioButtonCv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="CV引擎" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonCus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义引擎" />
+
+            </RadioGroup>
+
 
             <Button
-                android:id="@+id/button480"
+                android:id="@+id/buttonReloadModule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="640X480" />
+                android:text="刷新模型" />
 
-            <Button
-                android:id="@+id/button1920"
+            <EditText
+                android:id="@+id/editTextName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1920X1080" />
-
+                android:background="@null"
+                android:hint="输入登记姓名"
+                android:minWidth="120dp" />
 
             <CheckBox
-                android:id="@+id/checkBoxSqure"
+                android:id="@+id/checkBoxRecord"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="方块形照片" />
+                android:text="登记" />
 
             <CheckBox
-                android:id="@+id/checkBoxGray"
+                android:id="@+id/checkBoxRepeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="灰度" />
+                android:tag="10"
+                android:text="连续登记10帧" />
+
+            <Button
+                android:id="@+id/buttonList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="登记列表" />
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -67,8 +129,30 @@
         android:id="@+id/textViewTips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/linearLayoutTopOperates"
         android:background="#88000000"
         android:gravity="center" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewTips"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="120dp"
+            android:layout_margin="10dp"
+            android:text="阀值:" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100" />
+    </LinearLayout>
 
 </RelativeLayout>

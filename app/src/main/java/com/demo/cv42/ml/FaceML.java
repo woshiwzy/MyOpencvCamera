@@ -53,10 +53,7 @@ public class FaceML {
             peoplesMap = new HashMap<>();
         }
         peoplesMap.clear();
-
-
         List<People> peoples = DbController.getInstance(App.Companion.getApp()).getSession().getPeopleDao().loadAll();
-
         if (peoples.isEmpty()) {
             return;
         }
@@ -65,13 +62,10 @@ public class FaceML {
         this.kNearest.setDefaultK(1);
         this.kNearest.setIsClassifier(true);
 
-
         int col = peoples.get(0).getVector().size();
-        Log.e(App.tag, "找到已经登记的人脸数据:" + peoples.size() + " 纬度：" + col);
 
         Mat responseMat = new Mat(peoples.size(), 1, CvType.CV_32F);//label mat
         Mat samplesMat = new Mat(0, col, CvType.CV_32F);//sample
-
 
         for (int i = 0, isize = peoples.size(); i < isize; i++) {
             People people = peoples.get(i);
@@ -81,37 +75,16 @@ public class FaceML {
             MatOfFloat matOfFloat = new MatOfFloat();
             matOfFloat.fromList(vec);
 
-            int mc = matOfFloat.cols();
-            int mr = matOfFloat.rows();
-            int mt = matOfFloat.type();
-
             Mat nv = matOfFloat.reshape(0, 1);
-
-            int nvc = nv.cols();
-            int nvr = nv.rows();
-            int nvt = nv.type();
             samplesMat.push_back(nv);
-//            Log.e(App.tag,"nv.shape"+nv.cols()+" "+nv.rows()+" "+nv.type()+" -->"+samplesMat.type());
             responseMat.put(i, 0, people.getId());
         }
 
-
-        int t1 = samplesMat.type();
-        int t2 = responseMat.type();
 
         TrainData trainData = TrainData.create(samplesMat, 0, responseMat);
         this.kNearest.train(trainData);
     }
 
-//    public long predicate(VisionDetRet visionDetRet) {
-//        ArrayList<Float> vec = FeatureUtils.comptuteFeature(visionDetRet);
-//        MatOfFloat matOfFloat = new MatOfFloat();
-//        matOfFloat.fromList(vec);
-//        Mat preInputMat = matOfFloat.reshape(0, 1);
-//        Mat result = new Mat();
-//        float responId = this.kNearest.predict(preInputMat, result);
-//        return (long) responId;
-//    }
 
     public People predicate2(ArrayList<Float> vec) {
         MatOfFloat matOfFloat = new MatOfFloat();
@@ -121,10 +94,6 @@ public class FaceML {
         Mat input = matOfFloat.reshape(0, 1);
 
         long responId = (long) this.kNearest.findNearest(input, 1, result);
-
-//        long responId = (long) this.kNearest.predict(input, result);
-
-//        Log.e(App.tag, "结果矩阵:" + result.cols() + " x " + result.rows() + "   ==> id:" + responId);
 
         return peoplesMap.get(responId);
 

@@ -79,7 +79,7 @@ public class SimpleCusCameraActivity extends Activity {
 
             @Override
             public Mat onCameraFrame(Mat rgba) {
-//                Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
+                Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
 
                 if (checkBoxSqure.isChecked()) {
 

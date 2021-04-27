@@ -21,6 +21,7 @@ import com.demo.cv42.App;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -237,9 +238,17 @@ public class CameraDataGeter extends CameraDataGeterBase {
                     assert (image.getFormat() == mPreviewFormat);
 
                     JavaCamera2Frame tempFrame = new JavaCamera2Frame(image);
-                    deliverAndDrawFrame(tempFrame.rgba());
+                    Mat mat = tempFrame.rgba();
+
+//                    flipCode：= 0 图像向下翻转　　> 0 图像向右翻转　　< 0 图像同时向下向右翻转
+//                    if (isFrontCamera()) {
+//                        Core.flip(mat, mat, 1);
+//                    }
+                    deliverAndDrawFrame(mat);
                     tempFrame.release();
                     image.close();
+
+
                 }
             }, mBackgroundHandler);
             Surface surface = mImageReader.getSurface();
@@ -296,7 +305,7 @@ public class CameraDataGeter extends CameraDataGeterBase {
                     wrapMat = Imgproc.getRotationMatrix2D(center, 270, 1);
                 }
 
-                if(null==dstRgb || dstRgb.rows()!=rgba.cols() || dstRgb.cols()!=rgba.rows()){
+                if (null == dstRgb || dstRgb.rows() != rgba.cols() || dstRgb.cols() != rgba.rows()) {
                     dstRgb = new Mat(rgba.cols(), rgba.rows(), rgba.type());
                 }
 
@@ -304,9 +313,17 @@ public class CameraDataGeter extends CameraDataGeterBase {
                     size = new Size(rgba.cols(), rgba.rows());
                 }
                 Imgproc.warpAffine(rgba, dstRgb, wrapMat, size);
+
+                if (isFrontCamera()) {
+                    Core.flip(dstRgb, dstRgb, 1);
+                }
+
                 mListener.onCameraFrame(dstRgb);
             } else {
                 //横屏完全OK，原样返回
+                if (isFrontCamera()) {
+                    Core.flip(rgba, rgba, 1);
+                }
                 mListener.onCameraFrame(rgba);
             }
 

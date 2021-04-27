@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-
+@Deprecated
 public class Camera2DataGeter extends CameraDataGeterBase {
 
     private static final String LOGTAG = App.tag;
@@ -237,8 +237,11 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
                     Log.e(App.tag, "获得rgb帧1");
+
                     Image image = reader.acquireLatestImage();
                     image.close();
+
+//                    fixFuckingCam2OOM();
 
 //                    Image image = reader.acquireLatestImage();
 //                    if (image == null)
@@ -556,8 +559,14 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         private Mat mGray;
     }
 
-    ;
-
+    private byte [] fuckingData = null;
+    private void fixFuckingCam2OOM() {
+        if (fuckingData == null) {
+            fuckingData = new byte[1024 * 1024];
+        } else {
+            fuckingData = null;
+        }
+    }
 
     public boolean isPortrait() {
         return isPortrait;

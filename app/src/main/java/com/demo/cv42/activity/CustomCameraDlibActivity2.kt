@@ -66,7 +66,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
     }
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -74,11 +73,11 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         setContentView(R.layout.activity_custom_camera_dlib2)
         cameraViewImgPreview = findViewById(R.id.cameraViewImgPreview)
 
-//        CustomJavaCameraView.setDefaultPreviewSize(640, 480);
+        CustomJavaCameraView.setDefaultPreviewSize(640, 480);
 
         javaCameraView = findViewById(R.id.cameraView)
         javaCameraView?.isDrawUseDefaultMethod = false
-//        javaCameraView?.isUseFrontCamera = false
+        javaCameraView?.isUseFrontCamera = true
         javaCameraView?.isUseGray = checkBoxGray.isChecked
 
         checkBoxGray.setOnCheckedChangeListener { buttonView, isChecked -> javaCameraView?.isUseGray = isChecked }

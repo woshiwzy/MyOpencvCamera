@@ -72,6 +72,12 @@
             android:name=".activity.SimpleCusCameraActivity"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
+
+        <activity
+            android:name=".activity.SimpleCusCameraDlibActivity"
+            android:configChanges="orientation|screenSize"
+            tools:ignore="LockedOrientationActivity" />
+
         <activity
             android:name=".activity.RecordListActivity"
             android:configChanges="orientation|screenSize"

@@ -129,6 +129,13 @@
                 android:onClick="onClickGotoCustomCameraView"
                 android:text="相机API裁剪+自定义+实时滤镜" />
 
+            <Button
+                android:id="@+id/buttonCusCameraDlib"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickGotoCustomCameraDlibView"
+                android:text="相机API裁剪+自定义+实时滤镜+DLIB+人脸" />
+
         </LinearLayout>
     </ScrollView>
 

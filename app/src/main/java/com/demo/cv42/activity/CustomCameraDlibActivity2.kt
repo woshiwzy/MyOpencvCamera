@@ -22,13 +22,12 @@ import com.demo.cv42.hog.FaceHogTool
 import com.demo.cv42.ml.FaceML
 import com.demo.cv42.ml.MyMl
 import com.demo.cv42.ml.VectorTool
+import com.demo.cv42.utils.recordPerson
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
-import com.wangzy.face.DbController
-import com.wangzy.face.People
 import kotlinx.android.synthetic.main.activity_custom_camera_dlib2.*
 import kotlinx.coroutines.GlobalScope
 import org.opencv.android.OpenCVLoader
@@ -311,14 +310,6 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         return isInitSuccess
     }
 
-
-    private fun recordPerson(name: String, hogFeatureString: String) {
-        var peop = People()
-        peop.name = name
-//                                  peop.feature = featurs + "," + hogFeatureString//存储的时候加上hog特诊
-        peop.feature = hogFeatureString//只用hog特征
-        DbController.getInstance(App.app).getSession().peopleDao.insertOrReplace(peop)
-    }
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

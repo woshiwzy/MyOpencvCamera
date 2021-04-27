@@ -74,4 +74,8 @@ class MainActivity : Activity() {
     fun onClickGotoCameraX(view: View?){
         startActivity(Intent(this, CameraXActivity::class.java))
     }
+
+    fun onClickGotoCustomCameraDlibView(view: View?){
+        startActivity(Intent(this, SimpleCusCameraDlibActivity::class.java))
+    }
 }

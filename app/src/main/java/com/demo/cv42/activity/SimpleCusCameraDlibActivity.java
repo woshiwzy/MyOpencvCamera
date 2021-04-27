@@ -12,7 +12,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,26 +19,26 @@ import com.demo.cv42.App;
 import com.demo.cv42.R;
 import com.demo.cv42.custom.CameraDataGeter;
 import com.demo.cv42.custom.CameraDataGeterBase;
+import com.demo.cv42.custom.CvCameraViewListener2Adapter;
 import com.demo.cv42.gpu.GPUImageUtil;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
-
-import java.util.Random;
+import org.opencv.imgproc.Imgproc;
 
 import androidx.annotation.NonNull;
 
 import static android.Manifest.permission.CAMERA;
 
 
-public class SimpleCusCameraActivity extends Activity {
+public class SimpleCusCameraDlibActivity extends Activity {
 
     private String tag = "cv42demo";
     private CameraDataGeter javaCameraView;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private ImageView imageViewPreview;
-    private CheckBox  checkBoxSqure;
+    private CheckBox checkBoxSqure, checkBoxGray;
     private Button buttonSwitchCamera;
     private TextView textViewTips;
     private long lastFrameTime = 0;
@@ -53,9 +52,11 @@ public class SimpleCusCameraActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_simple_cus_camera);
+        setContentView(R.layout.activity_simple_cus_camera_dlib);
 
         checkBoxSqure = findViewById(R.id.checkBoxSqure);
+        checkBoxGray = findViewById(R.id.checkBoxGray);
+
         textViewTips = findViewById(R.id.textViewTips);
         buttonSwitchCamera = findViewById(R.id.buttonSwitchCamera);
         buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
@@ -67,21 +68,14 @@ public class SimpleCusCameraActivity extends Activity {
 
         imageViewPreview = findViewById(R.id.imageViewPreview);
         javaCameraView = new CameraDataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, 1920, 1080);
-        javaCameraView.setCvCameraViewListener(new CameraDataGeterBase.CvCameraViewListener2() {
-            @Override
-            public void onCameraViewStarted(int width, int height) {
-                Log.e(App.tag, "onCameraViewStarted:" + width + "," + height);
-                textViewTips.setText("onCameraViewStarted:" + width + "," + height);
-            }
-
-            @Override
-            public void onCameraViewStopped() {
-                Log.e(App.tag, "onCameraViewStopped");
-            }
-
+        javaCameraView.setCvCameraViewListener(new CvCameraViewListener2Adapter() {
             @Override
             public Mat onCameraFrame(Mat rgba) {
                 Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
+
+                if (checkBoxGray.isChecked()) {
+                    Imgproc.cvtColor(rgba, rgba, Imgproc.COLOR_BGR2GRAY);
+                }
 
                 if (checkBoxSqure.isChecked()) {
 
@@ -111,15 +105,15 @@ public class SimpleCusCameraActivity extends Activity {
         });
 
 
-        findViewById(R.id.buttonRandFilter).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Random random = new Random();
-                flagFilter = random.nextInt(43);
-                Log.e(App.tag, "tag filter:" + flagFilter);
-                textViewTips.setText("滤镜序号:" + flagFilter);
-            }
-        });
+//        findViewById(R.id.buttonRandFilter).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Random random = new Random();
+//                flagFilter = random.nextInt(43);
+//                Log.e(App.tag, "tag filter:" + flagFilter);
+//                textViewTips.setText("滤镜序号:" + flagFilter);
+//            }
+//        });
 
 
         findViewById(R.id.button480).setOnClickListener(new View.OnClickListener() {
@@ -144,15 +138,16 @@ public class SimpleCusCameraActivity extends Activity {
             @Override
             public void run() {
                 frameCount++;
+
                 if (frameCount == 10) {
                     double delta = (System.currentTimeMillis() - lastFrameTime) / 1000.0f;
-                    textViewTips.setText("fps:" + (int) (1f / (delta / frameCount)));
+                    textViewTips.setText("fps:" + (int) (1f / (delta / frameCount)) + " 图片大小:" + bitmap.getWidth() + " X " + bitmap.getHeight());
                     frameCount = 0;
                     lastFrameTime = System.currentTimeMillis();
                 }
 
                 if (-1 != flagFilter) {
-                    Bitmap resultBitmap = GPUImageUtil.bitmpFilter(SimpleCusCameraActivity.this, bitmap, flagFilter);
+                    Bitmap resultBitmap = GPUImageUtil.bitmpFilter(SimpleCusCameraDlibActivity.this, bitmap, flagFilter);
                     imageViewPreview.setImageBitmap(resultBitmap);
                 } else {
                     imageViewPreview.setImageBitmap(bitmap);

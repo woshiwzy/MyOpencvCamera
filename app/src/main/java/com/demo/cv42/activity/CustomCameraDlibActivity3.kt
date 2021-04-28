@@ -41,7 +41,7 @@ import java.io.File
 /**
  * 在自定义相机的基础上进行人脸识别
  */
-class SimpleCusCameraDlibActivity : Activity() {
+class CustomCameraDlibActivity3 : Activity() {
 
 
     private var faceMl: FaceML? = null
@@ -247,7 +247,7 @@ class SimpleCusCameraDlibActivity : Activity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
                     checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), SimpleCusCameraDlibActivity.CAMERA_PERMISSION_REQUEST_CODE)
+                requestPermissions(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), CustomCameraDlibActivity3.CAMERA_PERMISSION_REQUEST_CODE)
             } else {
                 initCamera()
             }
@@ -282,7 +282,7 @@ class SimpleCusCameraDlibActivity : Activity() {
         GlobalScope.run {
             //1.拷贝模型文件
             if (!File(Constants.getFaceShapeModelPath()).exists()) {
-                FileUtils.copyFileFromRawToOthers(this@SimpleCusCameraDlibActivity, R.raw.shape_predictor_68_face_landmarks, Constants.getFaceShapeModelPath())
+                FileUtils.copyFileFromRawToOthers(this@CustomCameraDlibActivity3, R.raw.shape_predictor_68_face_landmarks, Constants.getFaceShapeModelPath())
             }
             faceDet = FaceDet(Constants.getFaceShapeModelPath())
             //2.初始化faceml

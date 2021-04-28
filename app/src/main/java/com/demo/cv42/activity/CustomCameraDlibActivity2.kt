@@ -111,8 +111,8 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                         var ly = it.faceLandmarks.get(19).y
 
                         var rx = it.faceLandmarks.get(15).x
-                        var ry = it.faceLandmarks.get(8).y
-
+//                        var ry = it.faceLandmarks.get(8).y
+                        var ry = it.faceLandmarks.get(57).y
 
                         var hogWidth = rx - lx
                         var hogHeight = ry - ly

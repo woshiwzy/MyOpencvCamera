@@ -37,7 +37,7 @@ public class FaceHogTool {
         return hogDescriptor;
     }
 
-    protected static ArrayList<Float> compte(Mat input) {
+    public static ArrayList<Float> compte(Mat input) {
 
         int source_type = input.type();
         int source_channel = input.channels();

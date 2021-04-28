@@ -74,7 +74,7 @@
             tools:ignore="LockedOrientationActivity" />
 
         <activity
-            android:name=".activity.SimpleCusCameraDlibActivity"
+            android:name=".activity.CustomCameraDlibActivity3"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
 

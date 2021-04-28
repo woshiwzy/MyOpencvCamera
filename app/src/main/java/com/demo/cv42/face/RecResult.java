@@ -8,6 +8,7 @@ import com.wangzy.face.People;
  */
 public class RecResult {
 
+
     public People people;
     public float percent;
 

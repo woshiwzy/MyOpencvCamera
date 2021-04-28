@@ -84,7 +84,8 @@ public class FaceML {
     }
 
 
-    public People predicate2(ArrayList<Float> vec) {
+    public RecResult predicate2(ArrayList<Float> vec) {
+
         MatOfFloat matOfFloat = new MatOfFloat();
         matOfFloat.fromList(vec);
 
@@ -92,8 +93,15 @@ public class FaceML {
         Mat input = matOfFloat.reshape(0, 1);
 
         long responId = (long) this.kNearest.findNearest(input, 1, result);
+        People people = peoplesMap.get(responId);
 
-        return peoplesMap.get(responId);
+        if (null != people) {
+            float percent = VectorTool.computeSimilarity2(vec, people.getVector());
+            RecResult recResult = new RecResult(people, percent);
+            return recResult;
+        }
+
+        return null;
 
     }
 

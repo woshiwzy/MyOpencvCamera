@@ -9,18 +9,18 @@ import com.wangzy.face.People;
 public class RecResult {
 
     public People people;
-    public float distance;
+    public float percent;
 
-    public RecResult(People people, float distance) {
+    public RecResult(People people, float percent) {
         this.people = people;
-        this.distance = distance;
+        this.percent = percent;
     }
 
     @Override
     public String toString() {
         return "Result{" +
                 "people=" + people.getName() +
-                ", distance=" + distance +
+                ", distance=" + percent +
                 '}';
     }
 }

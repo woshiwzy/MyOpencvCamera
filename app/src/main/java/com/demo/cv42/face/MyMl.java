@@ -50,7 +50,7 @@ public class MyMl {
         for (People people : this.peoples) {
             float totalDistance = VectorTool.computeSimilarity2(inputVectors, people.getVector());
             if (nearPeoples.containsKey(1)) {
-                if (totalDistance > nearPeoples.get(1).distance) {
+                if (totalDistance > nearPeoples.get(1).percent) {
                     nearPeoples.put(1, new RecResult(people, totalDistance));
                 }
             } else {

@@ -21,7 +21,6 @@ import com.demo.cv42.custom.CvCameraViewListener2Adapter
 import com.demo.cv42.face.FaceHogTool
 import com.demo.cv42.face.FaceML
 import com.demo.cv42.face.MyMl
-import com.demo.cv42.face.VectorTool
 import com.demo.cv42.utils.recordPerson
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
@@ -138,19 +137,18 @@ class SimpleCusCameraDlibActivity : Activity() {
                             } else {
                                 var featurs = hogFaceFeatures//只用hog特征
                                 if (radioButtonCv.isChecked) {
-                                    var people = faceMl?.predicate2(featurs)
-                                    if (null != people) {
-                                        var percentDistance = VectorTool.computeSimilarity2(featurs, people.vector);
-                                        if (percentDistance > throld) {
-                                            Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
-                                            Imgproc.putText(rgbaMat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
+                                    var recResult = faceMl?.predicate2(featurs)
+                                    if (null != recResult) {
+                                        if (recResult.percent > throld) {
+                                            Log.e(App.tag, "find people:" + recResult.people + "," + recResult.percent);
+                                            Imgproc.putText(rgbaMat, recResult.people.name + "_" + recResult.percent, rect.tl(), 1, 2.0, scalarName)
                                         }
                                     }
                                 } else {
                                     var ret = MyMl.getInstance(App.app).findNears(1, featurs)[1]!!
-                                    if (ret.distance > throld) {
-                                        Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
-                                        Imgproc.putText(rgbaMat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
+                                    if (ret.percent > throld) {
+                                        Log.e(App.tag, "find people:" + ret.people.name + "," + ret.percent);
+                                        Imgproc.putText(rgbaMat, ret.people.name + "_" + ret.percent, rect.tl(), 1, 2.0, scalarName)
                                     }
                                 }
 
@@ -188,6 +186,8 @@ class SimpleCusCameraDlibActivity : Activity() {
                             Imgproc.circle(rgbaMat, Point(p.x.toDouble(), p.y.toDouble()), 2, scalar, 3)
                         }
                     }
+
+
                     Imgproc.rectangle(rgbaMat, rectHog, scalarHog, 2)
                 }
 
@@ -312,7 +312,8 @@ class SimpleCusCameraDlibActivity : Activity() {
         var ly = it.faceLandmarks.get(19).y
 
         var rx = it.faceLandmarks.get(15).x
-        var ry = it.faceLandmarks.get(8).y
+//        var ry = it.faceLandmarks.get(8).y//下巴的点
+        var ry = it.faceLandmarks.get(57).y//下嘴唇
 
         var hogWidth = rx - lx
         var hogHeight = ry - ly
@@ -322,6 +323,11 @@ class SimpleCusCameraDlibActivity : Activity() {
 
         rectHog.width = hogWidth
         rectHog.height = hogHeight
+
+        //一般的比例大小160X130
+//        Log.e(App.tag, "面部核心区域大小:" + rectHog.width + "," + rectHog.height)
+
+
 
     }
 

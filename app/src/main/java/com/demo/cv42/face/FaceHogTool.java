@@ -20,18 +20,24 @@ public class FaceHogTool {
 
     static {
         Size windowSize = new Size(normal_width, normal_width);
-        Size blockSize = new Size(normal_width / 4, normal_height / 4);
+        Size blockSize = new Size(windowSize.width / 4, windowSize.height / 4);
         Size _blockStride = new Size(blockSize.width / 2, blockSize.height / 2);
         Size _cellSize = _blockStride;
         int _nbins = 4;
         hogDescriptor = new HOGDescriptor(windowSize, blockSize, _blockStride, _cellSize, _nbins);
+//        hogDescriptor = new HOGDescriptor();
+
+
+        //下面是默认值
+//        CV_WRAP HOGDescriptor() : winSize(64,128), blockSize(16,16), blockStride(8,8),
+//                cellSize(8,8), nbins(9),
     }
 
     private static HOGDescriptor getHogDescriptor() {
         return hogDescriptor;
     }
 
-    public static ArrayList<Float> compte(Mat input) {
+    protected static ArrayList<Float> compte(Mat input) {
 
         int source_type = input.type();
         int source_channel = input.channels();
@@ -45,6 +51,8 @@ public class FaceHogTool {
         MatOfFloat matf = new MatOfFloat();
         getHogDescriptor().compute(dstMat, matf);//计算特征
         ArrayList<Float> vecs = new ArrayList<>(matf.toList());
+
+//        Log.e(App.tag, "特征纬度:" + vecs.size());
 
         return vecs;
 

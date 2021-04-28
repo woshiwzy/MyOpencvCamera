@@ -21,7 +21,6 @@ import com.demo.cv42.R
 import com.demo.cv42.face.FaceHogTool
 import com.demo.cv42.face.FaceML
 import com.demo.cv42.face.MyMl
-import com.demo.cv42.face.VectorTool
 import com.demo.cv42.utils.recordPerson
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
@@ -159,24 +158,20 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
                             if (faceMl.sampleSize <= 1) {
                                 Log.e(App.tag, "样本数不够，请勾选登记")
                             } else {
-//                                var featurs = FeatureUtils.comptuteFeature(it, faceMat)
-//                                featurs.addAll(hogFaceFeatures)//识别的时候加上hog
                                 var featurs = hogFaceFeatures//只用hog特征
-
                                 if (radioButtonCv.isChecked) {
-                                    var people = faceMl.predicate2(featurs)
-                                    if (null != people) {
-                                        var percentDistance = VectorTool.computeSimilarity2(featurs, people.vector);
-                                        if (percentDistance > throld) {
+                                    var peopleResult = faceMl.predicate2(featurs)
+                                    if (null != peopleResult) {
+                                        if (peopleResult.percent > throld) {
 //                                            Log.e(App.tag, "find people:" + people.name + "," + percentDistance);
-                                            Imgproc.putText(mat, people.name + "_" + percentDistance, rect.tl(), 1, 2.0, scalarName)
+                                            Imgproc.putText(mat, peopleResult.people.name + "_" + peopleResult.percent, rect.tl(), 1, 2.0, scalarName)
                                         }
                                     }
                                 } else {
                                     var ret = MyMl.getInstance(App.app).findNears(1, featurs)[1]!!
-                                    if (ret.distance > throld) {
+                                    if (ret.percent > throld) {
                                         //                                    Log.e(App.tag, "find people:" + ret.people.name + "," + ret.distance);
-                                        Imgproc.putText(mat, ret.people.name + "_" + ret.distance, rect.tl(), 1, 2.0, scalarName)
+                                        Imgproc.putText(mat, ret.people.name + "_" + ret.percent, rect.tl(), 1, 2.0, scalarName)
                                     }
 
                                 }

@@ -1,9 +1,8 @@
-package com.wangzy.face;
+package com.wangzy.db;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Transient;
 
 import java.util.ArrayList;
 import java.util.List;

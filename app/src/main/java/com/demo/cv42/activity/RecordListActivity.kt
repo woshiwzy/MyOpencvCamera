@@ -3,16 +3,14 @@ package com.demo.cv42.activity
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
-import com.chad.library.adapter.base.listener.OnItemChildClickListener
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.demo.cv42.App
 import com.demo.cv42.App.Companion.app
 import com.demo.cv42.R
-import com.wangzy.face.DbController
-import com.wangzy.face.People
+import com.wangzy.db.DbController
+import com.wangzy.db.People
 import kotlinx.android.synthetic.main.activity_record_list.*
 
 

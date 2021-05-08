@@ -18,10 +18,10 @@ import com.demo.cv42.R
 import com.demo.cv42.custom.CameraDataGeter
 import com.demo.cv42.custom.CameraDataGeterBase
 import com.demo.cv42.custom.CvCameraViewListener2Adapter
-import com.demo.cv42.face.FaceHogTool
-import com.demo.cv42.face.FaceML
-import com.demo.cv42.face.MyMl
 import com.demo.cv42.utils.recordPerson
+import com.face.lib.FaceHogTool
+import com.face.lib.FaceML
+import com.face.lib.MyMl
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
@@ -201,7 +201,7 @@ class CustomCameraDlibActivity3 : Activity() {
         button480.setOnClickListener { javaCameraView?.setResolution(640, 480) }
         button1920.setOnClickListener { javaCameraView?.setResolution(1920, 1080) }
         buttonReloadModule.setOnClickListener {
-            faceMl?.reload()
+            faceMl?.reload(App.app)
         }
 
         buttonList.setOnClickListener {
@@ -286,7 +286,7 @@ class CustomCameraDlibActivity3 : Activity() {
             }
             faceDet = FaceDet(Constants.getFaceShapeModelPath())
             //2.初始化faceml
-            faceMl = FaceML.getInstance()
+            faceMl = FaceML.getInstance(App.app)
             Log.e(App.tag, "init faceml done")
         }
     }

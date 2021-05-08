@@ -1,10 +1,11 @@
-package com.demo.cv42.face;
+package com.face.lib;
 
-import com.demo.cv42.App;
+import android.content.Context;
+
 import com.tzutalin.dlib.VisionDetRet;
-import com.wangzy.face.DbController;
-import com.wangzy.face.FeatureUtils;
-import com.wangzy.face.People;
+import com.wangzy.db.DbController;
+import com.wangzy.db.FeatureUtils;
+import com.wangzy.db.People;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -22,9 +23,9 @@ public class FaceML {
     private static FaceML faceML;
     private static HashMap<Long, People> peoplesMap;
 
-    public static FaceML getInstance() {
+    public static FaceML getInstance(Context context) {
         if (null == faceML) {
-            faceML = new FaceML();
+            faceML = new FaceML(context);
         }
         return faceML;
     }
@@ -32,26 +33,26 @@ public class FaceML {
 
     private KNearest kNearest;
 
-    private FaceML() {
+    private FaceML(Context context) {
 
-        this.loadData();
+        this.loadData(context);
     }
 
-    public void reload() {
+    public void reload(Context context) {
         peoplesMap.clear();
-        loadData();
+        loadData(context);
     }
 
     public int getSampleSize() {
         return peoplesMap.size();
     }
 
-    public void loadData() {
+    public void loadData(Context context) {
         if (null == peoplesMap) {
             peoplesMap = new HashMap<>();
         }
         peoplesMap.clear();
-        List<People> peoples = DbController.getInstance(App.Companion.getApp()).getSession().getPeopleDao().loadAll();
+        List<People> peoples = DbController.getInstance(context).getSession().getPeopleDao().loadAll();
         if (peoples.isEmpty()) {
             return;
         }

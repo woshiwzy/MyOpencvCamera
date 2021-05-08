@@ -13,7 +13,7 @@ import com.demo.cv42.R
 import com.demo.cv42.custom.Camera2DataGeter
 import com.demo.cv42.custom.CameraDataGeterBase
 import com.demo.cv42.custom.CvCameraViewListener2Adapter
-import com.demo.cv42.face.FaceML
+import com.face.lib.FaceML
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
@@ -96,7 +96,7 @@ class Camer2StudyActivty : Activity() {
 
     private fun initFaceML() {
         GlobalScope.run {
-            faceMl = FaceML.getInstance()
+            faceMl = FaceML.getInstance(App.app)
             Log.e(App.tag, "init faceml done")
         }
     }

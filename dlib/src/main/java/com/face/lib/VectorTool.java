@@ -1,4 +1,4 @@
-package com.demo.cv42.face;
+package com.face.lib;
 
 
 import java.util.List;

@@ -71,6 +71,10 @@ android {
         targetGenDir 'src.main.java'//设置DaoMaster、DaoSession、Dao目录
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
 
 
 }

@@ -1,9 +1,9 @@
-package com.demo.cv42.face;
+package com.face.lib;
 
 import android.content.Context;
 
-import com.wangzy.face.DbController;
-import com.wangzy.face.People;
+import com.wangzy.db.DbController;
+import com.wangzy.db.People;
 
 import java.util.ArrayList;
 import java.util.HashMap;

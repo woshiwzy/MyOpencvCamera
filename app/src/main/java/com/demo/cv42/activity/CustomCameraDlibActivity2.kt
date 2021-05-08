@@ -18,12 +18,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.cv42.App
 import com.demo.cv42.R
-import com.demo.cv42.face.FaceHogTool
-import com.demo.cv42.face.FaceML
-import com.demo.cv42.face.MyMl
 import com.demo.cv42.utils.recordPerson
 import com.demo.cv42.view.CustomJavaCameraView
 import com.demo.cv42.view.CustomJavaCameraView.OnFrameReadCallBack
+import com.face.lib.FaceHogTool
+import com.face.lib.FaceML
+import com.face.lib.MyMl
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import com.tzutalin.dlib.FileUtils
@@ -233,7 +233,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
         }
 
         buttonReloadModule.setOnClickListener {
-            faceMl.reload()
+            faceMl.reload(App.app)
         }
 
         button240.setOnClickListener {
@@ -273,7 +273,7 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
     private fun initFaceML() {
         GlobalScope.run {
-            faceMl = FaceML.getInstance()
+            faceMl = FaceML.getInstance(App.app)
             Log.e(App.tag, "init faceml done")
         }
     }

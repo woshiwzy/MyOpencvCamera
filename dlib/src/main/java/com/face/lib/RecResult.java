@@ -1,6 +1,6 @@
-package com.demo.cv42.face;
+package com.face.lib;
 
-import com.wangzy.face.People;
+import com.wangzy.db.People;
 
 /**
  * Created by wangzy on 4/14/21

@@ -1,8 +1,4 @@
-package com.demo.cv42.face;
-
-import android.util.Log;
-
-import com.demo.cv42.App;
+package com.face.lib;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;

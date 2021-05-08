@@ -1,8 +1,8 @@
 package com.demo.cv42.utils
 
 import com.demo.cv42.App
-import com.wangzy.face.DbController
-import com.wangzy.face.People
+import com.wangzy.db.DbController
+import com.wangzy.db.People
 
 /**
  * Created by wangzy on 4/27/21

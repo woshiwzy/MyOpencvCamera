@@ -31,7 +31,6 @@ public class CameraActivity extends Activity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private boolean isInitSuccess=false;
 
-
 //    static {
 //        Log.e(App.tag, "isinit success:" + OpenCVLoader.initDebug());
 //    }
@@ -56,6 +55,7 @@ public class CameraActivity extends Activity {
         requestPermission();
 
         ((TextView)findViewById(R.id.textViewTitleDesc)).setText("后置能全屏");
+
     }
 
     private void requestPermission() {

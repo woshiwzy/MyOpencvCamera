@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:name="com.demo.study.App"
         android:theme="@style/AppTheme">
-        <activity android:name="com.demo.study.MainActivity">
+        <activity android:name="com.demo.study.MainActivity"  android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

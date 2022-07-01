@@ -107,6 +107,10 @@ open class CustomCameraDlibActivity2 : AppCompatActivity() {
 
                     try {
 
+                        if(it.faceLandmarks.size<=0){
+                            return@forEach;
+                        }
+
                         var lx = it.faceLandmarks.get(0).x
                         var ly = it.faceLandmarks.get(19).y
 

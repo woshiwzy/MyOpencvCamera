@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/bean/ContackSendBean.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/bean/CreateBean.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/MainActivity.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/contacks/ReadContacks.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/contacks/UploadContacks.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/contacks/WriteContacks.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/msgs/DownloadMsgs.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/msgs/ReadMsgs.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/msgs/UploadMsgs.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/contack/msgs/WriteMsgs.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/contack/src/main/java/cn/hujie/util/Sender.java" charset="GBK" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

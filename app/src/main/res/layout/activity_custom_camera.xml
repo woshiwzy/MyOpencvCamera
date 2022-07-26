@@ -48,7 +48,6 @@
 
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/textViewTitleDesc"
         android:layout_width="match_parent"
@@ -60,8 +59,8 @@
 
     <ImageView
         android:id="@+id/cameraViewImg"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:text="切换摄像头" />

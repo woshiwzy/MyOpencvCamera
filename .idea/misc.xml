@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ASMIdeaPluginConfiguration">
-    <asm skipDebug="true" skipFrames="true" skipCode="false" expandFrames="false" />
+    <asm skipDebug="false" skipFrames="false" skipCode="false" expandFrames="true" />
     <groovy codeStyle="LEGACY" />
   </component>
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/workspace/study/OpenCV42-android-sdk/MyOpencvCamera/app/src/main/res/layout/activity_custom_camera.xml" value="0.2916666666666667" />
         <entry key="..\:/workspace/study/OpenCV42-android-sdk/MyOpencvCamera/app/src/main/res/layout/activity_entry.xml" value="0.2515625" />
         <entry key="..\:/workspace/study/OpenCV42-android-sdk/MyOpencvCamera/app/src/main/res/layout/activity_simple_cus_camera_dlib.xml" value="0.2515625" />
       </map>

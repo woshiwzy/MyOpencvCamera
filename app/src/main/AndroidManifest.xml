@@ -91,6 +91,7 @@
         <activity
             android:name=".activity.Camer2StudyActivty"  android:exported="false"
             android:configChanges="orientation|screenSize" />
+        <activity android:name=".activity.CustomHogCameraActivity" />
     </application>
 
 </manifest>

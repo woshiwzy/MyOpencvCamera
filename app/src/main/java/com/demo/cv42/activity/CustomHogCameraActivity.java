@@ -22,13 +22,28 @@ import com.demo.cv42.R;
 import com.demo.cv42.view.CustomJavaCameraView;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.HOGDescriptor;
+
+import java.util.List;
+import java.util.Scanner;
 
 import androidx.annotation.NonNull;
 
 import static android.Manifest.permission.CAMERA;
+import static org.opencv.core.CvType.CV_8U;
+import static org.opencv.core.CvType.CV_8UC1;
+import static org.opencv.core.CvType.CV_8UC3;
 
-public class CustomCameraActivity extends Activity {
+public class CustomHogCameraActivity extends Activity {
 
     private String tag = "cv42demo";
     private CustomJavaCameraView javaCameraView;
@@ -36,7 +51,27 @@ public class CustomCameraActivity extends Activity {
     private boolean isInitSuccess = false;
     private Button buttonSwitchCamera;
     private ImageView cameraViewImg;
+    private HOGDescriptor hogDescriptor;
 
+    private MatOfRect matOfRect;
+    private MatOfDouble matOfDouble;
+    private Scalar scalar=new Scalar(110,100,100,100);
+
+    private Bitmap grayBitmap=null;
+
+    private void initHog(){
+
+        //配置特征采集器
+//        int UNITWIDTH = 40, UNITHEIGHT = 60;
+//        Size windowSize = new Size(UNITWIDTH, UNITHEIGHT);
+//        Size blockSize = new Size(UNITWIDTH / 2, UNITHEIGHT / 2);
+//        Size _blockStride = new Size(blockSize.width / 2, blockSize.height / 2);
+//        Size _cellSize = _blockStride;
+//        int _nbins = 4;
+//        hogDescriptor = new HOGDescriptor(windowSize, blockSize, _blockStride, _cellSize, _nbins);
+        hogDescriptor=new HOGDescriptor();
+        hogDescriptor.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +85,7 @@ public class CustomCameraActivity extends Activity {
         javaCameraView = findViewById(R.id.cameraView);
 
         javaCameraView.setDrawUseDefaultMethod(true);
+        javaCameraView.setUseGray(true);
 
         ((CheckBox) findViewById(R.id.checkboxFull)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -62,14 +98,50 @@ public class CustomCameraActivity extends Activity {
         int ori = mConfiguration.orientation; //获取屏幕方向
         javaCameraView.setPortrait(ori == mConfiguration.ORIENTATION_PORTRAIT);
 
+
+
         javaCameraView.setOnFrameReadCallBack(new CustomJavaCameraView.OnFrameReadCallBack() {
             @Override
             public void OnFrameRead(final Bitmap bitmap, final Mat mat) {
 
+                boolean bitmapNull = (null == bitmap);
+                boolean matNull = (null == mat);
+                if(null!=hogDescriptor){
+//
+//                    int srcType=mat.type();
+//                    Mat dst = new Mat(mat.rows(), mat.cols(), CvType.CV_8U);
+//                    Imgproc.cvtColor(mat,dst, CvType.CV_8U);
+//
+//                    int targetType=dst.type();
+//                    int sourceType=mat.type();
+
+//                    Mat dst = new Mat(mat.rows(), mat.cols(), CV_8U);
+//                    Imgproc.cvtColor(mat,dst,Imgproc.COLOR_BGR2BGRA);
+//                    int bValue = 100;
+//                    Imgproc.threshold(mat, dst, bValue, 255, Imgproc.THRESH_BINARY);
+//                    Imgproc.cvtColor(mat,dst,Imgproc.COLOR_RGB2GRAY);
+
+                    hogDescriptor.detectMultiScale(mat, matOfRect, matOfDouble);
+
+
+                    List<Rect> rets = matOfRect.toList();
+                    Log.d(App.tag,"found:"+rets.size());
+
+                    for(Rect rect:rets){
+                        Imgproc.rectangle(mat,rect, scalar,10);
+                    }
+
+                }
+
+                if(null==grayBitmap){
+                    grayBitmap=Bitmap.createBitmap(mat.cols(),mat.rows(), Bitmap.Config.RGB_565);
+                }
+                Utils.matToBitmap(mat, grayBitmap);
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        cameraViewImg.setImageBitmap(bitmap);
+                        cameraViewImg.setImageBitmap(grayBitmap);
                     }
                 });
 
@@ -77,7 +149,7 @@ public class CustomCameraActivity extends Activity {
         });
 
         requestPermission();
-        ((TextView) findViewById(R.id.textViewTitleDesc)).setText("自定义(解决，全屏，横竖屏切换，前后摄像头切换)");
+        ((TextView) findViewById(R.id.textViewTitleDesc)).setText("1自定义(解决，全屏，横竖屏切换，前后摄像头切换)");
         buttonSwitchCamera = findViewById(R.id.buttonSwitchCamera);
         buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,6 +214,11 @@ public class CustomCameraActivity extends Activity {
                     javaCameraView.setCameraPermissionGranted();//需要已经授权可以使用摄像头再调用这个方法
                     javaCameraView.enableView();
                     javaCameraView.enableFpsMeter();
+
+                    matOfRect = new MatOfRect();
+                    matOfDouble = new MatOfDouble();
+
+                    initHog();
 
                 }
             });

@@ -78,4 +78,7 @@ class MainActivity : Activity() {
     fun onClickGotoCustomCameraDlibView(view: View?){
         startActivity(Intent(this, CustomCameraDlibActivity3::class.java))
     }
+    fun onClickHogTest(v:View?){
+        startActivity(Intent(this, CustomHogCameraActivity::class.java))
+    }
 }

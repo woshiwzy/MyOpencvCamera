@@ -23,25 +23,20 @@ import com.demo.cv42.view.CustomJavaCameraView;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
-import org.opencv.core.CvType;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.HOGDescriptor;
 
 import java.util.List;
-import java.util.Scanner;
 
 import androidx.annotation.NonNull;
 
 import static android.Manifest.permission.CAMERA;
-import static org.opencv.core.CvType.CV_8U;
-import static org.opencv.core.CvType.CV_8UC1;
-import static org.opencv.core.CvType.CV_8UC3;
 
 public class CustomHogCameraActivity extends Activity {
 
@@ -55,11 +50,12 @@ public class CustomHogCameraActivity extends Activity {
 
     private MatOfRect matOfRect;
     private MatOfDouble matOfDouble;
-    private Scalar scalar=new Scalar(110,100,100,100);
+    private Scalar scalar = new Scalar(110, 100, 100, 100);
+    private Scalar scalarFont = new Scalar(10, 100, 100);
 
-    private Bitmap grayBitmap=null;
+    private Bitmap grayBitmap = null;
 
-    private void initHog(){
+    private void initHog() {
 
         //配置特征采集器
 //        int UNITWIDTH = 40, UNITHEIGHT = 60;
@@ -69,7 +65,7 @@ public class CustomHogCameraActivity extends Activity {
 //        Size _cellSize = _blockStride;
 //        int _nbins = 4;
 //        hogDescriptor = new HOGDescriptor(windowSize, blockSize, _blockStride, _cellSize, _nbins);
-        hogDescriptor=new HOGDescriptor();
+        hogDescriptor = new HOGDescriptor();
         hogDescriptor.setSVMDetector(HOGDescriptor.getDefaultPeopleDetector());
     }
 
@@ -85,7 +81,7 @@ public class CustomHogCameraActivity extends Activity {
         javaCameraView = findViewById(R.id.cameraView);
 
         javaCameraView.setDrawUseDefaultMethod(true);
-        javaCameraView.setUseGray(true);
+        javaCameraView.setUseGray(false);
 
         ((CheckBox) findViewById(R.id.checkboxFull)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -99,14 +95,14 @@ public class CustomHogCameraActivity extends Activity {
         javaCameraView.setPortrait(ori == mConfiguration.ORIENTATION_PORTRAIT);
 
 
-
         javaCameraView.setOnFrameReadCallBack(new CustomJavaCameraView.OnFrameReadCallBack() {
             @Override
             public void OnFrameRead(final Bitmap bitmap, final Mat mat) {
 
+                /*
                 boolean bitmapNull = (null == bitmap);
                 boolean matNull = (null == mat);
-                if(null!=hogDescriptor){
+                if (null != hogDescriptor) {
 //
 //                    int srcType=mat.type();
 //                    Mat dst = new Mat(mat.rows(), mat.cols(), CvType.CV_8U);
@@ -120,30 +116,31 @@ public class CustomHogCameraActivity extends Activity {
 //                    int bValue = 100;
 //                    Imgproc.threshold(mat, dst, bValue, 255, Imgproc.THRESH_BINARY);
 //                    Imgproc.cvtColor(mat,dst,Imgproc.COLOR_RGB2GRAY);
-
+                    //hogDescriptor 必须为灰度图
+//                    matOfDouble=new MatOfDouble();
                     hogDescriptor.detectMultiScale(mat, matOfRect, matOfDouble);
-
-
                     List<Rect> rets = matOfRect.toList();
-                    Log.d(App.tag,"found:"+rets.size());
-
-                    for(Rect rect:rets){
-                        Imgproc.rectangle(mat,rect, scalar,10);
+                    if (rets.size() > 0) {
+                        Log.d(App.tag, "found:" + rets.size());
+                        double[] dlist = matOfDouble.toArray();
+                        for (int i = 0, isize = rets.size(); i < isize; i++) {
+                            Rect rect = rets.get(i);
+                            double percent = dlist[i];
+                            if (percent > 0.7) {
+                                Imgproc.rectangle(mat, rect, scalar, 10);
+//                                Log.d(App.tag, "percent:" + percent);
+                                Imgproc.putText(mat, String.valueOf(percent), rect.tl(), Imgproc.FONT_ITALIC, 2, scalarFont);
+                            }
+                        }
                     }
-
                 }
 
-                if(null==grayBitmap){
-                    grayBitmap=Bitmap.createBitmap(mat.cols(),mat.rows(), Bitmap.Config.RGB_565);
-                }
-                Utils.matToBitmap(mat, grayBitmap);
+                if (null == grayBitmap) {
+                    grayBitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.RGB_565);
+                }*/
+//                Utils.matToBitmap(mat, grayBitmap);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        cameraViewImg.setImageBitmap(grayBitmap);
-                    }
-                });
+//                runOnUiThread(() -> cameraViewImg.setImageBitmap(bitmap));
 
             }
         });

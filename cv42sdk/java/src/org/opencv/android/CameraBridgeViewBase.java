@@ -536,6 +536,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
      */
     protected Size calculateCameraFrameSize(List<?> supportedSizes, ListItemAccessor accessor, int surfaceWidth, int surfaceHeight) {
 
+
         if (useMaxPreview) {
             Object maxObj = supportedSizes.get(0);
             int maxWidth = accessor.getWidth(maxObj);
@@ -576,7 +577,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
 
 //        return new Size(calcWidth, calcHeight);
-        return new Size(640, 480);
+//        return new Size(640, 480);
+//        return new Size(1280, 720);
+        return new Size(1920, 1080);
     }
 
     public boolean isUseMaxPreview() {

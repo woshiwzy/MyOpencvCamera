@@ -1,4 +1,4 @@
-package com.demo.cv42.custom;
+package com.sand.apm.customzycamerademo.custom;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -9,7 +9,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -18,7 +17,7 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Surface;
 
-import com.demo.cv42.App;
+import com.sand.apm.customzycamerademo.App;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -33,7 +32,7 @@ import java.util.List;
 
 public class Camera2DataGeter extends CameraDataGeterBase {
 
-    private static final String LOGTAG = App.Companion.getTag();
+    private static final String LOGTAG = App.tag;
 
     private ImageReader mImageReader;
     private int mPreviewFormat = ImageFormat.YUV_420_888;
@@ -55,6 +54,8 @@ public class Camera2DataGeter extends CameraDataGeterBase {
     }
 
     private boolean isPortrait;
+
+    private OnImageCallBackListener onImageCallBackListener;
 
     public Camera2DataGeter(Context context, int cameraId, int defaultConnectWidth, int defaultConnectHeight) {
         super(context, cameraId, defaultConnectWidth, defaultConnectHeight);
@@ -235,10 +236,14 @@ public class Camera2DataGeter extends CameraDataGeterBase {
             mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
-                    Log.e(LOGTAG, "获得rgb帧1");
-
                     Image image = reader.acquireLatestImage();
-                    image.close();
+                    if (null != onImageCallBackListener && null != image) {
+                        onImageCallBackListener.onImageCatch(image);
+                    }
+                    if (null != image) {
+                        image.close();
+                    }
+
 
 //                    fixFuckingCam2OOM();
 
@@ -429,7 +434,9 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         return true;
     }
 
-    private class JavaCamera2Frame implements CvCameraViewFrame {
+    public static class JavaCamera2Frame implements CvCameraViewFrame {
+
+
         @Override
         public Mat gray() {
             Image.Plane[] planes = mImage.getPlanes();
@@ -556,9 +563,14 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         private Image mImage;
         private Mat mRgba;
         private Mat mGray;
+
+        public void setImage(Image image) {
+            this.mImage = image;
+        }
     }
 
-    private byte [] fuckingData = null;
+    private byte[] fuckingData = null;
+
     private void fixFuckingCam2OOM() {
         if (fuckingData == null) {
             fuckingData = new byte[1024 * 1024];
@@ -573,5 +585,13 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     public void setPortrait(boolean portrait) {
         isPortrait = portrait;
+    }
+
+    public OnImageCallBackListener getOnImageCallBackListener() {
+        return onImageCallBackListener;
+    }
+
+    public void setOnImageCallBackListener(OnImageCallBackListener onImageCallBackListener) {
+        this.onImageCallBackListener = onImageCallBackListener;
     }
 }

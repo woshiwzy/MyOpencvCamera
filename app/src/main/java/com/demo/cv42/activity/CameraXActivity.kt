@@ -68,8 +68,7 @@ class CameraXActivity : AppCompatActivity() {
 
         // Set up image capture listener, which is triggered after photo has
         // been taken
-        imageCapture.takePicture(
-                outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
+        imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
             override fun onError(exc: ImageCaptureException) {
                 Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
             }
@@ -107,8 +106,7 @@ class CameraXActivity : AppCompatActivity() {
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                        this, cameraSelector, preview)
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview)
 
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)

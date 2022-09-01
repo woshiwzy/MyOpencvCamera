@@ -22,7 +22,6 @@ class App : Application() {
 
     companion object {
         var app: App? = null
-        @JvmField
         var tag = "cv4"
     }
 }

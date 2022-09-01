@@ -1,9 +1,8 @@
-package com.demo.cv42.custom;
+package com.sand.apm.customzycamerademo.custom;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.demo.cv42.App;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Size;

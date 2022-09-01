@@ -143,6 +143,12 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClickHogTest"
                 android:text="HOG人体识别" />
+            <Button
+                android:id="@+id/cuscomCamera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickHogTest"
+                android:text="姿态专用相机" />
 
         </LinearLayout>
     </ScrollView>

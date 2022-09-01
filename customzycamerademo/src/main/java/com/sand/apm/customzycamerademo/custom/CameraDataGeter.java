@@ -1,4 +1,4 @@
-package com.demo.cv42.custom;
+package com.sand.apm.customzycamerademo.custom;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -9,7 +9,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -18,12 +17,15 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Surface;
 
-import com.demo.cv42.App;
+
+import com.sand.apm.customzycamerademo.App;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -31,10 +33,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-public class Camera2DataGeter extends CameraDataGeterBase {
 
-    private static final String LOGTAG = App.Companion.getTag();
+public class CameraDataGeter extends CameraDataGeterBase {
 
+    private static final String LOGTAG = "JavaCamera2View";
     private ImageReader mImageReader;
     private int mPreviewFormat = ImageFormat.YUV_420_888;
 
@@ -46,35 +48,30 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler;
-
+    private boolean isPortraint = false;
+    //首先加载Opencv
     public static boolean isOpencvInitSuccess = false;
+    private Point center = new Point();
+    private Mat dstRgb = null;
+    private Mat wrapMat = null;
+    private Size size = null;
 
     static {
         isOpencvInitSuccess = OpenCVLoader.initDebug();
-        Log.e(LOGTAG, "isinit success:" + isOpencvInitSuccess);
+        Log.e(App.tag, "isinit success:" + isOpencvInitSuccess);
     }
 
-    private boolean isPortrait;
-
-    public Camera2DataGeter(Context context, int cameraId, int defaultConnectWidth, int defaultConnectHeight) {
-        super(context, cameraId, defaultConnectWidth, defaultConnectHeight);
-    }
-
-
-    public void configOrientation(Configuration mConfiguration) {
-        int ori = mConfiguration.orientation;
-        boolean tempOri = Configuration.ORIENTATION_LANDSCAPE != ori;
-        if (tempOri != isPortrait) {
-            isPortrait = tempOri;
-            restartCamera();
+    public CameraDataGeter(Context context, int cameraId, int defaultWidth, int defaultHeight) {
+        super(context, cameraId, defaultWidth, defaultHeight);
+        Configuration mConfiguration = context.getResources().getConfiguration();
+        int ori = mConfiguration.orientation; //获取屏幕方向
+        if (ori == Configuration.ORIENTATION_LANDSCAPE) {
+            setPortraint(false);
+        } else if (ori == Configuration.ORIENTATION_PORTRAIT) {
+            setPortraint(true);
         }
     }
 
-
-    public void restartCamera() {
-        disconnectCamera();
-        connectCamera(defaultConnectWidth, defaultConnectHeight);
-    }
 
     /**
      * 是否使用了前置摄像头
@@ -213,9 +210,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     };
 
-    Mat rotatedMat = null;
-    JavaCamera2Frame tempFrame = null;
-
     private void createCameraPreviewSession() {
         final int w = mPreviewSize.getWidth(), h = mPreviewSize.getHeight();
         Log.i(LOGTAG, "createCameraPreviewSession(" + w + "x" + h + ")");
@@ -235,64 +229,33 @@ public class Camera2DataGeter extends CameraDataGeterBase {
             mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
-                    Log.e(LOGTAG, "获得rgb帧1");
-
                     Image image = reader.acquireLatestImage();
+                    if (image == null)
+                        return;
+
+                    // sanity checks - 3 planes
+                    Image.Plane[] planes = image.getPlanes();
+                    assert (planes.length == 3);
+                    assert (image.getFormat() == mPreviewFormat);
+
+                    JavaCamera2Frame tempFrame = new JavaCamera2Frame(image);
+                    Mat mat = tempFrame.rgba();
+
+//                    flipCode：= 0 图像向下翻转　　> 0 图像向右翻转　　< 0 图像同时向下向右翻转
+//                    if (isFrontCamera()) {
+//                        Core.flip(mat, mat, 1);
+//                    }
+                    deliverAndDrawFrame(mat);
+                    tempFrame.release();
                     image.close();
 
-//                    fixFuckingCam2OOM();
 
-//                    Image image = reader.acquireLatestImage();
-//                    if (image == null)
-//                        return;
-//
-//                    // sanity checks - 3 planes
-//                    Image.Plane[] planes = image.getPlanes();
-//                    assert (planes.length == 3);
-//                    assert (image.getFormat() == mPreviewFormat);
-
-
-//                    if (null == tempFrame) {
-//                        tempFrame = new JavaCamera2Frame(image);
-//                    }
-//                    tempFrame.mImage = image;
-
-//                    Mat srcMat = tempFrame.rgba();
-
-//                    deliverAndDrawFrame(srcMat);
-
-                    //=======================================================
-
-                    /*
-                    if (isPortrait()) { //竖屏
-                        if (isFrontCamera()) {
-                            Core.flip(srcMat, srcMat, 1);//使用了前置摄像头，需要翻转左右，不然旋转90度之后会有问题
-                        }
-                        if (null == rotatedMat || rotatedMat.width() != srcMat.rows() || rotatedMat.height() != srcMat.cols()) {
-//                            if(null!=rotatedMat){
-//                                rotatedMat.release();
-//                            }
-                            rotatedMat = new Mat(srcMat.cols(), srcMat.rows(), srcMat.type());//注意旋转90度后，宽高变化
-                        }
-                        Core.rotate(srcMat, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-                        deliverAndDrawFrame(rotatedMat);
-//                        rotatedMat.release();
-                    } else {
-                        deliverAndDrawFrame(srcMat);
-                    }
-*/
-
-//                    srcMat.release();
-                    //=======================================================
-//                    tempFrame.release();
-//                    image.close();
                 }
             }, mBackgroundHandler);
             Surface surface = mImageReader.getSurface();
 
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewRequestBuilder.addTarget(surface);
-
 
             mCameraDevice.createCaptureSession(Arrays.asList(surface),
                     new CameraCaptureSession.StateCallback() {
@@ -308,10 +271,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
                                         CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-
-                                CaptureRequest rets = mPreviewRequestBuilder.build();
-
-                                mCaptureSession.setRepeatingRequest(rets, null, mBackgroundHandler);
+                                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
                                 Log.i(LOGTAG, "CameraPreviewSession has been started");
                             } catch (Exception e) {
                                 Log.e(LOGTAG, "createCaptureSession failed", e);
@@ -331,6 +291,47 @@ public class Camera2DataGeter extends CameraDataGeterBase {
     }
 
     @Override
+    protected void deliverAndDrawFrame(Mat rgba) {
+
+        if (mListener != null) {
+
+            if (isPortraint()) {//竖屏要旋转，分前后
+
+                center.x = rgba.cols() / 2;
+                center.y = rgba.rows() / 2;
+
+                if (isFrontCamera()) {
+                    wrapMat = Imgproc.getRotationMatrix2D(center, 90, 1);
+                } else {
+                    wrapMat = Imgproc.getRotationMatrix2D(center, 270, 1);
+                }
+
+                if (null == dstRgb || dstRgb.rows() != rgba.cols() || dstRgb.cols() != rgba.rows()) {
+                    dstRgb = new Mat(rgba.cols(), rgba.rows(), rgba.type());
+                }
+
+                if (null == size || size.width != rgba.cols() || size.height != rgba.rows()) {
+                    size = new Size(rgba.cols(), rgba.rows());
+                }
+                Imgproc.warpAffine(rgba, dstRgb, wrapMat, size);
+
+                if (isFrontCamera()) {
+                    Core.flip(dstRgb, dstRgb, 1);
+                }
+
+                mListener.onCameraFrame(dstRgb);
+            } else {
+                //横屏完全OK，原样返回
+                if (isFrontCamera()) {
+                    Core.flip(rgba, rgba, 1);
+                }
+                mListener.onCameraFrame(rgba);
+            }
+
+        }
+    }
+
+    @Override
     protected void disconnectCamera() {
         Log.i(LOGTAG, "close camera");
         try {
@@ -344,13 +345,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                 c.close();
             }
         } finally {
-
-            if (null != tempFrame) {
-                tempFrame.release();
-                tempFrame = null;
-            }
-
-
             stopBackgroundThread();
             if (null != mImageReader) {
                 mImageReader.close();
@@ -407,6 +401,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     @Override
     protected boolean connectCamera(int width, int height) {
+
         Log.i(LOGTAG, "setCameraPreviewSize(" + width + "x" + height + ")");
         startBackgroundThread();
         initializeCamera();
@@ -415,14 +410,14 @@ public class Camera2DataGeter extends CameraDataGeterBase {
             mFrameWidth = mPreviewSize.getWidth();
             mFrameHeight = mPreviewSize.getHeight();
 
-            if (needReconfig) {
-                if (null != mCaptureSession) {
-                    Log.d(LOGTAG, "closing existing previewSession");
-                    mCaptureSession.close();
-                    mCaptureSession = null;
-                }
-                createCameraPreviewSession();
+//            if (needReconfig) {
+            if (null != mCaptureSession) {
+                Log.d(LOGTAG, "closing existing previewSession");
+                mCaptureSession.close();
+                mCaptureSession = null;
             }
+            createCameraPreviewSession();
+//            }
         } catch (RuntimeException e) {
             throw new RuntimeException("Interrupted while setCameraPreviewSize.", e);
         }
@@ -449,6 +444,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
             int h = mImage.getHeight();
             int chromaPixelStride = planes[1].getPixelStride();
 
+
             if (chromaPixelStride == 2) { // Chroma channels are interleaved
                 assert (planes[0].getPixelStride() == 1);
                 assert (planes[2].getPixelStride() == 2);
@@ -458,7 +454,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                 int uv_plane1_step = planes[1].getRowStride();
                 ByteBuffer uv_plane2 = planes[2].getBuffer();
                 int uv_plane2_step = planes[2].getRowStride();
-
                 Mat y_mat = new Mat(h, w, CvType.CV_8UC1, y_plane, y_plane_step);
                 Mat uv_mat1 = new Mat(h / 2, w / 2, CvType.CV_8UC2, uv_plane1, uv_plane1_step);
                 Mat uv_mat2 = new Mat(h / 2, w / 2, CvType.CV_8UC2, uv_plane2, uv_plane2_step);
@@ -470,17 +465,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                     assert (addr_diff == -1);
                     Imgproc.cvtColorTwoPlane(y_mat, uv_mat2, mRgba, Imgproc.COLOR_YUV2RGBA_NV21);
                 }
-
-
-                y_mat.release();
-                uv_mat1.release();
-                uv_mat2.release();
-
-                y_mat = null;
-                uv_mat1 = null;
-                uv_mat2 = null;
-
-
                 return mRgba;
             } else { // Chroma channels are not interleaved
                 byte[] yuv_bytes = new byte[w * (h + h / 2)];
@@ -558,20 +542,22 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         private Mat mGray;
     }
 
-    private byte [] fuckingData = null;
-    private void fixFuckingCam2OOM() {
-        if (fuckingData == null) {
-            fuckingData = new byte[1024 * 1024];
-        } else {
-            fuckingData = null;
+    public void onConfigurationChanged(Configuration newConfig) {
+        int ori = newConfig.orientation; //获取屏幕方向
+        if (ori == newConfig.ORIENTATION_LANDSCAPE) {
+            //横屏
+            setPortraint(false);
+        } else if (ori == newConfig.ORIENTATION_PORTRAIT) {
+            setPortraint(true);
         }
     }
 
-    public boolean isPortrait() {
-        return isPortrait;
+
+    public boolean isPortraint() {
+        return isPortraint;
     }
 
-    public void setPortrait(boolean portrait) {
-        isPortrait = portrait;
+    public void setPortraint(boolean portraint) {
+        isPortraint = portraint;
     }
 }

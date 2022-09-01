@@ -78,7 +78,7 @@ public class BackCameraActivity extends Activity {
 
 
     private boolean initCamera() {
-        Log.e(App.tag, "isinit success:" + isInitSuccess);
+        Log.e(tag, "isinit success:" + isInitSuccess);
         if (null != javaCameraView) {
 
             javaCameraView.post(new Runnable() {
@@ -94,7 +94,7 @@ public class BackCameraActivity extends Activity {
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
-                            Log.e(App.tag, "原生后置图片大小:" + width + " x " + height);
+                            Log.e(tag, "原生后置图片大小:" + width + " x " + height);
 //                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);
                         }
 
@@ -106,7 +106,7 @@ public class BackCameraActivity extends Activity {
                         @Override
                         public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
                             final Mat src = inputFrame.rgba();
-                            Log.e(App.tag, "原生后置图片大小:" + src.width() + " x " + src.height());
+                            Log.e(tag, "原生后置图片大小:" + src.width() + " x " + src.height());
                             return src;
                         }
 

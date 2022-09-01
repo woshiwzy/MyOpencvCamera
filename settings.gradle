@@ -1,3 +1,4 @@
 include ':app', ':cv42sdk', ':dlib'
 rootProject.name='MyOpenCV'
 include ':jni_study'
+include ':customzycamerademo'

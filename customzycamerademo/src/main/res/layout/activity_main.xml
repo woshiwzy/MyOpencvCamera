@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageViewPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.sand.apm.customzycamerademo.custom.PoseImageView
+            android:id="@+id/imageViewCenter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
+
+    </LinearLayout>
+
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/input_item_height"
+        android:background="#33ffffff"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_item_height"
+            android:gravity="top|left"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonSwitchCamera"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="切换摄像头" />
+
+            <CheckBox
+                android:id="@+id/checkBoxGray"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="灰度" />
+
+            <CheckBox
+                android:id="@+id/checkBoxMax"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="最大分辨率" />
+
+            <Button
+                android:id="@+id/button240"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="240X320" />
+
+            <Button
+                android:id="@+id/button480"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="480X640" />
+
+            <Button
+                android:id="@+id/button1080"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="1080X1920" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+    <TextView
+        android:id="@+id/textViewFps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textColor="#ff0000"
+        android:textSize="20sp" />
+
+</RelativeLayout>

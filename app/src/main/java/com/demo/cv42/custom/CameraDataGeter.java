@@ -57,7 +57,7 @@ public class CameraDataGeter extends CameraDataGeterBase {
 
     static {
         isOpencvInitSuccess = OpenCVLoader.initDebug();
-        Log.e(App.tag, "isinit success:" + isOpencvInitSuccess);
+        Log.e(App.Companion.getTag(), "isinit success:" + isOpencvInitSuccess);
     }
 
     public CameraDataGeter(Context context, int cameraId, int defaultWidth, int defaultHeight) {

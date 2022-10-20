@@ -78,7 +78,7 @@ public class FrontCameraPortraitFullScreenActivity extends Activity {
 
 
     private boolean initCamera() {
-        Log.e(App.tag, "isinit success:" + isInitSuccess);
+        Log.e(App.Companion.getTag(), "isinit success:" + isInitSuccess);
 
         final Point centerPoint = new Point();
 
@@ -94,12 +94,12 @@ public class FrontCameraPortraitFullScreenActivity extends Activity {
                     final int cameraViewWidth = javaCameraView.getWidth();
                     final int cameraViewHeight = javaCameraView.getHeight();
 
-                    Log.e(App.tag, "onCameraView:" + cameraViewWidth + " x " + cameraViewHeight);
+                    Log.e(App.Companion.getTag(), "onCameraView:" + cameraViewWidth + " x " + cameraViewHeight);
 
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
-                            Log.e(App.tag, "onCameraViewStarted:" + width + " x " + height);
+                            Log.e(App.Companion.getTag(), "onCameraViewStarted:" + width + " x " + height);
 //                            javaCameraView.AllocateCache2(height, width);//注意这里width*height是反的，原因是原生的CameraView 绘制的时候 Mat转Bitmap需要构造旋转后的大小的Bitmap
                             javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);//注意这里width*height是反的，原因是原生的CameraView 绘制的时候 Mat转Bitmap需要构造旋转后的大小的Bitmap
 
@@ -132,7 +132,7 @@ public class FrontCameraPortraitFullScreenActivity extends Activity {
                             float scaleHeight = cameraViewHeight * 1.0f / sourceHeight;
 
                             float maxScale = Math.max(scaleWidth, scaleHeight);//得到最大的放大比例按照最大的比例放大，保证高宽都能铺满
-                            Log.d(App.tag, "scale:" + maxScale);
+                            Log.d(App.Companion.getTag(), "scale:" + maxScale);
 
                             float resize = maxScale;
                             Size dstSize = new Size((int) (rotatedMat.cols() * resize), (int) (rotatedMat.rows() * resize));//缩放到目标大小

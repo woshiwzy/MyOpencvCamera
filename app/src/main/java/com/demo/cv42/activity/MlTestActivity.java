@@ -81,7 +81,7 @@ public class MlTestActivity extends AppCompatActivity {
         Mat ninput = input.reshape(0, 1);
 
         float res = kNearest.predict(ninput);
-        Log.e(App.tag, "预测结果2===>>>" + res);
+        Log.e(App.Companion.getTag(), "预测结果2===>>>" + res);
 
 
     }

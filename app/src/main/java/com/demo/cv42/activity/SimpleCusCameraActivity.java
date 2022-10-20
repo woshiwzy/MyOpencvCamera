@@ -70,18 +70,18 @@ public class SimpleCusCameraActivity extends Activity {
         javaCameraView.setCvCameraViewListener(new CameraDataGeterBase.CvCameraViewListener2() {
             @Override
             public void onCameraViewStarted(int width, int height) {
-                Log.e(App.tag, "onCameraViewStarted:" + width + "," + height);
+                Log.e(App.Companion.getTag(), "onCameraViewStarted:" + width + "," + height);
                 textViewTips.setText("onCameraViewStarted:" + width + "," + height);
             }
 
             @Override
             public void onCameraViewStopped() {
-                Log.e(App.tag, "onCameraViewStopped");
+                Log.e(App.Companion.getTag(), "onCameraViewStopped");
             }
 
             @Override
             public Mat onCameraFrame(Mat rgba) {
-                Log.e(App.tag, "获得数据===>>:" + rgba.width() + " X " + rgba.height());
+                Log.e(App.Companion.getTag(), "获得数据===>>:" + rgba.width() + " X " + rgba.height());
 
                 if (checkBoxSqure.isChecked()) {
 
@@ -116,7 +116,7 @@ public class SimpleCusCameraActivity extends Activity {
             public void onClick(View v) {
                 Random random = new Random();
                 flagFilter = random.nextInt(43);
-                Log.e(App.tag, "tag filter:" + flagFilter);
+                Log.e(App.Companion.getTag(), "tag filter:" + flagFilter);
                 textViewTips.setText("滤镜序号:" + flagFilter);
             }
         });

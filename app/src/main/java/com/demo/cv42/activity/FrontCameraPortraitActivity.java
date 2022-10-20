@@ -74,7 +74,7 @@ public class FrontCameraPortraitActivity extends Activity {
 
 
     private boolean initCamera() {
-        Log.e(App.tag, "isinit success:" + isInitSuccess);
+        Log.e(App.Companion.getTag(), "isinit success:" + isInitSuccess);
         if (null != javaCameraView) {
 
             javaCameraView.post(new Runnable() {
@@ -87,7 +87,7 @@ public class FrontCameraPortraitActivity extends Activity {
                     final int cameraViewWidth = javaCameraView.getWidth();
                     final int cameraViewHeight = javaCameraView.getHeight();
 
-                    Log.e(App.tag, "onCameraView:" + cameraViewWidth + " x " + cameraViewHeight);
+                    Log.e(App.Companion.getTag(), "onCameraView:" + cameraViewWidth + " x " + cameraViewHeight);
 
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override

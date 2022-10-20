@@ -198,7 +198,7 @@ public class CustomHogCameraActivity extends Activity {
 
 
     private boolean initCamera() {
-        Log.e(App.tag, "isinit success:" + isInitSuccess);
+        Log.e(App.Companion.getTag(), "isinit success:" + isInitSuccess);
 
         if (null != javaCameraView) {
 

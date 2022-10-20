@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/input_item_height"
         android:background="#33ffffff"
-        android:visibility="invisible">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"

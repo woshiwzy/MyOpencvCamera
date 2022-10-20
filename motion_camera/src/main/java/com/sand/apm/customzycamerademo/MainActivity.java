@@ -182,16 +182,14 @@ public class MainActivity extends Activity {
 
     private Bitmap getCacheBitmap(int targetWidth, int targetHeight) {
         if (null == mCacheBitmap || mCacheBitmap.getWidth() != targetWidth || mCacheBitmap.getHeight() != targetHeight) {
-            mCacheBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+            mCacheBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.RGB_565);
         }
         return mCacheBitmap;
     }
 
 
     CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
-
     private Pose process(InputImage image) {
-
         processIng = true;
         Task<Pose> result = poseDetector.process(image).addOnSuccessListener(pose -> {
             try {
@@ -291,6 +289,7 @@ public class MainActivity extends Activity {
             camera2DataGeter.enableView();
             blurBitmap = Bitmap.createBitmap(cameraWidth / 2, cameraHeight / 2, Bitmap.Config.ARGB_8888);
         }
+
     }
 
 }

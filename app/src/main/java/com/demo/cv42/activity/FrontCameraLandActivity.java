@@ -74,7 +74,7 @@ public class FrontCameraLandActivity extends Activity {
 
 
     private boolean initCamera() {
-        Log.e(App.tag, "isinit success:" + isInitSuccess);
+        Log.e(App.Companion.getTag(), "isinit success:" + isInitSuccess);
         if (null != javaCameraView) {
 
             javaCameraView.post(new Runnable() {
@@ -90,7 +90,7 @@ public class FrontCameraLandActivity extends Activity {
                     javaCameraView.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
                         @Override
                         public void onCameraViewStarted(int width, int height) {
-                            Log.e(App.tag, "onCameraViewStarted:" + width + " x " + height);
+                            Log.e(App.Companion.getTag(), "onCameraViewStarted:" + width + " x " + height);
 //                            javaCameraView.AllocateCache2(cameraViewWidth, cameraViewHeight);
                         }
 

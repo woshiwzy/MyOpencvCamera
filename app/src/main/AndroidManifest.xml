@@ -92,6 +92,11 @@
             android:name=".activity.Camer2StudyActivty"  android:exported="false"
             android:configChanges="orientation|screenSize" />
         <activity android:name=".activity.CustomHogCameraActivity" />
+
+        <meta-data
+            android:name="ScopedStorage"
+            android:value="true" />
+
     </application>
 
 </manifest>

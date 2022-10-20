@@ -12,10 +12,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/customzycamerademo" />
             <option value="$PROJECT_DIR$/cv42sdk" />
             <option value="$PROJECT_DIR$/dlib" />
             <option value="$PROJECT_DIR$/jni_study" />
+            <option value="$PROJECT_DIR$/motion_camera" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

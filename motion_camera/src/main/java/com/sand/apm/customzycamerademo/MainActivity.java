@@ -16,6 +16,9 @@ import com.google.mlkit.vision.pose.Pose;
 import com.google.mlkit.vision.pose.PoseDetection;
 import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
@@ -29,6 +32,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Size;
 
+import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
@@ -39,7 +43,7 @@ public class MainActivity extends Activity {
     private Camera2DataGeter.JavaCamera2Frame camera2Frame;
     private int widthSource, heightSource, widthTarget, heightTarget;
     private Bitmap mCacheBitmap, blurBitmap;
-    private int cameraWidth = 1280, cameraHeight = 720;
+    private int cameraWidth = 1920, cameraHeight = 1080;
     private ImageView imageViewPreview;
     private PoseImageView imageViewCenter;
     private TextView textViewFps;
@@ -68,59 +72,50 @@ public class MainActivity extends Activity {
         imageViewPreview = findViewById(R.id.imageViewPreview);
         imageViewCenter = findViewById(R.id.imageViewCenter);
 
-        camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, cameraWidth, cameraHeight);
-        camera2DataGeter.configOrientation(getResources().getConfiguration());
-
-        camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
-            @Override
-            public void onImageCatch(Image image) {
-                if (processIng) {
-                    return;
-                }
-                if (null == camera2Frame) {
-                    camera2Frame = new Camera2DataGeter.JavaCamera2Frame(image);
-                } else {
-                    camera2Frame.setImage(image);
-                }
-
-                if (widthTarget == 0 || heightTarget == 0) {
-                    widthTarget = imageViewCenter.getWidth();
-                    heightTarget = imageViewCenter.getHeight();
-                }
-
-                Mat sourceMat = camera2Frame.rgba();
-                Core.flip(sourceMat, sourceMat, 1);
-                widthSource = sourceMat.width();
-                heightSource = sourceMat.height();
-
-                //targetWidth 可以自由控制
-                int targetWidth = imageViewCenter.getWidth();
-                int targetHeight = imageViewCenter.getHeight();
-                if (targetWidth <= 0 || targetHeight <= 0) {
-                    return;
-                }
-                DetectResult result = fitMat2TargetAndDetect(sourceMat, widthSource, heightSource, targetWidth, targetHeight);
-                runOnUiThread(() -> {
-                    long now = System.currentTimeMillis();
-                    long delta = now - lastTime;
-                    if (delta != 0) {
-                        int fps = (int) (1000 / delta);
-                        String fpsAndPixs = "摄像头信息:" + widthSource + "x" + heightSource + " - " + String.valueOf(fps);
-                        textViewFps.setText(fpsAndPixs);
-                    }
-                    imageViewCenter.setDetectResult(result);
-                    lastTime = System.currentTimeMillis();
-//                  imageViewPreview.setImageBitmap(blurBitmap);
-                });
-
-            }
-        });
-
-        initCamera();
-        initAi();
+        requestPermissionAndInitCamera();
     }
 
-    private DetectResult detectResult=new DetectResult();
+
+    /**
+     * 权限请求打开相机
+     */
+    private void requestPermissionAndInitCamera() {
+        XXPermissions.with(this)
+                .permission(Permission.CAMERA)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE)
+                .permission(Permission.READ_EXTERNAL_STORAGE)
+                // 申请单个权限
+//                .permission(Permission.RECORD_AUDIO)
+                // 申请多个权限
+                //.interceptor(new PermissionInterceptor())
+                .request(new OnPermissionCallback() {
+                    @Override
+                    public void onGranted(List<String> permissions, boolean all) {
+                        if (all) {
+//                            toast("获取录音和日历权限成功");
+                            initCamera();
+                            initAi();
+                        } else {
+//                            toast("获取部分权限成功，但部分权限未正常授予");
+                        }
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions, boolean never) {
+                        if (never) {
+//                            toast("被永久拒绝授权，请手动授予录音和日历权限");
+                            // 如果是被永久拒绝就跳转到应用权限系统设置页面
+                            XXPermissions.startPermissionActivity(MainActivity.this, permissions);
+                        } else {
+//                            toast("获取录音和日历权限失败");
+                        }
+                    }
+                });
+    }
+
+
+    private DetectResult detectResult = new DetectResult();
+
     private DetectResult fitMat2TargetAndDetect(Mat sourceMat, int widthSource, int heightSource, int targetWidth, int targetHeight) {
 
         float widthFraction = widthSource * 1.0f / targetWidth;
@@ -185,17 +180,6 @@ public class MainActivity extends Activity {
     }
 
 
-    Mat targetMat = null;
-
-    private Mat getTargetMat(Mat sourceMat, Range rowRange, Range colRange) {
-//        if(null==targetMat || ro){
-
-//        }
-
-        return targetMat;
-    }
-
-
     private Bitmap getCacheBitmap(int targetWidth, int targetHeight) {
         if (null == mCacheBitmap || mCacheBitmap.getWidth() != targetWidth || mCacheBitmap.getHeight() != targetHeight) {
             mCacheBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
@@ -238,7 +222,6 @@ public class MainActivity extends Activity {
     }
 
     private void initAi() {
-
         // Base pose detector with streaming frames, when depending on the pose-detection sdk
         options = new PoseDetectorOptions.Builder().setDetectorMode(PoseDetectorOptions.STREAM_MODE).build();
         poseDetector = PoseDetection.getClient(options);
@@ -252,6 +235,55 @@ public class MainActivity extends Activity {
     }
 
     private void initCamera() {
+
+        camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, cameraWidth, cameraHeight);
+        camera2DataGeter.configOrientation(getResources().getConfiguration());
+        camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
+            @Override
+            public void onImageCatch(Image image) {
+                if (processIng) {
+                    return;
+                }
+                if (null == camera2Frame) {
+                    camera2Frame = new Camera2DataGeter.JavaCamera2Frame(image);
+                } else {
+                    camera2Frame.setImage(image);
+                }
+
+                if (widthTarget == 0 || heightTarget == 0) {
+                    widthTarget = imageViewCenter.getWidth();
+                    heightTarget = imageViewCenter.getHeight();
+                }
+
+                Mat sourceMat = camera2Frame.rgba();
+                Core.flip(sourceMat, sourceMat, 1);
+                widthSource = sourceMat.width();
+                heightSource = sourceMat.height();
+
+                //targetWidth 可以自由控制
+                int targetWidth = imageViewCenter.getWidth();
+                int targetHeight = imageViewCenter.getHeight();
+                if (targetWidth <= 0 || targetHeight <= 0) {
+                    return;
+                }
+                DetectResult result = fitMat2TargetAndDetect(sourceMat, widthSource, heightSource, targetWidth, targetHeight);
+                runOnUiThread(() -> {
+                    long now = System.currentTimeMillis();
+                    long delta = now - lastTime;
+                    if (delta != 0) {
+                        int fps = (int) (1000 / delta);
+                        String fpsAndPixs = "摄像头信息:" + widthSource + "x" + heightSource + " - " + String.valueOf(fps);
+                        textViewFps.setText(fpsAndPixs);
+                    }
+                    imageViewCenter.setDetectResult(result);
+                    lastTime = System.currentTimeMillis();
+//                  imageViewPreview.setImageBitmap(blurBitmap);
+                });
+
+            }
+        });
+
+
         if (null != camera2DataGeter) {
             mCacheBitmap = Bitmap.createBitmap(cameraWidth, cameraHeight, Bitmap.Config.ARGB_8888);
             //3.打开相机

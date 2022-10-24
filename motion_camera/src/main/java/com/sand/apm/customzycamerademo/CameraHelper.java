@@ -46,6 +46,11 @@ public class CameraHelper {
     public static PoseDetectorOptions options = null;
     public static PoseDetector poseDetector = null;
 
+
+    public static int frameCount=0;
+
+
+
     /**
      * 正在识别
      */
@@ -115,7 +120,7 @@ public class CameraHelper {
 
     /**
      * 识别姿态
-     *
+     * 将图像转换成目标大小
      * @param sourceMat
      * @param widthSource
      * @param heightSource
@@ -137,9 +142,9 @@ public class CameraHelper {
             Utils.matToBitmap(sourceMat, CameraHelper.mCacheBitmap);
         } else if (minFraction > 1) {
             //原图太大，居中裁剪
-            CameraHelper.rowRange.start = heightSource / 2 - targetHeight / 2;
+            CameraHelper.rowRange.start = (heightSource >>1) - (targetHeight >>1);
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
-            CameraHelper.colRange.start = widthSource / 2 - targetWidth / 2;
+            CameraHelper.colRange.start = (widthSource >>1) - (targetWidth >>1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
             Mat targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
             CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(targetWidth, targetHeight);
@@ -150,11 +155,10 @@ public class CameraHelper {
             int ftargetWidth = (int) (targetWidth * minFraction);
             int ftargetHeight = (int) (targetHeight * minFraction);
 
-            CameraHelper.rowRange.start = heightSource / 2 - ftargetHeight / 2;
+            CameraHelper.rowRange.start = (heightSource >>1) - (ftargetHeight >>1);
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + ftargetHeight;
-            CameraHelper.colRange.start = widthSource / 2 - ftargetWidth / 2;
+            CameraHelper.colRange.start = (widthSource >> 1) - (ftargetWidth >> 1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + ftargetWidth;
-
 
             Mat targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
             CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(ftargetWidth, ftargetHeight);

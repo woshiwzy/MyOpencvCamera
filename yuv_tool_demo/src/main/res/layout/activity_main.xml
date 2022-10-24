@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="显示"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="功能"
+        android:gravity="center"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV21转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV21 -> I420"
+                android:onClick="nv21Toi420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV21 -> argb8888"
+                android:onClick="nv21ToARGB8888Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV21 -> rgb565"
+                android:onClick="nv21ToRG565Click"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV12转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV12 -> I420"
+                android:onClick="nv12Toi420Click"/>
+
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV12 -> I420 rotate"
+                android:onClick="nv12Toi420RotateClick"/>
+
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV12 -> argb8888"
+                android:onClick="nv12ToARGB8888Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NV12 -> rgb565"
+                android:onClick="nv12ToRG565Click"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> NV21"
+                android:onClick="i420Tonv21Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> NV12"
+                android:onClick="i420Tonv12Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> I400"
+                android:onClick="i420ToI400Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> I411"
+                android:onClick="i420ToI411Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> I422"
+                android:onClick="i420ToI422Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> I444"
+                android:onClick="i420ToI444Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> ARGB8888"
+                android:onClick="i420ToARGB8888Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> RGB565"
+                android:onClick="i420ToRGB565Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> ARGB4444"
+                android:onClick="i420ToARGB4444Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> ARGB1555"
+                android:onClick="i420ToARGB1555Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> ABGR"
+                android:onClick="i420ToABGRClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> RGB24"
+                android:onClick="i420ToRGB24Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> RGBA"
+                android:onClick="i420ToRGBAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> BGRA"
+                android:onClick="i420ToBGRAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> UYVY"
+                android:onClick="i420ToUYVYClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> YUY2"
+                android:onClick="i420ToYUY2Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> raw"
+                android:onClick="i420ToRawClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Copy"
+                android:onClick="i420CopyClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Mirror"
+                android:onClick="i420MirrorClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Rotate"
+                android:onClick="i420RotateClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Scale"
+                android:onClick="i420ScaleClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Scale_16"
+                android:onClick="i420Scale16Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Psnr"
+                android:onClick="i420PsnrClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> Ssim"
+                android:onClick="i420SsimClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420 -> rect"
+                android:onClick="i420RectClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I444转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I444 -> I420"
+                android:onClick="i444ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I444 -> ARGB"
+                android:onClick="i444ToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I444 -> ABGR"
+                android:onClick="i444ToABGRClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> I420"
+                android:onClick="i422ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> ABGR"
+                android:onClick="i422ToABGRClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> BGRA"
+                android:onClick="i422ToBGRAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> RGBA"
+                android:onClick="i422ToRGBAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> ARGB"
+                android:onClick="i422ToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> UYVY"
+                android:onClick="i422ToUYVYClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I422 -> YUY2"
+                android:onClick="i422ToYUY2Click"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I400转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I400 -> I420"
+                android:onClick="i400ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I400 -> ARGB"
+                android:onClick="i400ToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I400 -> Mirror"
+                android:onClick="i400ToMirrorClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2 -> I420"
+                android:onClick="yuy2ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2 -> I422"
+                android:onClick="yuy2ToI422Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2 -> NV12"
+                android:onClick="yuy2ToNV12Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2 -> Y"
+                android:onClick="yuy2ToYClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YUY2 -> ARGB"
+                android:onClick="yuy2ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UYVY转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UYVY -> I420"
+                android:onClick="uyvyToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UYVY -> I422"
+                android:onClick="uyvyToI422Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UYVY -> NV12"
+                android:onClick="uyvyToNV12Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UYVY -> ARGB"
+                android:onClick="uyvyToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB24转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB24 -> I420"
+                android:onClick="rgb24ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB24 -> ARGB"
+                android:onClick="rgb24ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB565转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB565 -> I420"
+                android:onClick="rgb565ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGB565 -> ARGB"
+                android:onClick="rgb565ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ABGR转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ABGR -> I420"
+                android:onClick="abgrToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ABGR -> ARGB"
+                android:onClick="abgrToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> NV21"
+                android:onClick="argbToNV21Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> NV12"
+                android:onClick="argbToNV12Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> YUY2"
+                android:onClick="argbToYUY2Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> UYVY"
+                android:onClick="argbToUYVYClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> I420"
+                android:onClick="argbToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> I400"
+                android:onClick="argbToI400Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> I411"
+                android:onClick="argbToI411Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> I422"
+                android:onClick="argbToI422Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> I444"
+                android:onClick="argbToI444Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> ABGR"
+                android:onClick="argbToABGRClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> BGRA"
+                android:onClick="argbToBGRAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> RGBA"
+                android:onClick="argbToRGBAClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> RGB24"
+                android:onClick="argbToRGB24Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> RGB565"
+                android:onClick="argbToRGB565Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> ARGB1555"
+                android:onClick="argbToARGB1555Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> ARGB4444"
+                android:onClick="argbToARGB4444Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> J400"
+                android:onClick="argbToJ400Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> J420"
+                android:onClick="argbToJ420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> J422"
+                android:onClick="argbToJ422Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> RAW"
+                android:onClick="argbToRAWClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> Copy"
+                android:onClick="argbToCopyClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> Mirror"
+                android:onClick="argbToMirrorClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> Rotate"
+                android:onClick="argbToRotateClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB -> Scale"
+                android:onClick="argbToScaleClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BGRA转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BGRA -> I420"
+                android:onClick="bgraToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BGRA -> ARGB"
+                android:onClick="bgraToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB4444转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB4444 -> I420"
+                android:onClick="argb4444ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB4444 -> ARGB"
+                android:onClick="argb4444ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGBA转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGBA -> I420"
+                android:onClick="rgbaToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RGBA -> AGBR"
+                android:onClick="rgbaToAGBRClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB1555转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB1555 -> I420"
+                android:onClick="argb1555ToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARGB1555 -> ARGB"
+                android:onClick="argb1555ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAW转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAW -> I420"
+                android:onClick="rawToI420Click"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAW -> ARGB"
+                android:onClick="rawToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAW -> RGB24"
+                android:onClick="rawToRGB24Click"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="裁剪及Convert操作"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="裁剪旋转为I420"
+                android:onClick="toI420"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="裁剪旋转为ARGB"
+                android:onClick="toARGB"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I420旋转裁剪为"
+                android:onClick="fromI420"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J400转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J400 -> ARGB"
+                android:onClick="j400ToARGBClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J420转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J420 -> ARGB"
+                android:onClick="j420ToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J420 -> ABGR"
+                android:onClick="j420ToABGRClick"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J422转码"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J420 -> ARGB"
+                android:onClick="j422ToARGBClick"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J420 -> ABGR"
+                android:onClick="j422ToABGRClick"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>

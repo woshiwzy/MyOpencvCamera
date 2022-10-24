@@ -53,6 +53,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         Log.e(LOGTAG, "isinit success:" + isOpencvInitSuccess);
     }
 
+
     private boolean isPortrait;
 
     private OnImageCallBackListener onImageCallBackListener;

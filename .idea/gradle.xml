@@ -16,6 +16,8 @@
             <option value="$PROJECT_DIR$/dlib" />
             <option value="$PROJECT_DIR$/jni_study" />
             <option value="$PROJECT_DIR$/motion_camera" />
+            <option value="$PROJECT_DIR$/yuv-tool" />
+            <option value="$PROJECT_DIR$/yuv_tool_demo" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

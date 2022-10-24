@@ -28,7 +28,7 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="@dimen/input_item_height"
-        android:background="#33ffffff"
+        android:background="#33000000"
         android:visibility="visible">
 
         <LinearLayout
@@ -48,15 +48,16 @@
                 android:id="@+id/checkBoxGray"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
-                android:layout_marginBottom="@dimen/input_item_height"
+                android:layout_marginRight="20dp"
                 android:text="灰度" />
 
             <CheckBox
-                android:id="@+id/checkBoxMax"
+                android:id="@+id/checkBoxMirror"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
-                android:layout_marginBottom="@dimen/input_item_height"
-                android:text="最大分辨率" />
+                android:layout_marginRight="20dp"
+                android:checked="true"
+                android:text="镜像" />
 
             <Button
                 android:id="@+id/button240"
@@ -71,6 +72,14 @@
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
                 android:text="480X640" />
+
+
+            <Button
+                android:id="@+id/button1280"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="720X1280" />
 
             <Button
                 android:id="@+id/button1080"

@@ -112,7 +112,7 @@ dependencies {
     implementation "androidx.camera:camera-camera2:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     implementation "androidx.camera:camera-view:1.0.0-alpha14"
-    implementation 'com.github.Yangandmore:yuv-tool:1.0'
+//    implementation 'com.github.Yangandmore:yuv-tool:1.0'
 
 //    implementation 'org.greenrobot:greendao:3.3.0'
 //    implementation 'org.greenrobot:greendao-api:3.3.0'

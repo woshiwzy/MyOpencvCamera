@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +24,7 @@ import com.sand.apm.customzycamerademo.custom.PoseImageView;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
@@ -30,8 +33,8 @@ public class MainActivity extends Activity {
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
     public TextView textViewFps;
+    public CheckBox checkBoxMirror,checkBoxGray;
     public long lastTime = 0;
-
 
 
     @Override
@@ -44,6 +47,8 @@ public class MainActivity extends Activity {
         textViewFps = findViewById(R.id.textViewFps);
         imageViewPreview = findViewById(R.id.imageViewPreview);
         imageViewShowTarget = findViewById(R.id.imageViewCenter);
+        checkBoxMirror=findViewById(R.id.checkBoxMirror);
+        checkBoxGray=findViewById(R.id.checkBoxGray);
 
         findViewById(R.id.button240).setOnClickListener(view -> {
             //240X320
@@ -55,9 +60,24 @@ public class MainActivity extends Activity {
             CameraHelper.camera2DataGeter.setResolution(640, 480);
         });
 
+        findViewById(R.id.button1280).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CameraHelper.camera2DataGeter.setResolution(1280, 720);
+            }
+        });
+
         findViewById(R.id.button1080).setOnClickListener(view -> {
             //1080X1920
             CameraHelper.camera2DataGeter.setResolution(1920, 1080);
+        });
+
+
+        findViewById(R.id.buttonSwitchCamera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CameraHelper.camera2DataGeter.toogleCamera();
+            }
         });
 
         requestPermissionAndInitCamera();
@@ -102,9 +122,6 @@ public class MainActivity extends Activity {
     }
 
 
-
-
-
     private void initCamera() {
 
         CameraHelper.camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, CameraHelper.cameraWidth, CameraHelper.cameraHeight);
@@ -127,7 +144,14 @@ public class MainActivity extends Activity {
                 }
 
                 Mat sourceMat = CameraHelper.camera2Frame.rgba();
-                Core.flip(sourceMat, sourceMat, 1);
+                if(checkBoxMirror.isChecked()){//实处处理镜像
+                    Core.flip(sourceMat, sourceMat, 1);
+                }
+
+                if(checkBoxGray.isChecked()){//是否处理灰度
+                    Imgproc.cvtColor(sourceMat,sourceMat,Imgproc.COLOR_RGB2GRAY);
+                }
+
                 CameraHelper.widthSource = sourceMat.width();
                 CameraHelper.heightSource = sourceMat.height();
 
@@ -138,7 +162,7 @@ public class MainActivity extends Activity {
                     return;
                 }
 
-               CameraHelper.fitMat2TargetAndDetect(sourceMat, CameraHelper.widthSource, CameraHelper.heightSource, targetWidth, targetHeight,
+                CameraHelper.fitMat2TargetAndDetect(sourceMat, CameraHelper.widthSource, CameraHelper.heightSource, targetWidth, targetHeight,
                         new AiPoseProcessCallBack() {
                             @Override
                             public void onSuccess(Pose poseInfo) {
@@ -175,16 +199,18 @@ public class MainActivity extends Activity {
 
     private void onDetectResult(DetectResult result) {
         runOnUiThread(() -> {
+
             long now = System.currentTimeMillis();
             long delta = now - lastTime;
-            if (delta != 0) {
-                int fps = (int) (1000 / delta);
-                String fpsAndPixs = "摄像头信息:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + " - " + String.valueOf(fps);
+            if (delta >= 1000) {
+                int fps = CameraHelper.frameCount;
+                String fpsAndPixs = "摄像头信息:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "  fps: " + fps;
                 textViewFps.setText(fpsAndPixs);
+                lastTime = now;
+                CameraHelper.frameCount = 0;
             }
+            CameraHelper.frameCount++;
             imageViewShowTarget.setDetectResult(result);
-            lastTime = System.currentTimeMillis();
-//                  imageViewPreview.setImageBitmap(blurBitmap);
         });
     }
 

@@ -244,54 +244,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                     if (null != image) {
                         image.close();
                     }
-
-
-//                    fixFuckingCam2OOM();
-
-//                    Image image = reader.acquireLatestImage();
-//                    if (image == null)
-//                        return;
-//
-//                    // sanity checks - 3 planes
-//                    Image.Plane[] planes = image.getPlanes();
-//                    assert (planes.length == 3);
-//                    assert (image.getFormat() == mPreviewFormat);
-
-
-//                    if (null == tempFrame) {
-//                        tempFrame = new JavaCamera2Frame(image);
-//                    }
-//                    tempFrame.mImage = image;
-
-//                    Mat srcMat = tempFrame.rgba();
-
-//                    deliverAndDrawFrame(srcMat);
-
-                    //=======================================================
-
-                    /*
-                    if (isPortrait()) { //竖屏
-                        if (isFrontCamera()) {
-                            Core.flip(srcMat, srcMat, 1);//使用了前置摄像头，需要翻转左右，不然旋转90度之后会有问题
-                        }
-                        if (null == rotatedMat || rotatedMat.width() != srcMat.rows() || rotatedMat.height() != srcMat.cols()) {
-//                            if(null!=rotatedMat){
-//                                rotatedMat.release();
-//                            }
-                            rotatedMat = new Mat(srcMat.cols(), srcMat.rows(), srcMat.type());//注意旋转90度后，宽高变化
-                        }
-                        Core.rotate(srcMat, rotatedMat, Core.ROTATE_90_CLOCKWISE);//旋转之后得到正确的预览图像
-                        deliverAndDrawFrame(rotatedMat);
-//                        rotatedMat.release();
-                    } else {
-                        deliverAndDrawFrame(srcMat);
-                    }
-*/
-
-//                    srcMat.release();
-                    //=======================================================
-//                    tempFrame.release();
-//                    image.close();
                 }
             }, mBackgroundHandler);
             Surface surface = mImageReader.getSurface();
@@ -355,7 +307,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                 tempFrame.release();
                 tempFrame = null;
             }
-
 
             stopBackgroundThread();
             if (null != mImageReader) {
@@ -546,6 +497,11 @@ public class Camera2DataGeter extends CameraDataGeterBase {
                 Imgproc.cvtColor(yuv_mat, mRgba, Imgproc.COLOR_YUV2RGBA_I420, 4);
                 return mRgba;
             }
+        }
+
+        public void yuv(){
+
+
         }
 
 

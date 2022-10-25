@@ -1,8 +1,12 @@
 package com.sand.apm.customzycamerademo;
 
 import android.graphics.Bitmap;
+import android.media.Image;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.pose.Pose;
 import com.google.mlkit.vision.pose.PoseDetection;
 import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions;
@@ -16,7 +20,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Size;
 
-import java.util.concurrent.ExecutorService;
+import androidx.annotation.NonNull;
 
 /**
  * @ProjectName: MyOpenCV
@@ -47,8 +51,7 @@ public class CameraHelper {
     public static PoseDetector poseDetector = null;
 
 
-    public static int frameCount=0;
-
+    public static int frameCount = 0;
 
 
     /**
@@ -103,24 +106,31 @@ public class CameraHelper {
         CameraHelper.processIng = true;
         CameraHelper.poseDetector.process(image).addOnSuccessListener(pose -> {
             if (null != aiPoseProcessCallBack) {
-                aiPoseProcessCallBack.onSuccess(pose);
+                aiPoseProcessCallBack.onSuccess(pose,image);
             }
             CameraHelper.processIng = false;
         }).addOnFailureListener(e -> {
             if (null != aiPoseProcessCallBack) {
-                aiPoseProcessCallBack.onFail();
+                aiPoseProcessCallBack.onFail(image);
             }
             CameraHelper.processIng = false;
+        }).addOnCompleteListener(new OnCompleteListener<Pose>() {
+            @Override
+            public void onComplete(@NonNull Task<Pose> task) {
+                CameraHelper.processIng = false;
+                if (null != aiPoseProcessCallBack) {
+                    aiPoseProcessCallBack.onComplete(task);
+                }
+            }
         });
 
 
     }
 
 
-
     /**
-     * 识别姿态
-     * 将图像转换成目标大小
+     * 将图像转换成目标大小,并检测其中的姿态
+     *
      * @param sourceMat
      * @param widthSource
      * @param heightSource
@@ -142,9 +152,9 @@ public class CameraHelper {
             Utils.matToBitmap(sourceMat, CameraHelper.mCacheBitmap);
         } else if (minFraction > 1) {
             //原图太大，居中裁剪
-            CameraHelper.rowRange.start = (heightSource >>1) - (targetHeight >>1);
+            CameraHelper.rowRange.start = (heightSource >> 1) - (targetHeight >> 1);
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
-            CameraHelper.colRange.start = (widthSource >>1) - (targetWidth >>1);
+            CameraHelper.colRange.start = (widthSource >> 1) - (targetWidth >> 1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
             Mat targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
             CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(targetWidth, targetHeight);
@@ -155,7 +165,7 @@ public class CameraHelper {
             int ftargetWidth = (int) (targetWidth * minFraction);
             int ftargetHeight = (int) (targetHeight * minFraction);
 
-            CameraHelper.rowRange.start = (heightSource >>1) - (ftargetHeight >>1);
+            CameraHelper.rowRange.start = (heightSource >> 1) - (ftargetHeight >> 1);
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + ftargetHeight;
             CameraHelper.colRange.start = (widthSource >> 1) - (ftargetWidth >> 1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + ftargetWidth;
@@ -171,4 +181,17 @@ public class CameraHelper {
         CameraHelper.process(inputImage, aiPoseProcessCallBack);
 
     }
+
+
+    /**
+     * 直接处理相机的Image
+     * @param cameraImage
+     * @param degree
+     * @param aiPoseProcessCallBack
+     */
+    public static void processInputImage(Image cameraImage, int degree,AiPoseProcessCallBack aiPoseProcessCallBack) {
+        InputImage inputImage = InputImage.fromMediaImage(cameraImage, degree);
+        CameraHelper.process(inputImage,aiPoseProcessCallBack);
+    }
+
 }

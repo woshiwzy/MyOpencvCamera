@@ -3,6 +3,7 @@ package com.sand.apm.customzycamerademo;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -29,7 +30,7 @@ public class MainActivity extends BaseTestActivity {
 
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
-    public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel;
+    public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel, textViewPreviewInfo, textViewCameraOutputInfo;
     public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource;
     public long lastProcessTime = 0, lastPhotoTime = 0;
     private SeekBar seekBar;
@@ -51,8 +52,13 @@ public class MainActivity extends BaseTestActivity {
         checkBoxMirrorV = findViewById(R.id.checkBoxMirrorV);
         checkBoxGray = findViewById(R.id.checkBoxGray);
         checkBoxShowSource = findViewById(R.id.checkBoxShowSource);
-
+        textViewPreviewInfo = findViewById(R.id.textViewPreviewInfo);
         textViewPhotoInfo = findViewById(R.id.textViewPhotoInfo);
+        textViewCameraOutputInfo = findViewById(R.id.textViewCameraOutputInfo);
+
+        imageViewShowTarget.post(() -> {
+            textViewPreviewInfo.setText("预览View大小:" + imageViewShowTarget.getWidth() + "X" + imageViewShowTarget.getHeight());
+        });
 
         findViewById(R.id.button240).setOnClickListener(view -> {
             CameraHelper.camera2DataGeter.setResolution(320, 240);//240X320
@@ -68,13 +74,20 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.camera2DataGeter.setResolution(1920, 1080);//1080X1920
         });
 
+        findViewById(R.id.button2160).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraHelper.camera2DataGeter.setResolution(3840, 2160);
+            }
+        });
+
         findViewById(R.id.buttonSwitchCamera).setOnClickListener(view -> CameraHelper.camera2DataGeter.toogleCamera());
 
         seekBar = findViewById(R.id.seekBarScale);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                textViewScaleLabel.setText("缩放级别:" + i + "/" + seekBar.getMax());
+                textViewScaleLabel.setText("级别:" + i + "/" + seekBar.getMax());
             }
 
             @Override
@@ -109,12 +122,14 @@ public class MainActivity extends BaseTestActivity {
                 } else if ((now - lastPhotoTime) >= 1000) {
                     int fps = photoCount;
                     textViewPhotoInfo.post(() -> {
-                        textViewPhotoInfo.setText("相机出图fps:" + fps);
+                        textViewPhotoInfo.setText("相机出图:" + fps + "fps");
                     });
                     photoCount = 0;
                     lastPhotoTime = now;
 
                 }
+
+
                 processPose1(image);//处理姿态识别方式1
             }
         });
@@ -171,6 +186,14 @@ public class MainActivity extends BaseTestActivity {
             return;
         }
 
+        int cameraOutputWidth = sourceMat.width();
+        int cameraOutputHeight = sourceMat.height();
+
+        textViewCameraOutputInfo.post(() -> {
+            String cameraInfo = cameraOutputWidth + "X" + cameraOutputHeight;
+            textViewCameraOutputInfo.setText("相机输出图片大小:" + cameraInfo);
+        });
+
         //将图像按照目标显示View的大小做一个最佳调整
         Mat bestMat = CameraHelper.fitMat2Target(sourceMat, sourceMat.width(), sourceMat.height(), targetWidth, targetHeight);
         if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
@@ -211,9 +234,9 @@ public class MainActivity extends BaseTestActivity {
                 CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
                 CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
 
-                if (checkBoxShowSource.isChecked()){
+                if (checkBoxShowSource.isChecked()) {
                     CameraHelper.detectResult.setBitmap(CameraHelper.finalShowBitmap);
-                }else{
+                } else {
                     CameraHelper.detectResult.setBitmap(targetBitmap);
                 }
 
@@ -242,7 +265,8 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.frameCount++;
             if (delta >= 1000) {
                 int fps = CameraHelper.frameCount;
-                String fpsAndPixs = "原始最佳分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + ",处理速度fps: " + fps;
+//                String fpsAndPixs = "原始最佳分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + ",处理速度fps: " + fps;
+                String fpsAndPixs = "处理速度: " + fps + "fps";
                 textViewFps.setText(fpsAndPixs);
                 lastProcessTime = now;
                 CameraHelper.frameCount = 0;

@@ -33,8 +33,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#ff0000"
-                android:text="AI处理的缩放比:" />
+                android:text="优化:"
+                android:textColor="#ff0000" />
 
             <SeekBar
                 android:id="@+id/seekBarScale"
@@ -105,20 +105,19 @@
                 android:checked="false"
                 android:text="相机原图显示" />
 
-
             <Button
                 android:id="@+id/button240"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
-                android:text="240X320" />
+                android:text="320X240" />
 
             <Button
                 android:id="@+id/button480"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
-                android:text="480X640" />
+                android:text="640X480" />
 
 
             <Button
@@ -126,35 +125,71 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
-                android:text="720X1280" />
+                android:text="1280X720" />
 
             <Button
                 android:id="@+id/button1080"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginBottom="@dimen/input_item_height"
-                android:text="1080X1920" />
+                android:text="1920X1080" />
+
+            <Button
+                android:id="@+id/button2160"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginBottom="@dimen/input_item_height"
+                android:text="3840X2160(4K)" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
 
-    <TextView
-        android:id="@+id/textViewPhotoInfo"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/textViewFps"
+        android:layout_below="@id/hscrollViewOperate"
         android:layout_alignParentLeft="true"
-        android:textColor="#ff0000"
-        android:textSize="15sp" />
+        android:background="#88000000"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textViewFps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:textColor="#ff0000"
-        android:textSize="15sp" />
+        <TextView
+            android:id="@+id/textViewPhotoInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff0000"
+            android:textSize="@dimen/info_text_size" />
+
+
+        <TextView
+            android:id="@+id/textViewFps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewPhotoInfo"
+            android:layout_alignParentLeft="true"
+            android:textColor="#ff0000"
+            android:textSize="@dimen/info_text_size" />
+
+
+        <TextView
+            android:id="@+id/textViewPreviewInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewFps"
+            android:layout_alignParentLeft="true"
+            android:textColor="#ff0000"
+            android:textSize="@dimen/info_text_size" />
+
+
+        <TextView
+            android:id="@+id/textViewCameraOutputInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewPreviewInfo"
+            android:layout_alignParentLeft="true"
+            android:textColor="#ff0000"
+            android:textSize="@dimen/info_text_size" />
+    </LinearLayout>
+
 
 </RelativeLayout>

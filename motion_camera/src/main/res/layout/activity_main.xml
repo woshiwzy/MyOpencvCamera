@@ -22,20 +22,34 @@
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
 
-        <SeekBar
-            android:id="@+id/seekBarScale"
-            android:layout_width="200dp"
-            android:max="100"
-            android:progress="100"
 
-            android:layout_centerHorizontal="true"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ff0000"
+                android:text="AI处理的缩放比:" />
+
+            <SeekBar
+                android:id="@+id/seekBarScale"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="100" />
+        </LinearLayout>
+
 
     </RelativeLayout>
 
 
     <HorizontalScrollView
+        android:id="@+id/hscrollViewOperate"
         android:layout_width="match_parent"
         android:layout_height="@dimen/input_item_height"
         android:background="#33000000"
@@ -57,7 +71,7 @@
             <TextView
                 android:id="@+id/textViewScaleLabel"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/input_item_height"/>
+                android:layout_height="@dimen/input_item_height" />
 
             <CheckBox
                 android:id="@+id/checkBoxGray"
@@ -67,12 +81,30 @@
                 android:text="灰度" />
 
             <CheckBox
-                android:id="@+id/checkBoxMirror"
+                android:id="@+id/checkBoxMirrorH"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginRight="20dp"
                 android:checked="true"
-                android:text="镜像" />
+                android:text="左右镜像" />
+
+            <CheckBox
+                android:id="@+id/checkBoxMirrorV"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginRight="20dp"
+                android:checked="false"
+                android:text="上下镜像" />
+
+
+            <CheckBox
+                android:id="@+id/checkBoxShowSource"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginRight="20dp"
+                android:checked="false"
+                android:text="相机原图显示" />
+
 
             <Button
                 android:id="@+id/button240"
@@ -108,11 +140,21 @@
 
 
     <TextView
+        android:id="@+id/textViewPhotoInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/textViewFps"
+        android:layout_alignParentLeft="true"
+        android:textColor="#ff0000"
+        android:textSize="15sp" />
+
+    <TextView
         android:id="@+id/textViewFps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:textColor="#ff0000"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
 </RelativeLayout>

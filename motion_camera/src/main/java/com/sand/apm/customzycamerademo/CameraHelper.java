@@ -15,10 +15,11 @@ import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.MyPoseInfo;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Size;
+
+import java.util.HashMap;
 
 import androidx.annotation.NonNull;
 
@@ -49,9 +50,11 @@ public class CameraHelper {
 
     public static PoseDetectorOptions options = null;
     public static PoseDetector poseDetector = null;
-
+    public static HashMap<String, Bitmap> cacheBitmapPool = new HashMap<>();
 
     public static int frameCount = 0;
+
+    public static Bitmap finalShowBitmap = null;
 
 
     /**
@@ -70,10 +73,15 @@ public class CameraHelper {
      * @return
      */
     public static Bitmap getCacheBitmap(int targetWidth, int targetHeight) {
-        if (null == mCacheBitmap || mCacheBitmap.getWidth() != targetWidth || mCacheBitmap.getHeight() != targetHeight) {
-            mCacheBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.RGB_565);
+        String key = targetWidth + "x" + targetHeight;
+        if (cacheBitmapPool.containsKey(key)) {
+            return cacheBitmapPool.get(key);
+        } else {
+            Bitmap tempMap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.RGB_565);
+            cacheBitmapPool.put(key, tempMap);
+            return tempMap;
         }
-        return mCacheBitmap;
+
     }
 
 
@@ -106,7 +114,7 @@ public class CameraHelper {
         CameraHelper.processIng = true;
         CameraHelper.poseDetector.process(image).addOnSuccessListener(pose -> {
             if (null != aiPoseProcessCallBack) {
-                aiPoseProcessCallBack.onSuccess(pose,image);
+                aiPoseProcessCallBack.onSuccess(pose, image);
             }
             CameraHelper.processIng = false;
         }).addOnFailureListener(e -> {
@@ -136,9 +144,8 @@ public class CameraHelper {
      * @param heightSource
      * @param targetWidth
      * @param targetHeight
-     * @param aiPoseProcessCallBack
      */
-    public static void fitMat2TargetAndDetect(Mat sourceMat, int widthSource, int heightSource, int targetWidth, int targetHeight, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public static Mat fitMat2Target(Mat sourceMat, int widthSource, int heightSource, int targetWidth, int targetHeight) {
 
         float widthFraction = widthSource * 1.0f / targetWidth;
         float heightFraction = heightSource * 1.0f / targetHeight;
@@ -146,20 +153,19 @@ public class CameraHelper {
 //        float maxFraction = Math.max(widthFraction, heightFraction);
 //        Log.d(App.tag, "fraction:" + widthFraction + " - " + heightFraction + " min :" + minFraction);
 
+        Mat targetMat = null;
+
         if (minFraction == 1) {
             //刚好一样大
-            CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(targetWidth, targetHeight);
-            Utils.matToBitmap(sourceMat, CameraHelper.mCacheBitmap);
+            targetMat = sourceMat;
         } else if (minFraction > 1) {
             //原图太大，居中裁剪
             CameraHelper.rowRange.start = (heightSource >> 1) - (targetHeight >> 1);
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
             CameraHelper.colRange.start = (widthSource >> 1) - (targetWidth >> 1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
-            Mat targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
-            CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(targetWidth, targetHeight);
-            Utils.matToBitmap(targetMat, CameraHelper.mCacheBitmap);
-            targetMat.release();
+            targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+            sourceMat.release();
         } else {
             //原图太小，居中按比例裁剪,最好不处理这种情况，这种情况把照相机分辨率设置大就可以了
             int ftargetWidth = (int) (targetWidth * minFraction);
@@ -169,29 +175,24 @@ public class CameraHelper {
             CameraHelper.rowRange.end = CameraHelper.rowRange.start + ftargetHeight;
             CameraHelper.colRange.start = (widthSource >> 1) - (ftargetWidth >> 1);
             CameraHelper.colRange.end = CameraHelper.colRange.start + ftargetWidth;
-
-            Mat targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
-            CameraHelper.mCacheBitmap = CameraHelper.getCacheBitmap(ftargetWidth, ftargetHeight);
-            Utils.matToBitmap(targetMat, CameraHelper.mCacheBitmap);
-            targetMat.release();
+            targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+            sourceMat.release();
         }
-        sourceMat.release();
 
-        InputImage inputImage = InputImage.fromBitmap(CameraHelper.mCacheBitmap, 0);//原始图
-        CameraHelper.process(inputImage, aiPoseProcessCallBack);
-
+        return targetMat;
     }
 
 
     /**
      * 直接处理相机的Image
+     *
      * @param cameraImage
      * @param degree
      * @param aiPoseProcessCallBack
      */
-    public static void processInputImage(Image cameraImage, int degree,AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public static void processInputImage(Image cameraImage, int degree, AiPoseProcessCallBack aiPoseProcessCallBack) {
         InputImage inputImage = InputImage.fromMediaImage(cameraImage, degree);
-        CameraHelper.process(inputImage,aiPoseProcessCallBack);
+        CameraHelper.process(inputImage, aiPoseProcessCallBack);
     }
 
 }

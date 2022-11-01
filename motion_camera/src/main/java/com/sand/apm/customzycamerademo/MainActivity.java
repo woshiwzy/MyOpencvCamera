@@ -15,11 +15,11 @@ import com.google.mlkit.vision.pose.Pose;
 import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
-import com.sand.apm.customzycamerademo.custom.CameraImageUtil;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.OnImageCallBackListener;
 import com.sand.apm.customzycamerademo.custom.PoseImageView;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -29,10 +29,11 @@ public class MainActivity extends BaseTestActivity {
 
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
-    public TextView textViewFps, textViewScaleLabel;
-    public CheckBox checkBoxMirror, checkBoxGray;
-    public long lastTime = 0;
+    public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel;
+    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource;
+    public long lastProcessTime = 0, lastPhotoTime = 0;
     private SeekBar seekBar;
+    private int photoCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +46,13 @@ public class MainActivity extends BaseTestActivity {
         textViewFps = findViewById(R.id.textViewFps);
         imageViewPreview = findViewById(R.id.imageViewPreview);
         imageViewShowTarget = findViewById(R.id.imageViewCenter);
-        checkBoxMirror = findViewById(R.id.checkBoxMirror);
+
+        checkBoxMirrorH = findViewById(R.id.checkBoxMirrorH);
+        checkBoxMirrorV = findViewById(R.id.checkBoxMirrorV);
         checkBoxGray = findViewById(R.id.checkBoxGray);
+        checkBoxShowSource = findViewById(R.id.checkBoxShowSource);
+
+        textViewPhotoInfo = findViewById(R.id.textViewPhotoInfo);
 
         findViewById(R.id.button240).setOnClickListener(view -> {
             CameraHelper.camera2DataGeter.setResolution(320, 240);//240X320
@@ -96,8 +102,20 @@ public class MainActivity extends BaseTestActivity {
         CameraHelper.camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
             @Override
             public void onImageCatch(Image image) {
+                photoCount++;
+                long now = System.currentTimeMillis();
+                if (lastPhotoTime == 0) {
+                    lastPhotoTime = now;
+                } else if ((now - lastPhotoTime) >= 1000) {
+                    int fps = photoCount;
+                    textViewPhotoInfo.post(() -> {
+                        textViewPhotoInfo.setText("相机出图fps:" + fps);
+                    });
+                    photoCount = 0;
+                    lastPhotoTime = now;
+
+                }
                 processPose1(image);//处理姿态识别方式1
-//                processPose2(image);//处理姿态识别方式2
             }
         });
 
@@ -109,44 +127,6 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.camera2DataGeter.enableView();
             CameraHelper.blurBitmap = Bitmap.createBitmap(CameraHelper.cameraWidth / 2, CameraHelper.cameraHeight / 2, Bitmap.Config.ARGB_8888);
         }
-
-    }
-
-
-    private void processPose2(Image image) {
-
-        CameraHelper.processInputImage(image, 0, new AiPoseProcessCallBack() {
-
-            @Override
-            public void onSuccess(Pose pose, InputImage inputImage) {
-                if (null != pose) {
-                    runOnUiThread(() -> {
-
-                        byte[] bytes = CameraImageUtil.getBytesFromImageAsType(image, CameraImageUtil.YUV420SP);
-                        int[] rgb = CameraImageUtil.decodeYUV420SP(bytes, inputImage.getWidth(), inputImage.getHeight());
-//                        Bitmap resultMap= BitmapFactory.decodeByteArray(rgb,0,bytes.length);
-                        Bitmap resultMap = null;
-                        long now = System.currentTimeMillis();
-                        long delta = now - lastTime;
-                        if (delta >= 1000) {
-                            int fps = CameraHelper.frameCount;
-                            String fpsAndPixs = "图像信息:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "  fps: " + fps;
-                            textViewFps.setText(fpsAndPixs);
-                            lastTime = now;
-                            CameraHelper.frameCount = 0;
-                        }
-                        CameraHelper.frameCount++;
-                        imageViewShowTarget.setImageBitmap(resultMap);
-                    });
-
-                }
-            }
-
-            @Override
-            public void onFail(InputImage image) {
-
-            }
-        });
 
     }
 
@@ -166,67 +146,82 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.camera2Frame.setImage(image);
         }
 
-        if (CameraHelper.widthTarget == 0 || CameraHelper.heightTarget == 0) {
-            CameraHelper.widthTarget = imageViewShowTarget.getWidth();
-            CameraHelper.heightTarget = imageViewShowTarget.getHeight();
-        }
-
         Mat sourceMat = null;
         if (checkBoxGray.isChecked()) {//是否处理灰度
             sourceMat = CameraHelper.camera2Frame.gray();
         } else {
             sourceMat = CameraHelper.camera2Frame.rgba();
         }
-
-        if (checkBoxMirror.isChecked()) {//实处处理镜像
+        if (checkBoxMirrorH.isChecked()) {//实处处理镜像
             Core.flip(sourceMat, sourceMat, 1);
         }
 
-        CameraHelper.widthSource = sourceMat.width();
-        CameraHelper.heightSource = sourceMat.height();
+        if (checkBoxMirrorV.isChecked()) {//垂直镜像
+            Core.flip(sourceMat, sourceMat, -1);
+        }
 
         //targetWidth 可以自由控制
         int targetWidth = imageViewShowTarget.getWidth();
         int targetHeight = imageViewShowTarget.getHeight();
+
+        CameraHelper.widthTarget = targetWidth;
+        CameraHelper.heightTarget = targetHeight;
+
         if (targetWidth <= 0 || targetHeight <= 0) {
             return;
         }
 
-        Mat dstMat = null;
-        if (null != seekBar && 0 != getScale()) {
-            //这里还可以做Mat缓存等优化
-            int dstWidth = (int) (sourceMat.cols() * getScale());
-            int dstHeight = (int) (sourceMat.rows() * getScale());
-            dstMat = new Mat(dstHeight, dstWidth, sourceMat.type());
-            Imgproc.resize(sourceMat, dstMat, new Size(dstWidth, dstHeight));
-            CameraHelper.widthSource = dstMat.width();
-            CameraHelper.heightSource = dstMat.height();
-            sourceMat.release();
-        } else {
-            dstMat = sourceMat;
+        //将图像按照目标显示View的大小做一个最佳调整
+        Mat bestMat = CameraHelper.fitMat2Target(sourceMat, sourceMat.width(), sourceMat.height(), targetWidth, targetHeight);
+        if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
+            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
+            Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
         }
 
-        CameraHelper.fitMat2TargetAndDetect(dstMat, CameraHelper.widthSource, CameraHelper.heightSource, targetWidth, targetHeight,
+        //送入AI前缩放处理开始------------
+        Mat dstMat = null;
+        if (null != seekBar && 0 != getScale() && 1 != getScale()) {//在这个做缩放处理
+            //这里还可以做Mat缓存等优化
+            int dstWidth = (int) (bestMat.cols() * getScale());
+            int dstHeight = (int) (bestMat.rows() * getScale());
+            dstMat = new Mat(dstHeight, dstWidth, bestMat.type());
+            Imgproc.resize(bestMat, dstMat, new Size(dstWidth, dstHeight));
+            bestMat.release();
+        } else {
+            dstMat = bestMat;
+        }
 
-                new AiPoseProcessCallBack() {
+        CameraHelper.widthSource = dstMat.width();
+        CameraHelper.heightSource = dstMat.height();
+        Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height());
+        Utils.matToBitmap(dstMat, targetBitmap);
+        dstMat.release();
+        //送入AI前缩放处理结束------------
+        //送入AI处理的图片永远需要缩放后的图片
+        InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
 
-                    @Override
-                    public void onSuccess(Pose poseInfo, InputImage image1) {
+        CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
+            @Override
+            public void onSuccess(Pose poseInfo, InputImage image1) {
 
-                        CameraHelper.myPoseInfo.setPose(poseInfo);
-                        CameraHelper.myPoseInfo.setSourceWidth(CameraHelper.mCacheBitmap.getWidth());
-                        CameraHelper.myPoseInfo.setSourceHeight(CameraHelper.mCacheBitmap.getHeight());
+                CameraHelper.myPoseInfo.setPose(poseInfo);
+                CameraHelper.myPoseInfo.setSourceWidth(targetBitmap.getWidth());
+                CameraHelper.myPoseInfo.setSourceHeight(targetBitmap.getHeight());
 
-                        CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
-                        CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
+                CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
+                CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
 
-                        CameraHelper.detectResult.setBitmap(CameraHelper.mCacheBitmap);
-                        CameraHelper.detectResult.setPoseInfo(CameraHelper.myPoseInfo);
-
-                        onDetectResult(CameraHelper.detectResult);
-                    }
+                if (checkBoxShowSource.isChecked()){
+                    CameraHelper.detectResult.setBitmap(CameraHelper.finalShowBitmap);
+                }else{
+                    CameraHelper.detectResult.setBitmap(targetBitmap);
                 }
-        );
+
+                CameraHelper.detectResult.setPoseInfo(CameraHelper.myPoseInfo);
+                onDetectResult(CameraHelper.detectResult);
+            }
+        });
+
 
     }
 
@@ -243,15 +238,16 @@ public class MainActivity extends BaseTestActivity {
     public void onDetectResult(DetectResult result) {
         runOnUiThread(() -> {
             long now = System.currentTimeMillis();
-            long delta = now - lastTime;
+            long delta = now - lastProcessTime;
+            CameraHelper.frameCount++;
             if (delta >= 1000) {
                 int fps = CameraHelper.frameCount;
-                String fpsAndPixs = "图像信息:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "  fps: " + fps;
+                String fpsAndPixs = "原始最佳分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + ",处理速度fps: " + fps;
                 textViewFps.setText(fpsAndPixs);
-                lastTime = now;
+                lastProcessTime = now;
                 CameraHelper.frameCount = 0;
             }
-            CameraHelper.frameCount++;
+
             imageViewShowTarget.setDetectResult(result);
         });
     }

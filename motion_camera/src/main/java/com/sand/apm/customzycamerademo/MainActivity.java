@@ -31,7 +31,7 @@ public class MainActivity extends BaseTestActivity {
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
     public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel, textViewPreviewInfo, textViewCameraOutputInfo;
-    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource;
+    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput;
     public long lastProcessTime = 0, lastPhotoTime = 0;
     private SeekBar seekBar;
     private int photoCount = 0;
@@ -51,6 +51,8 @@ public class MainActivity extends BaseTestActivity {
         checkBoxMirrorH = findViewById(R.id.checkBoxMirrorH);
         checkBoxMirrorV = findViewById(R.id.checkBoxMirrorV);
         checkBoxGray = findViewById(R.id.checkBoxGray);
+        checkBoxGrayInput = findViewById(R.id.checkBoxGrayInput);
+
         checkBoxShowSource = findViewById(R.id.checkBoxShowSource);
         textViewPreviewInfo = findViewById(R.id.textViewPreviewInfo);
         textViewPhotoInfo = findViewById(R.id.textViewPhotoInfo);
@@ -195,7 +197,8 @@ public class MainActivity extends BaseTestActivity {
         });
 
         //将图像按照目标显示View的大小做一个最佳调整
-        Mat bestMat = CameraHelper.fitMat2Target(sourceMat, sourceMat.width(), sourceMat.height(), targetWidth, targetHeight);
+        Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
+
         if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
             CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
             Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
@@ -212,6 +215,11 @@ public class MainActivity extends BaseTestActivity {
             bestMat.release();
         } else {
             dstMat = bestMat;
+        }
+
+//        //如果没有进行灰度处理，但是输入需要灰度
+        if (checkBoxGrayInput.isChecked() && !checkBoxGray.isChecked()) {
+            Imgproc.cvtColor(dstMat, dstMat, Imgproc.COLOR_RGB2GRAY);
         }
 
         CameraHelper.widthSource = dstMat.width();
@@ -265,8 +273,9 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.frameCount++;
             if (delta >= 1000) {
                 int fps = CameraHelper.frameCount;
-//                String fpsAndPixs = "原始最佳分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + ",处理速度fps: " + fps;
-                String fpsAndPixs = "处理速度: " + fps + "fps";
+                String fpsAndPixs = "AI消耗分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "\n处理速度fps: " +
+                        fps+"\n显示的图像大小:"+result.getBitmap().getWidth()+"X"+result.getBitmap().getHeight();
+//                String fpsAndPixs = "处理速度: " + fps + "fps";
                 textViewFps.setText(fpsAndPixs);
                 lastProcessTime = now;
                 CameraHelper.frameCount = 0;

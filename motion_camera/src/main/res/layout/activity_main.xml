@@ -33,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="优化:"
+                android:text="缩放等级:"
                 android:textColor="#ff0000" />
 
             <SeekBar
@@ -79,6 +79,14 @@
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginRight="20dp"
                 android:text="灰度" />
+
+            <CheckBox
+                android:id="@+id/checkBoxGrayInput"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginRight="20dp"
+                android:text="输入灰度"
+                android:visibility="visible" />
 
             <CheckBox
                 android:id="@+id/checkBoxMirrorH"

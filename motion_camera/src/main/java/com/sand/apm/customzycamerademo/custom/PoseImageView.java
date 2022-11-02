@@ -54,7 +54,7 @@ public class PoseImageView extends androidx.appcompat.widget.AppCompatImageView 
                     PointF point = poseLandmark.getPosition();
                     float fx=detectResult.getPoseInfo().getFractionWidth();
                     float fy=detectResult.getPoseInfo().getFractionHeight();
-                    canvas.drawCircle(point.x * fx, point.y *fy, 10, paint);
+                    canvas.drawCircle(point.x * fx, point.y *fy, 5, paint);
                 }
             }
         }

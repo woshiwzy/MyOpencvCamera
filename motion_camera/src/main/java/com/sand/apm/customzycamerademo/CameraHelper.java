@@ -140,12 +140,17 @@ public class CameraHelper {
      * 将图像转换成目标大小,并检测其中的姿态
      *
      * @param sourceMat
-     * @param widthSource
-     * @param heightSource
      * @param targetWidth
      * @param targetHeight
      */
-    public static Mat fitMat2Target(Mat sourceMat, int widthSource, int heightSource, int targetWidth, int targetHeight) {
+    public static Mat fitMat2Target(Mat sourceMat, int targetWidth, int targetHeight) {
+        if (widthSource == 1920 && targetWidth == 1921 && heightSource == targetHeight) {
+            //特殊情况
+            return sourceMat;
+        }
+
+        int widthSource = sourceMat.width();
+        int heightSource = sourceMat.height();
 
         float widthFraction = widthSource * 1.0f / targetWidth;
         float heightFraction = heightSource * 1.0f / targetHeight;
@@ -159,24 +164,40 @@ public class CameraHelper {
             //刚好一样大
             targetMat = sourceMat;
         } else if (minFraction > 1) {
-            //原图太大，居中裁剪
-            CameraHelper.rowRange.start = (heightSource >> 1) - (targetHeight >> 1);
-            CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
-            CameraHelper.colRange.start = (widthSource >> 1) - (targetWidth >> 1);
-            CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
-            targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
-            sourceMat.release();
-        } else {
-            //原图太小，居中按比例裁剪,最好不处理这种情况，这种情况把照相机分辨率设置大就可以了
-            int ftargetWidth = (int) (targetWidth * minFraction);
-            int ftargetHeight = (int) (targetHeight * minFraction);
 
-            CameraHelper.rowRange.start = (heightSource >> 1) - (ftargetHeight >> 1);
-            CameraHelper.rowRange.end = CameraHelper.rowRange.start + ftargetHeight;
-            CameraHelper.colRange.start = (widthSource >> 1) - (ftargetWidth >> 1);
-            CameraHelper.colRange.end = CameraHelper.colRange.start + ftargetWidth;
-            targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
-            sourceMat.release();
+            if (widthSource < 3840) {//原则上小于4K
+                //原图太大，居中裁剪
+                CameraHelper.rowRange.start = (heightSource >> 1) - (targetHeight >> 1);
+                CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
+                CameraHelper.colRange.start = (widthSource >> 1) - (targetWidth >> 1);
+                CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
+                targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+                sourceMat.release();
+            } else {//如果是大于等于4K，找到比例然后按最大图片区域，而且比例始终来裁剪
+                if (Math.abs(widthFraction - heightFraction) < 0.01) {//认为其比例一样，证明只是等比缩放而已
+                    targetMat = sourceMat;
+                } else {
+                    //找到居中最大的比例图，暂未处理
+                }
+            }
+
+        } else {
+            //倍数和比例差不超过0.01,认为是一样大
+            if ((Math.abs(1 - minFraction) < 0.01f) && (Math.abs(widthFraction - heightFraction) < 0.01f)) {//认为比例一样大
+                targetMat = sourceMat;
+            } else {
+                //原图太小，居中按比例裁剪,最好不处理这种情况，这种情况把照相机分辨率设置大就可以了
+                int ftargetWidth = (int) (targetWidth * minFraction);
+                int ftargetHeight = (int) (targetHeight * minFraction);
+
+                CameraHelper.rowRange.start = (heightSource >> 1) - (ftargetHeight >> 1);
+                CameraHelper.rowRange.end = CameraHelper.rowRange.start + ftargetHeight;
+                CameraHelper.colRange.start = (widthSource >> 1) - (ftargetWidth >> 1);
+                CameraHelper.colRange.end = CameraHelper.colRange.start + ftargetWidth;
+                targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+                sourceMat.release();
+            }
+
         }
 
         return targetMat;

@@ -112,6 +112,7 @@ public class CameraHelper {
      */
     public static void process(InputImage image, AiPoseProcessCallBack aiPoseProcessCallBack) {
         CameraHelper.processIng = true;
+
         CameraHelper.poseDetector.process(image).addOnSuccessListener(pose -> {
             if (null != aiPoseProcessCallBack) {
                 aiPoseProcessCallBack.onSuccess(pose, image);
@@ -160,30 +161,52 @@ public class CameraHelper {
 
         Mat targetMat = null;
 
-        if (minFraction == 1) {
-            //刚好一样大
+        boolean b = (Math.abs(1 - minFraction) < 0.01f) && (Math.abs(widthFraction - heightFraction) < 0.01f);
+        if (((widthFraction == heightFraction)) ||b) {
+            //刚好一样大,或者，倍数差别很小
             targetMat = sourceMat;
-        } else if (minFraction > 1) {
 
-            if (widthSource < 3840) {//原则上小于4K
-                //原图太大，居中裁剪
-                CameraHelper.rowRange.start = (heightSource >> 1) - (targetHeight >> 1);
-                CameraHelper.rowRange.end = CameraHelper.rowRange.start + targetHeight;
-                CameraHelper.colRange.start = (widthSource >> 1) - (targetWidth >> 1);
-                CameraHelper.colRange.end = CameraHelper.colRange.start + targetWidth;
-                targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
-                sourceMat.release();
-            } else {//如果是大于等于4K，找到比例然后按最大图片区域，而且比例始终来裁剪
-                if (Math.abs(widthFraction - heightFraction) < 0.01) {//认为其比例一样，证明只是等比缩放而已
-                    targetMat = sourceMat;
-                } else {
-                    //找到居中最大的比例图，暂未处理
+        } else if (minFraction > 1) {
+            //原图太大
+            if (Math.abs(widthFraction - heightFraction) < 0.01) {
+                //长宽比例，差距非常小，我认为其比例始一致的，直接原图返回，有2个好处，第一节省裁剪时间，第二活的更高清的图片效果更好
+                targetMat = sourceMat;
+            } else {
+                //寻找最合适的内切比例来裁剪
+                if (minFraction == widthFraction) {
+                    //保留宽度,居中裁剪
+                    int cropWidth = widthSource;
+                    int cropHeight = (int) (heightTarget * minFraction);
+
+                    CameraHelper.rowRange.start = (heightSource >> 1) - (cropHeight >> 1);
+                    CameraHelper.rowRange.end = CameraHelper.rowRange.start + cropHeight;
+
+                    CameraHelper.colRange.start = 0;
+                    CameraHelper.colRange.end = CameraHelper.colRange.start + cropWidth;
+
+                    targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+
+                } else if (minFraction == heightFraction) {
+                    //保留高度,居中裁剪
+                    int cropHeight = heightSource;
+                    int cropWidth = (int) (widthTarget * minFraction);
+
+                    CameraHelper.rowRange.start = 0;
+                    CameraHelper.rowRange.end = CameraHelper.rowRange.start + cropHeight;
+
+                    CameraHelper.colRange.start = (widthSource >> 1) - (cropWidth >> 1);
+                    CameraHelper.colRange.end = CameraHelper.colRange.start + cropWidth;
+
+                    targetMat = new Mat(sourceMat, CameraHelper.rowRange, CameraHelper.colRange);
+
                 }
+                sourceMat.release();
+
             }
 
         } else {
             //倍数和比例差不超过0.01,认为是一样大
-            if ((Math.abs(1 - minFraction) < 0.01f) && (Math.abs(widthFraction - heightFraction) < 0.01f)) {//认为比例一样大
+            if (b) {//认为比例一样大
                 targetMat = sourceMat;
             } else {
                 //原图太小，居中按比例裁剪,最好不处理这种情况，这种情况把照相机分辨率设置大就可以了

@@ -31,7 +31,7 @@ public class MainActivity extends BaseTestActivity {
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
     public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel, textViewPreviewInfo, textViewCameraOutputInfo;
-    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput;
+    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput,checkBoxDouble;
     public long lastProcessTime = 0, lastPhotoTime = 0;
     private SeekBar seekBar;
     private int photoCount = 0;
@@ -52,6 +52,7 @@ public class MainActivity extends BaseTestActivity {
         checkBoxMirrorV = findViewById(R.id.checkBoxMirrorV);
         checkBoxGray = findViewById(R.id.checkBoxGray);
         checkBoxGrayInput = findViewById(R.id.checkBoxGrayInput);
+        checkBoxDouble=findViewById(R.id.checkBoxDouble);
 
         checkBoxShowSource = findViewById(R.id.checkBoxShowSource);
         textViewPreviewInfo = findViewById(R.id.textViewPreviewInfo);
@@ -177,6 +178,7 @@ public class MainActivity extends BaseTestActivity {
             Core.flip(sourceMat, sourceMat, -1);
         }
 
+
         //targetWidth 可以自由控制
         int targetWidth = imageViewShowTarget.getWidth();
         int targetHeight = imageViewShowTarget.getHeight();
@@ -198,6 +200,7 @@ public class MainActivity extends BaseTestActivity {
 
         //将图像按照目标显示View的大小做一个最佳调整
         Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
+
 
         if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
             CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
@@ -229,6 +232,13 @@ public class MainActivity extends BaseTestActivity {
         dstMat.release();
         //送入AI前缩放处理结束------------
         //送入AI处理的图片永远需要缩放后的图片
+
+
+        //rgb转yuv数组
+//        Imgproc.cvtColor(dstMat,dstMat,Imgproc.COLOR_YUV2RGB_NV21);
+//        byte [] bytes_data=new byte[(int)dstMat.total()];
+//        dstMat.get(0,0,bytes_data);
+
         InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
 
         CameraHelper.process(inputImage, new AiPoseProcessCallBack() {

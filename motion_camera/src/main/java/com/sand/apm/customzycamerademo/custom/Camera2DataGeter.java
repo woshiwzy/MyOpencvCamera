@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import com.sand.apm.customzycamerademo.App;
+import com.sand.apm.customzycamerademo.util.YuvToRgbConverter;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -47,6 +48,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
     private Handler mBackgroundHandler;
 
     public static boolean isOpencvInitSuccess = false;
+
 
     static {
         isOpencvInitSuccess = OpenCVLoader.initDebug();
@@ -385,6 +387,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
         return true;
     }
 
+    private static YuvToRgbConverter yuvToRgbConverter=null;
     public static class JavaCamera2Frame implements CvCameraViewFrame {
 
 
@@ -498,10 +501,19 @@ public class Camera2DataGeter extends CameraDataGeterBase {
             }
         }
 
-        public void yuv(){
-
-
-        }
+//        byte[] yuvBuffer=null;
+//        public  byte[] yuv(){
+//            if(null==yuvToRgbConverter){
+//                yuvToRgbConverter=new YuvToRgbConverter(this.context);
+//            }
+//
+//            if(null==yuvBuffer){
+//                int i420Size = mImage.getWidth() * mImage.getHeight() * 3 / 2;
+//                yuvBuffer=new byte[i420Size];
+//            }
+//            yuvToRgbConverter.imageToByteBuffer(mImage,yuvBuffer);
+//            return yuvBuffer;
+//        }
 
 
         public JavaCamera2Frame(Image image) {

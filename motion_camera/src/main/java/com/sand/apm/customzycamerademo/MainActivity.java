@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.pose.Pose;
-import com.google.mlkit.vision.pose.PoseLandmark;
 import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
@@ -29,8 +28,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.List;
 
 public class MainActivity extends BaseTestActivity {
 
@@ -48,6 +45,7 @@ public class MainActivity extends BaseTestActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+
 
         textViewScaleLabel = findViewById(R.id.textViewScaleLabel);
         textViewFps = findViewById(R.id.textViewFps);
@@ -163,7 +161,7 @@ public class MainActivity extends BaseTestActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        initCamera();
+//        initCamera();
 
     }
 
@@ -183,11 +181,14 @@ public class MainActivity extends BaseTestActivity {
         }
     }
 
+
     /**
      * 处理姿态识别
      *
      * @param image
      */
+    Mat sourceMat = null;
+
     public void processPose1(Image image) {
         if (CameraHelper.processIng) {
             return;
@@ -198,12 +199,29 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.camera2Frame.setImage(image);
         }
 
-        Mat sourceMat = null;
+        long startGetImg = System.currentTimeMillis();
+
         if (checkBoxGray.isChecked()) {//是否处理灰度
             sourceMat = CameraHelper.camera2Frame.gray();
         } else {
             sourceMat = CameraHelper.camera2Frame.rgba();
         }
+
+        long costGetMat = System.currentTimeMillis() - startGetImg;
+        Log.d(App.tag, "Mat-1 获取耗时:" + costGetMat);
+
+
+//        long yuvGetStart=System.currentTimeMillis();
+//        if(null==yuvBuffer){
+//            int i420Size = image.getWidth() * image.getHeight() * 3 / 2;
+//            yuvBuffer=new byte[i420Size];
+//        }
+//
+//        yuvToRgbConverter.imageToByteBuffer(image,yuvBuffer);
+//        long yuvCost=System.currentTimeMillis()-yuvGetStart;
+//        Log.d(App.tag, "Mat-2 获取耗时:" + yuvCost);
+
+
         if (checkBoxMirrorH.isChecked()) {//实处处理镜像
             Core.flip(sourceMat, sourceMat, 1);
         }
@@ -237,7 +255,6 @@ public class MainActivity extends BaseTestActivity {
         Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
         long cropTime = System.currentTimeMillis() - startCrop;
         Log.d(App.tag, "最佳裁剪耗时：" + cropTime);
-
         if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
             CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
             Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
@@ -318,7 +335,6 @@ public class MainActivity extends BaseTestActivity {
 
         } else if (checkBoxDouble.isChecked()) {//双人模式
 
-
             Rect leftRect = new Rect(0, 0, dstMat.width() / 2, dstMat.height());
             Mat leftMat = dstMat.submat(leftRect);
             Bitmap leftBitmap = getLeftBitmap(leftMat.width(), leftMat.height());
@@ -357,7 +373,6 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetWidth(targetWidth);
             CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetHeight(targetHeight);
 
-
             //===========================================================================================
             CameraHelper.detectResultDouble.getRightPoseInfo().setPose(poseRight);
             CameraHelper.detectResultDouble.getRightPoseInfo().setSourceWidth(imageRight.getWidth());
@@ -369,10 +384,6 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.detectResultDouble.setBitmapTotal(bitmapTotal);
             CameraHelper.detectResultDouble.setSourceBitmapTotal(sourceBitmapTotal);
             CameraHelper.detectResultDouble.setShowSource(checkBoxShowSource.isChecked());
-
-            List<PoseLandmark> lm = poseLeft.getAllPoseLandmarks();
-            List<PoseLandmark> rm = poseRight.getAllPoseLandmarks();
-            Log.d(App.tag, "找到了2个人:onSuccessDouble:" + lm.size() + "  -  " + rm.size());
 
             onDetectResult(CameraHelper.detectResultDouble);
 

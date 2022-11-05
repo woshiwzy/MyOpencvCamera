@@ -2,8 +2,11 @@ package com.sand.apm.customzycamerademo;
 
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.pose.Pose;
@@ -62,7 +65,13 @@ public class CameraHelper {
      */
     public static boolean processIng = false;
     public static MyPoseInfo myPoseInfo = new MyPoseInfo();
-    public static DetectResult detectResult = new DetectResult();
+    public static DetectResult detectResult = new DetectResult(false);
+
+
+    public static MyPoseInfo myPoseInfoLeft = new MyPoseInfo();
+    public static MyPoseInfo myPoseInfoRight = new MyPoseInfo();
+    public static DetectResult detectResultDouble = new DetectResult(true);
+    public static Bitmap bitmapTotal = null;
 
 
     /**
@@ -92,6 +101,7 @@ public class CameraHelper {
         // Base pose detector with streaming frames, when depending on the pose-detection sdk
         CameraHelper.options = new PoseDetectorOptions.Builder()
                 .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
+
                 .build();
         CameraHelper.poseDetector = PoseDetection.getClient(CameraHelper.options);
 
@@ -112,7 +122,6 @@ public class CameraHelper {
      */
     public static void process(InputImage image, AiPoseProcessCallBack aiPoseProcessCallBack) {
         CameraHelper.processIng = true;
-
         CameraHelper.poseDetector.process(image).addOnSuccessListener(pose -> {
             if (null != aiPoseProcessCallBack) {
                 aiPoseProcessCallBack.onSuccess(pose, image);
@@ -132,8 +141,93 @@ public class CameraHelper {
                 }
             }
         });
+    }
 
 
+    static OnSuccessListener<Pose> successListener = new OnSuccessListener<Pose>() {
+        @Override
+        public void onSuccess(Pose pose) {
+            Log.d(App.tag, "onSuccess:" + pose);
+        }
+    };
+
+    static OnFailureListener failureListener = new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            Log.d(App.tag, "onFailure:" + e);
+        }
+    };
+
+    static OnCompleteListener<Pose> completeListener = new OnCompleteListener<Pose>() {
+        @Override
+        public void onComplete(@NonNull Task<Pose> task) {
+            Log.d(App.tag, "onComplete:" + task.getResult());
+
+            if (task == tleft) {
+                leftPose = task.getResult();
+            } else if (task == tRight) {
+                rightPose = task.getResult();
+            }
+            if (null != leftPose && null != rightPose) {
+
+                Log.d(App.tag, "成功了");
+
+                if (null != aiPoseProcessCallBackDouble) {
+                    aiPoseProcessCallBackDouble.onSuccessDouble(totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
+                }
+
+                leftPose = null;
+                rightPose = null;
+
+                tleft = null;
+                tRight = null;
+
+                timageLeft = null;
+                timageRight = null;
+                totalBitmap2Doule = null;
+
+                processIng = false;
+            }
+
+        }
+    };
+
+
+    private static Pose leftPose, rightPose;
+    private static Bitmap timageLeft, timageRight;
+    private static Task<Pose> tleft, tRight;
+    private static AiPoseProcessCallBack aiPoseProcessCallBackDouble;
+    private static Bitmap totalBitmap2Doule = null;
+
+    public static void process(Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
+
+        try {
+
+            if (processIng) {
+                return;
+            }
+            processIng = true;
+            aiPoseProcessCallBackDouble = aiPoseProcessCallBack;
+            timageLeft=imageLeft;
+            timageRight=imageRight;
+
+            InputImage timageLeft = InputImage.fromBitmap(imageLeft, 0);
+            InputImage timageRight = InputImage.fromBitmap(imageRight, 0);
+            totalBitmap2Doule = totalBitmap;
+
+            tleft = poseDetector.process(timageLeft).addOnSuccessListener(successListener).addOnCompleteListener(completeListener).addOnFailureListener(failureListener);
+            tRight = poseDetector.process(timageRight).addOnSuccessListener(successListener).addOnCompleteListener(completeListener).addOnFailureListener(failureListener);
+
+            Pose leftResult = tleft.getResult();
+            Pose rightResult = tRight.getResult();
+
+            Log.d(App.tag, "是否都有结果:" + leftResult + " - " + rightResult);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return;
     }
 
 
@@ -162,7 +256,7 @@ public class CameraHelper {
         Mat targetMat = null;
 
         boolean b = (Math.abs(1 - minFraction) < 0.01f) && (Math.abs(widthFraction - heightFraction) < 0.01f);
-        if (((widthFraction == heightFraction)) ||b) {
+        if (((widthFraction == heightFraction)) || b) {
             //刚好一样大,或者，倍数差别很小
             targetMat = sourceMat;
 

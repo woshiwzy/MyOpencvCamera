@@ -1,5 +1,6 @@
 package com.sand.apm.customzycamerademo.custom;
 
+import android.graphics.Bitmap;
 import android.media.Image;
 
 import com.google.android.gms.tasks.Task;
@@ -17,6 +18,9 @@ public class AiPoseProcessCallBack {
 
     }
 
+    public void onSuccessDouble(Bitmap bitmapTotal, Pose poseLeft, Bitmap imageLeft, Pose poseRight, Bitmap imageRight){
+
+    }
     public void onFail(InputImage image){
 
     }

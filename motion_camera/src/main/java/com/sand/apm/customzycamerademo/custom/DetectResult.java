@@ -9,8 +9,17 @@ import android.graphics.Bitmap;
  */
 public class DetectResult {
 
-    public Bitmap bitmap;
+    public Bitmap bitmap,bitmapTotal;
     public MyPoseInfo poseInfo;
+    public MyPoseInfo leftPoseInfo,rightPoseInfo;
+    private boolean isDouble=false;
+
+    public DetectResult(boolean isDouble) {
+        this.isDouble=isDouble;
+        poseInfo=new MyPoseInfo();
+        leftPoseInfo=new MyPoseInfo();
+        rightPoseInfo=new MyPoseInfo();
+    }
 
     public Bitmap getBitmap() {
         return bitmap;
@@ -35,5 +44,29 @@ public class DetectResult {
 
     public void setPoseInfo(MyPoseInfo poseInfo) {
         this.poseInfo = poseInfo;
+    }
+
+    public boolean isDouble() {
+        return isDouble;
+    }
+
+    public void setDouble(boolean aDouble) {
+        isDouble = aDouble;
+    }
+
+    public MyPoseInfo getLeftPoseInfo() {
+        return leftPoseInfo;
+    }
+
+    public void setLeftPoseInfo(MyPoseInfo leftPoseInfo) {
+        this.leftPoseInfo = leftPoseInfo;
+    }
+
+    public MyPoseInfo getRightPoseInfo() {
+        return rightPoseInfo;
+    }
+
+    public void setRightPoseInfo(MyPoseInfo rightPoseInfo) {
+        this.rightPoseInfo = rightPoseInfo;
     }
 }

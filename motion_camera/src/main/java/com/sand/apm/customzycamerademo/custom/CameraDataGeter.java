@@ -332,7 +332,7 @@ public class CameraDataGeter extends CameraDataGeterBase {
     }
 
     @Override
-    protected void disconnectCamera() {
+    public void disconnectCamera() {
         Log.i(LOGTAG, "close camera");
         try {
             CameraDevice c = mCameraDevice;

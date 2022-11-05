@@ -9,10 +9,13 @@ import android.graphics.Bitmap;
  */
 public class DetectResult {
 
-    public Bitmap bitmap,bitmapTotal;
-    public MyPoseInfo poseInfo;
-    public MyPoseInfo leftPoseInfo,rightPoseInfo;
+    private Bitmap bitmap,bitmapTotal,sourceBitmapTotal;
+    private MyPoseInfo poseInfo;//单人模式用这个
+    private MyPoseInfo leftPoseInfo,rightPoseInfo;//双人模式这2个
     private boolean isDouble=false;
+    private  boolean showSource=false;
+
+
 
     public DetectResult(boolean isDouble) {
         this.isDouble=isDouble;
@@ -25,7 +28,7 @@ public class DetectResult {
         return bitmap;
     }
 
-    public boolean isOk(){
+    public boolean isSingleOk(){
 
         if(null!=bitmap && null!=poseInfo && null!=poseInfo.getPose()){
             return true;
@@ -69,4 +72,29 @@ public class DetectResult {
     public void setRightPoseInfo(MyPoseInfo rightPoseInfo) {
         this.rightPoseInfo = rightPoseInfo;
     }
+
+    public Bitmap getBitmapTotal() {
+        return bitmapTotal;
+    }
+
+    public void setBitmapTotal(Bitmap bitmapTotal) {
+        this.bitmapTotal = bitmapTotal;
+    }
+
+    public Bitmap getSourceBitmapTotal() {
+        return sourceBitmapTotal;
+    }
+
+    public void setSourceBitmapTotal(Bitmap sourceBitmapTotal) {
+        this.sourceBitmapTotal = sourceBitmapTotal;
+    }
+
+    public boolean isShowSource() {
+        return showSource;
+    }
+
+    public void setShowSource(boolean showSource) {
+        this.showSource = showSource;
+    }
+
 }

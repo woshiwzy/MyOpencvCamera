@@ -126,41 +126,62 @@ public class MainActivity extends BaseTestActivity {
 
     private void initCamera() {
 
-        CameraHelper.camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, CameraHelper.cameraWidth, CameraHelper.cameraHeight);
-        CameraHelper.camera2DataGeter.configOrientation(getResources().getConfiguration());
-        CameraHelper.camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
-            @Override
-            public void onImageCatch(Image image) {
-                photoCount++;
-                long now = System.currentTimeMillis();
-                if (lastPhotoTime == 0) {
-                    lastPhotoTime = now;
-                } else if ((now - lastPhotoTime) >= 1000) {
-                    int fps = photoCount;
-                    textViewPhotoInfo.post(() -> {
-                        textViewPhotoInfo.setText("相机出图:" + fps + "fps");
-                    });
-                    photoCount = 0;
-                    lastPhotoTime = now;
+        if (null == CameraHelper.camera2DataGeter) {
+            CameraHelper.camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, CameraHelper.cameraWidth, CameraHelper.cameraHeight);
+            CameraHelper.camera2DataGeter.configOrientation(getResources().getConfiguration());
+            CameraHelper.camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
+                @Override
+                public void onImageCatch(Image image) {
 
+                    photoCount++;
+                    long now = System.currentTimeMillis();
+                    if (lastPhotoTime == 0) {
+                        lastPhotoTime = now;
+                    } else if ((now - lastPhotoTime) >= 1000) {
+                        int fps = photoCount;
+                        textViewPhotoInfo.post(() -> {
+                            textViewPhotoInfo.setText("相机出图:" + fps + "fps");
+                        });
+                        photoCount = 0;
+                        lastPhotoTime = now;
+
+                    }
+
+                    processPose1(image);//处理姿态识别方式1
                 }
-
-
-                processPose1(image);//处理姿态识别方式1
-            }
-        });
+            });
+        }
 
 
         if (null != CameraHelper.camera2DataGeter) {
-            CameraHelper.mCacheBitmap = Bitmap.createBitmap(CameraHelper.cameraWidth, CameraHelper.cameraHeight, Bitmap.Config.ARGB_8888);
             //3.打开相机
-            CameraHelper.mat = new Mat();
             CameraHelper.camera2DataGeter.enableView();
-            CameraHelper.blurBitmap = Bitmap.createBitmap(CameraHelper.cameraWidth / 2, CameraHelper.cameraHeight / 2, Bitmap.Config.ARGB_8888);
         }
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initCamera();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (null != CameraHelper.camera2DataGeter) {
+            CameraHelper.camera2DataGeter.disableView();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (null != CameraHelper.camera2DataGeter) {
+            CameraHelper.camera2DataGeter.disconnectCamera();
+        }
+    }
 
     /**
      * 处理姿态识别
@@ -211,15 +232,24 @@ public class MainActivity extends BaseTestActivity {
             textViewCameraOutputInfo.setText("相机输出图片大小:" + cameraInfo);
         });
 
+        long startCrop = System.currentTimeMillis();
         //将图像按照目标显示View的大小做一个最佳调整
         Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
+        long cropTime = System.currentTimeMillis() - startCrop;
+        Log.d(App.tag, "最佳裁剪耗时：" + cropTime);
 
-
-        if (checkBoxShowSource.isChecked()  || checkBoxDouble.isChecked()) {//要展示原图，而非缩放后的图片
+        if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
             CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
             Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
         }
 
+//        if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
+//            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
+//            Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
+//        }
+
+
+        long aiFitStart = System.currentTimeMillis();
         //送入AI前缩放处理开始------------
         Mat dstMat = null;
         if (null != seekBar && 0 != getScale() && 1 != getScale()) {//在这个做缩放处理
@@ -232,6 +262,9 @@ public class MainActivity extends BaseTestActivity {
         } else {
             dstMat = bestMat;
         }
+
+        long aiCostTime = System.currentTimeMillis() - aiFitStart;
+        Log.d(App.tag, "AI裁剪耗时:" + (aiCostTime));
 
 //        //如果没有进行灰度处理，但是输入需要灰度
         if (checkBoxGrayInput.isChecked() && !checkBoxGray.isChecked()) {
@@ -246,6 +279,7 @@ public class MainActivity extends BaseTestActivity {
 
         if (!checkBoxDouble.isChecked()) {//单人模式
 
+            long prepareStart = System.currentTimeMillis();
             CameraHelper.widthSource = dstMat.width();
             CameraHelper.heightSource = dstMat.height();
             Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height());
@@ -253,9 +287,13 @@ public class MainActivity extends BaseTestActivity {
             dstMat.release();
             //送入AI前缩放处理结束------------
             //送入AI处理的图片永远需要缩放后的图片
-
             InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
+            long prepareEnd = System.currentTimeMillis() - prepareStart;
+            Log.d(App.tag, "Ai准备耗时:" + prepareEnd);
+
             CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
+
+
                 @Override
                 public void onSuccess(Pose poseInfo, InputImage image1) {
 
@@ -276,6 +314,8 @@ public class MainActivity extends BaseTestActivity {
                     onDetectResult(CameraHelper.detectResult);
                 }
             });
+
+
         } else if (checkBoxDouble.isChecked()) {//双人模式
 
 
@@ -283,13 +323,19 @@ public class MainActivity extends BaseTestActivity {
             Mat leftMat = dstMat.submat(leftRect);
             Bitmap leftBitmap = getLeftBitmap(leftMat.width(), leftMat.height());
             Utils.matToBitmap(leftMat, leftBitmap);
+            leftMat.release();
 
             Rect rightRect = new Rect(dstMat.width() / 2, 0, dstMat.width() / 2, dstMat.height());
             Mat rightMat = dstMat.submat(rightRect);
             Bitmap rightBitmap = getRightBitmap(rightMat.width(), rightMat.height());
             Utils.matToBitmap(rightMat, rightBitmap);
+            rightMat.release();
 
-            CameraHelper.process(CameraHelper.finalShowBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
+            Bitmap aitotalBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height());
+            Utils.matToBitmap(dstMat, aitotalBitmap);
+            dstMat.release();
+
+            CameraHelper.process(CameraHelper.finalShowBitmap, aitotalBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
         }
 
     }
@@ -300,20 +346,29 @@ public class MainActivity extends BaseTestActivity {
     private AiPoseProcessCallBack aiPoseProcessCallBack = new AiPoseProcessCallBack() {
 
         @Override
-        public void onSuccessDouble(Bitmap bitmapTotal, Pose poseLeft, Bitmap imageLeft, Pose poseRight, Bitmap imageRight) {
+        public void onSuccessDouble(Bitmap sourceBitmapTotal, Bitmap bitmapTotal, Pose poseLeft, Bitmap imageLeft, Pose poseRight, Bitmap imageRight) {
 
+            int targetWidth = imageViewShowTarget.getWidth() >> 1;
+            int targetHeight = imageViewShowTarget.getHeight();
 
-            CameraHelper.detectResultDouble.leftPoseInfo.setPose(poseLeft);
-            CameraHelper.detectResultDouble.leftPoseInfo.setSourceWidth(imageLeft.getWidth());
-            CameraHelper.detectResultDouble.leftPoseInfo.setSourceHeight(imageLeft.getHeight());
-            CameraHelper.detectResultDouble.setLeftPoseInfo(CameraHelper.detectResultDouble.leftPoseInfo);
+            CameraHelper.detectResultDouble.getLeftPoseInfo().setPose(poseLeft);
+            CameraHelper.detectResultDouble.getLeftPoseInfo().setSourceWidth(imageLeft.getWidth());
+            CameraHelper.detectResultDouble.getLeftPoseInfo().setSourceHeight(imageLeft.getHeight());
+            CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetWidth(targetWidth);
+            CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetHeight(targetHeight);
+
 
             //===========================================================================================
-            CameraHelper.detectResultDouble.rightPoseInfo.setPose(poseRight);
-            CameraHelper.detectResultDouble.rightPoseInfo.setSourceWidth(imageRight.getWidth());
-            CameraHelper.detectResultDouble.rightPoseInfo.setSourceHeight(imageRight.getHeight());
-            CameraHelper.detectResultDouble.setRightPoseInfo(CameraHelper.detectResultDouble.rightPoseInfo);
-            CameraHelper.detectResultDouble.bitmapTotal = bitmapTotal;
+            CameraHelper.detectResultDouble.getRightPoseInfo().setPose(poseRight);
+            CameraHelper.detectResultDouble.getRightPoseInfo().setSourceWidth(imageRight.getWidth());
+            CameraHelper.detectResultDouble.getRightPoseInfo().setSourceHeight(imageRight.getHeight());
+            CameraHelper.detectResultDouble.getRightPoseInfo().setTargetWidth(targetWidth);
+            CameraHelper.detectResultDouble.getRightPoseInfo().setTargetHeight(targetHeight);
+
+            //============================================================================================
+            CameraHelper.detectResultDouble.setBitmapTotal(bitmapTotal);
+            CameraHelper.detectResultDouble.setSourceBitmapTotal(sourceBitmapTotal);
+            CameraHelper.detectResultDouble.setShowSource(checkBoxShowSource.isChecked());
 
             List<PoseLandmark> lm = poseLeft.getAllPoseLandmarks();
             List<PoseLandmark> rm = poseRight.getAllPoseLandmarks();
@@ -351,8 +406,8 @@ public class MainActivity extends BaseTestActivity {
 
                 } else {
 
-                    fpsAndPixs = "AI消耗分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "\n处理速度fps: " +
-                            fps + "\n显示的图像大小:" + result.bitmapTotal.getWidth() + "X" + result.bitmapTotal.getHeight();
+                    fpsAndPixs = "AI消耗分辨率:" + result.getBitmapTotal().getWidth() + "x" + result.getBitmapTotal().getHeight() + "\n处理速度fps: " +
+                            fps + "\n显示的图像大小:2X(" + result.getLeftPoseInfo().getTargetWidth() + "x" + result.getLeftPoseInfo().getTargetHeight() + ")";
 //                String fpsAndPixs = "处理速度: " + fps + "fps";
 
                 }

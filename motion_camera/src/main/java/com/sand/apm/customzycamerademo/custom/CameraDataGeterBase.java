@@ -246,7 +246,7 @@ public abstract class CameraDataGeterBase {
 
     protected abstract boolean connectCamera(int width, int height);
 
-    protected abstract void disconnectCamera();
+    public abstract void disconnectCamera();
 
 
     public interface ListItemAccessor {

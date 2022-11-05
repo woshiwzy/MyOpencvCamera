@@ -17,6 +17,7 @@ import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.MyPoseInfo;
+import com.sand.apm.customzycamerademo.lru.LurCacheMap;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
@@ -37,28 +38,17 @@ public class CameraHelper {
      * //相机图片获取器
      */
     public static Camera2DataGeter camera2DataGeter;
-    public static Mat mat;
     public static Camera2DataGeter.JavaCamera2Frame camera2Frame;
     public static int widthSource, heightSource, widthTarget, heightTarget;
-    public static Bitmap mCacheBitmap, blurBitmap;
     public static int cameraWidth = 1920, cameraHeight = 1080;
-
-
-    public Size blurSize = new Size(9, 9);
-    public Size gaoSiBlurSize = new Size(15, 15);
-
 
     public static Range rowRange = new Range(cameraHeight / 2 - cameraHeight / 4, cameraHeight / 2 + cameraHeight / 4);
     public static Range colRange = new Range(cameraWidth / 2 - cameraWidth / 4, cameraWidth / 2 + cameraWidth / 4);
 
     public static PoseDetectorOptions options = null;
     public static PoseDetector poseDetector = null;
-    public static HashMap<String, Bitmap> cacheBitmapPool = new HashMap<>();
-
     public static int frameCount = 0;
-
     public static Bitmap finalShowBitmap = null;
-
 
     /**
      * 正在识别
@@ -66,12 +56,7 @@ public class CameraHelper {
     public static boolean processIng = false;
     public static MyPoseInfo myPoseInfo = new MyPoseInfo();
     public static DetectResult detectResult = new DetectResult(false);
-
-
-    public static MyPoseInfo myPoseInfoLeft = new MyPoseInfo();
-    public static MyPoseInfo myPoseInfoRight = new MyPoseInfo();
     public static DetectResult detectResultDouble = new DetectResult(true);
-    public static Bitmap bitmapTotal = null;
 
 
     /**
@@ -82,15 +67,7 @@ public class CameraHelper {
      * @return
      */
     public static Bitmap getCacheBitmap(int targetWidth, int targetHeight) {
-        String key = targetWidth + "x" + targetHeight;
-        if (cacheBitmapPool.containsKey(key)) {
-            return cacheBitmapPool.get(key);
-        } else {
-            Bitmap tempMap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.RGB_565);
-            cacheBitmapPool.put(key, tempMap);
-            return tempMap;
-        }
-
+        return LurCacheMap.getBitmap(targetWidth,targetHeight);
     }
 
 
@@ -101,7 +78,6 @@ public class CameraHelper {
         // Base pose detector with streaming frames, when depending on the pose-detection sdk
         CameraHelper.options = new PoseDetectorOptions.Builder()
                 .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
-
                 .build();
         CameraHelper.poseDetector = PoseDetection.getClient(CameraHelper.options);
 
@@ -173,7 +149,7 @@ public class CameraHelper {
                 Log.d(App.tag, "成功了");
 
                 if (null != aiPoseProcessCallBackDouble) {
-                    aiPoseProcessCallBackDouble.onSuccessDouble(totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
+                    aiPoseProcessCallBackDouble.onSuccessDouble(finalShowBitmap,totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
                 }
 
                 leftPose = null;
@@ -199,7 +175,7 @@ public class CameraHelper {
     private static AiPoseProcessCallBack aiPoseProcessCallBackDouble;
     private static Bitmap totalBitmap2Doule = null;
 
-    public static void process(Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public static void process(Bitmap souceTotalBitmap,Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
 
         try {
 
@@ -217,11 +193,6 @@ public class CameraHelper {
 
             tleft = poseDetector.process(timageLeft).addOnSuccessListener(successListener).addOnCompleteListener(completeListener).addOnFailureListener(failureListener);
             tRight = poseDetector.process(timageRight).addOnSuccessListener(successListener).addOnCompleteListener(completeListener).addOnFailureListener(failureListener);
-
-            Pose leftResult = tleft.getResult();
-            Pose rightResult = tRight.getResult();
-
-            Log.d(App.tag, "是否都有结果:" + leftResult + " - " + rightResult);
 
         } catch (Exception e) {
             e.printStackTrace();

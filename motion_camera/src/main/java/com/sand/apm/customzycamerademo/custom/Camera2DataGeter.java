@@ -215,7 +215,6 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     };
 
-    Mat rotatedMat = null;
     JavaCamera2Frame tempFrame = null;
 
     private void createCameraPreviewSession() {
@@ -289,7 +288,7 @@ public class Camera2DataGeter extends CameraDataGeterBase {
     }
 
     @Override
-    protected void disconnectCamera() {
+    public void disconnectCamera() {
         Log.i(LOGTAG, "close camera");
         try {
             CameraDevice c = mCameraDevice;

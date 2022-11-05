@@ -54,9 +54,13 @@ public class PoseImageView extends androidx.appcompat.widget.AppCompatImageView 
     public void setDetectResult(DetectResult detectResult) {
         this.detectResult = detectResult;
         if (detectResult.isDouble()) {
-            setImageBitmap(detectResult.bitmapTotal);
+            if (detectResult.isShowSource() && null != detectResult.getSourceBitmapTotal()) {
+                setImageBitmap(detectResult.getSourceBitmapTotal());
+            } else {
+                setImageBitmap(detectResult.getBitmapTotal());
+            }
         } else {
-            setImageBitmap(detectResult.bitmap);
+            setImageBitmap(detectResult.getBitmap());
         }
 
     }
@@ -67,19 +71,32 @@ public class PoseImageView extends androidx.appcompat.widget.AppCompatImageView 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (null != detectResult && detectResult.isOk()) {
+        if (null != detectResult) {
+
             if (detectResult.isDouble()) {
 
-            } else {
+                //======左侧===
+                MyPoseInfo leftPose = detectResult.getLeftPoseInfo();
+                fx = leftPose.getFractionWidth();
+                fy = leftPose.getFractionHeight();
+                JfPoseInfo poseSkeletonLeft = poseLandmarkToSkeleton("", "", leftPose.getSourceWidth(), leftPose.getSourceHeight(), null, leftPose.getPose().getAllPoseLandmarks());
+                drawBody(canvas, poseSkeletonLeft.defaultSkeleton(), false);
+                //======右侧===
+                MyPoseInfo rightPose = detectResult.getRightPoseInfo();
+                JfPoseInfo poseSkeletonRight = poseLandmarkToSkeleton("", "", rightPose.getSourceWidth(), rightPose.getSourceHeight(), null, rightPose.getPose().getAllPoseLandmarks());
+                drawBody(canvas, poseSkeletonRight.defaultSkeleton(), true);
+
+            } else if (detectResult.isSingleOk()) {
+
                 Pose pose = detectResult.getPoseInfo().getPose();
                 JfPoseInfo poseSkeleton = poseLandmarkToSkeleton("", "", detectResult.getBitmap().getWidth(), detectResult.getBitmap().getHeight(), null, pose.getAllPoseLandmarks());
                 List<PoseLandmark> marks = detectResult.getPoseInfo().getPose().getAllPoseLandmarks();
                 if (null != marks) {
                     fx = detectResult.getPoseInfo().getFractionWidth();
                     fy = detectResult.getPoseInfo().getFractionHeight();
-                    drawBody(canvas, poseSkeleton.defaultSkeleton());
-
+                    drawBody(canvas, poseSkeleton.defaultSkeleton(), false);
                 }
+
             }
         }
 
@@ -99,99 +116,123 @@ public class PoseImageView extends androidx.appcompat.widget.AppCompatImageView 
     }
 
 
-    protected void drawBody(Canvas canvas, JfPoseSkeleton body) {
+    protected void drawBody(Canvas canvas, JfPoseSkeleton body, boolean isRight) {
 
         // 眼睛
-        drawCircle(canvas, body.getLEye());
-        drawCircle(canvas, body.getREye());
+        drawCircle(canvas, body.getLEye(), isRight);
+        drawCircle(canvas, body.getREye(), isRight);
 
         // 鼻子
-        drawCircle(canvas, body.getNose());
+        drawCircle(canvas, body.getNose(), isRight);
 
         // 下巴
-        drawCircle(canvas, body.getChin());
+        drawCircle(canvas, body.getChin(), isRight);
 
         // 头部线条
-        drawLine(canvas, true, body.getLEye(), body.getREye(), body.getNose());
+        drawHead(canvas, isRight, body.getLEye(), body.getREye(), body.getNose());
+//        drawLine(canvas, isRight, body.getLEye(), body.getREye(), body.getNose());
 
         // 鼻子肩膀的连接线
-        drawLine(canvas, body.getNose(), body.getLShoulder());
-        drawLine(canvas, body.getNose(), body.getRShoulder());
+        drawLine(canvas, isRight, body.getNose(), body.getLShoulder());
+        drawLine(canvas, isRight, body.getNose(), body.getRShoulder());
 
         // 脖子
-        drawCircle(canvas, body.getNeck());
+        drawCircle(canvas, body.getNeck(), isRight);
 
         // 肩膀
-        drawLine(canvas, body.getLShoulder(), body.getRShoulder(), body.getNeck());
-        drawCircle(canvas, body.getLShoulder());
-        drawCircle(canvas, body.getRShoulder());
+        drawLine(canvas, isRight, body.getLShoulder(), body.getRShoulder(), body.getNeck());
+        drawCircle(canvas, body.getLShoulder(), isRight);
+        drawCircle(canvas, body.getRShoulder(), isRight);
 
         // 胳膊线条
-        drawLine(canvas, body.getLShoulder(), body.getLElbow(), body.getLWrist());
-        drawLine(canvas, body.getRShoulder(), body.getRElbow(), body.getRWrist());
+        drawLine(canvas, isRight, body.getLShoulder(), body.getLElbow(), body.getLWrist());
+        drawLine(canvas, isRight, body.getRShoulder(), body.getRElbow(), body.getRWrist());
 
         // 手肘
-        drawCircle(canvas, body.getLElbow());
-        drawCircle(canvas, body.getRElbow());
+        drawCircle(canvas, body.getLElbow(), isRight);
+        drawCircle(canvas, body.getRElbow(), isRight);
 
         // 手腕
-        drawCircle(canvas, body.getLWrist());
-        drawCircle(canvas, body.getRWrist());
+        drawCircle(canvas, body.getLWrist(), isRight);
+        drawCircle(canvas, body.getRWrist(), isRight);
 
         // 手指
-        drawCircle(canvas, body.getLFinger());
-        drawCircle(canvas, body.getRFinger());
+        drawCircle(canvas, body.getLFinger(), isRight);
+        drawCircle(canvas, body.getRFinger(), isRight);
 
         // 上下连接
-        drawLine(canvas, body.getLShoulder(), body.getLHip());
-        drawLine(canvas, body.getRShoulder(), body.getRHip());
+        drawLine(canvas, isRight, body.getLShoulder(), body.getLHip());
+        drawLine(canvas, isRight, body.getRShoulder(), body.getRHip());
 
         // 臀部
-        drawLine(canvas, body.getLHip(), body.getRHip());
-        drawCircle(canvas, body.getLHip());
-        drawCircle(canvas, body.getRHip());
-        drawCircle(canvas, body.getMidHip());
+        drawLine(canvas, isRight, body.getLHip(), body.getRHip());
+        drawCircle(canvas, body.getLHip(), isRight);
+        drawCircle(canvas, body.getRHip(), isRight);
+        drawCircle(canvas, body.getMidHip(), isRight);
 
         // 腿部线条
-        drawLine(canvas, body.getLHip(), body.getLKnee(), body.getLAnkle());
-        drawLine(canvas, body.getRHip(), body.getRKnee(), body.getRAnkle());
+        drawLine(canvas, isRight, body.getLHip(), body.getLKnee(), body.getLAnkle());
+        drawLine(canvas, isRight, body.getRHip(), body.getRKnee(), body.getRAnkle());
 
         // 膝
-        drawCircle(canvas, body.getLKnee());
-        drawCircle(canvas, body.getRKnee());
+        drawCircle(canvas, body.getLKnee(), isRight);
+        drawCircle(canvas, body.getRKnee(), isRight);
 
         // 脚踝
-        drawCircle(canvas, body.getLAnkle());
-        drawCircle(canvas, body.getRAnkle());
+        drawCircle(canvas, body.getLAnkle(), isRight);
+        drawCircle(canvas, body.getRAnkle(), isRight);
 
         // 脚后跟
-        drawLine(canvas, body.getLAnkle(), body.getLHeel());
-        drawLine(canvas, body.getRAnkle(), body.getRHeel());
+        drawLine(canvas, isRight, body.getLAnkle(), body.getLHeel());
+        drawLine(canvas, isRight, body.getRAnkle(), body.getRHeel());
 
         // 脚大拇指
-        drawLine(canvas, body.getLAnkle(), body.getLBigToe());
-        drawLine(canvas, body.getRAnkle(), body.getRBigToe());
+        drawLine(canvas, isRight, body.getLAnkle(), body.getLBigToe());
+        drawLine(canvas, isRight, body.getRAnkle(), body.getRBigToe());
 
         // 脚后跟
-        drawCircle(canvas, body.getLHeel());
-        drawCircle(canvas, body.getRHeel());
+        drawCircle(canvas, body.getLHeel(), isRight);
+        drawCircle(canvas, body.getRHeel(), isRight);
 
         // 大脚趾
-        drawCircle(canvas, body.getLBigToe());
-        drawCircle(canvas, body.getRBigToe());
+        drawCircle(canvas, body.getLBigToe(), isRight);
+        drawCircle(canvas, body.getRBigToe(), isRight);
+    }
+
+    private void drawHead(Canvas canvas, boolean isRight, JfPoseKeyPoint leye, JfPoseKeyPoint reye, JfPoseKeyPoint nose) {
+
+        drawLine(canvas, isRight, leye, reye);
+        drawLine(canvas, isRight, leye, nose);
+        drawLine(canvas, isRight, reye, nose);
+
     }
 
 
-    private void drawCircle(Canvas canvas, JfPoseKeyPoint site) {
+    int deltaRight = 0;
+
+    private int getRigtDetal(boolean isRight) {
+        if (isRight) {
+            if (deltaRight == 0) {
+                deltaRight = getWidth() >> 1;
+            }
+            return deltaRight;
+
+        } else {
+            return 0;
+        }
+    }
+
+    private void drawCircle(Canvas canvas, JfPoseKeyPoint site, boolean isRight) {
         if (site == null) return;
-        canvas.drawCircle(site.getX() * fx, site.getY() * fy, radius, paint);
+
+        canvas.drawCircle(site.getX() * fx + getRigtDetal(isRight), site.getY() * fy, radius, paint);
     }
 
-    private void drawLine(Canvas canvas, JfPoseKeyPoint... sites) {
-        drawLine(canvas, false, sites);
+    private void drawLine(Canvas canvas, boolean isRight, JfPoseKeyPoint... sites) {
+        drawLine(canvas, false, isRight, sites);
     }
 
-    private void drawLine(Canvas canvas, boolean isCycle, JfPoseKeyPoint... sites) {
+    private void drawLine(Canvas canvas, boolean isCycle, boolean isRight, JfPoseKeyPoint... sites) {
         if (sites == null || sites.length <= 1) return;
         JfPoseKeyPoint s;
         JfPoseKeyPoint e;
@@ -200,13 +241,13 @@ public class PoseImageView extends androidx.appcompat.widget.AppCompatImageView 
             s = sites[i - 1];
             e = sites[i];
             if (s == null || e == null) return;
-            canvas.drawLine(s.x * fx, s.y * fy, e.x * fx, e.y * fy, paint);
+            canvas.drawLine(s.x * fx + getRigtDetal(isRight), s.y * fy, e.x * fx + getRigtDetal(isRight), e.y * fy, paint);
         }
 
         if (isCycle) {
             s = sites[0];
             e = sites[sites.length - 1];
-            canvas.drawLine(s.x * fx, s.y * fy, e.x * fx, e.y * fy, paint);
+            canvas.drawLine(s.x * fx + getRigtDetal(isRight), s.y * fy, e.x * fx + getRigtDetal(isRight), e.y * fy, paint);
         }
     }
 

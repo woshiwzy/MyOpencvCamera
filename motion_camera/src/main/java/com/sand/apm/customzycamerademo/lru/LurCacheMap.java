@@ -16,7 +16,7 @@ public class LurCacheMap {
         //获取手机最大内存,单位kb
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         //一般都将1/8设为LruCache的最大缓存
-        int cacheSize = maxMemory / 4;
+        int cacheSize = maxMemory / 2;
 
         mLruCache = new LruCache<String, Bitmap>(cacheSize) {
             /**

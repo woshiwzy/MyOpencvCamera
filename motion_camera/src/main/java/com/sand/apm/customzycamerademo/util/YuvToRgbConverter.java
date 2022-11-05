@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 
 public final class YuvToRgbConverter {
 
+
     private RenderScript renderScript;
     private ScriptIntrinsicYuvToRGB scriptYuvToRgb;
 
@@ -21,7 +22,17 @@ public final class YuvToRgbConverter {
     //private Allocation outputAllocation;
     private byte[] rowData;
 
-    public YuvToRgbConverter(Context context) {
+    private static YuvToRgbConverter yuvToRgbConverter = null;
+
+    public static YuvToRgbConverter getInstance(Context context) {
+        if (null == yuvToRgbConverter) {
+            yuvToRgbConverter = new YuvToRgbConverter(context);
+        }
+        return yuvToRgbConverter;
+    }
+
+
+    private YuvToRgbConverter(Context context) {
         this.renderScript = RenderScript.create(context);
         this.scriptYuvToRgb = ScriptIntrinsicYuvToRGB.create(renderScript, Element.U8_4(renderScript));
     }
@@ -70,18 +81,19 @@ public final class YuvToRgbConverter {
 //        return yuv;
 //    }
 
-    private byte[] yuvBufferByte=null;
-    public synchronized byte[] imageToByteBuffer(Image image){
+    private byte[] yuvBufferByte = null;
+
+    public synchronized byte[] imageToByteBuffer(Image image) {
         int i420Size = image.getWidth() * image.getHeight() * 3 / 2;
-        if(null==yuvBufferByte){
-            yuvBufferByte=new byte[i420Size];
+        if (null == yuvBufferByte) {
+            yuvBufferByte = new byte[i420Size];
         }
-        if(null!=yuvBufferByte && yuvBufferByte.length!=i420Size){
-            yuvBufferByte=null;
-            yuvBufferByte=new byte[i420Size];
+        if (null != yuvBufferByte && yuvBufferByte.length != i420Size) {
+            yuvBufferByte = null;
+            yuvBufferByte = new byte[i420Size];
         }
 
-        return imageToByteBuffer(image,yuvBufferByte);
+        return imageToByteBuffer(image, yuvBufferByte);
     }
 
     public synchronized byte[] imageToByteBuffer(Image image, byte[] out) {

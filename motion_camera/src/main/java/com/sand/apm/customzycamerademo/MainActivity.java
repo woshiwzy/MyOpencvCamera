@@ -193,33 +193,25 @@ public class MainActivity extends BaseTestActivity {
         if (CameraHelper.processIng) {
             return;
         }
+
+
+        long startGetImg = System.currentTimeMillis();
+
         if (null == CameraHelper.camera2Frame) {
             CameraHelper.camera2Frame = new Camera2DataGeter.JavaCamera2Frame(image);
         } else {
             CameraHelper.camera2Frame.setImage(image);
         }
-
-        long startGetImg = System.currentTimeMillis();
-
         if (checkBoxGray.isChecked()) {//是否处理灰度
             sourceMat = CameraHelper.camera2Frame.gray();
         } else {
             sourceMat = CameraHelper.camera2Frame.rgba();
         }
 
+//
+
         long costGetMat = System.currentTimeMillis() - startGetImg;
         Log.d(App.tag, "Mat-1 获取耗时:" + costGetMat);
-
-
-//        long yuvGetStart=System.currentTimeMillis();
-//        if(null==yuvBuffer){
-//            int i420Size = image.getWidth() * image.getHeight() * 3 / 2;
-//            yuvBuffer=new byte[i420Size];
-//        }
-//
-//        yuvToRgbConverter.imageToByteBuffer(image,yuvBuffer);
-//        long yuvCost=System.currentTimeMillis()-yuvGetStart;
-//        Log.d(App.tag, "Mat-2 获取耗时:" + yuvCost);
 
 
         if (checkBoxMirrorH.isChecked()) {//实处处理镜像
@@ -307,12 +299,16 @@ public class MainActivity extends BaseTestActivity {
             InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
             long prepareEnd = System.currentTimeMillis() - prepareStart;
             Log.d(App.tag, "Ai准备耗时:" + prepareEnd);
+            long recStart = System.currentTimeMillis();
 
             CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
 
-
                 @Override
                 public void onSuccess(Pose poseInfo, InputImage image1) {
+
+                    long recEnd=System.currentTimeMillis();
+
+
 
                     CameraHelper.myPoseInfo.setPose(poseInfo);
                     CameraHelper.myPoseInfo.setSourceWidth(targetBitmap.getWidth());

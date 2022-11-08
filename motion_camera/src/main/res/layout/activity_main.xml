@@ -121,6 +121,14 @@
                 android:checked="false"
                 android:text="双人" />
 
+            <CheckBox
+                android:id="@+id/checkBoxMoveNet"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/input_item_height"
+                android:layout_marginRight="20dp"
+                android:checked="false"
+                android:text="MoveNet" />
+
             <Button
                 android:id="@+id/button240"
                 android:layout_width="wrap_content"

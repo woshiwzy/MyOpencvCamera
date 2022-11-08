@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -16,11 +15,14 @@ import android.widget.TextView;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.pose.Pose;
 import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
+import com.sand.apm.customzycamerademo.custom.BaseDetectResult;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.OnImageCallBackListener;
 import com.sand.apm.customzycamerademo.custom.PoseImageView;
+import com.sand.apm.customzycamerademo.util.VisualizationUtils;
+import com.tensorflow.lite.data.Person;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -29,12 +31,14 @@ import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+
 public class MainActivity extends BaseTestActivity {
 
     public ImageView imageViewPreview;
     public PoseImageView imageViewShowTarget;
     public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel, textViewPreviewInfo, textViewCameraOutputInfo;
-    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput, checkBoxDouble;
+    public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput, checkBoxDouble, checkBoxMoveNet;
     public long lastProcessTime = 0, lastPhotoTime = 0;
     private SeekBar seekBar;
     private int photoCount = 0;
@@ -56,13 +60,9 @@ public class MainActivity extends BaseTestActivity {
         checkBoxGray = findViewById(R.id.checkBoxGray);
         checkBoxGrayInput = findViewById(R.id.checkBoxGrayInput);
         checkBoxDouble = findViewById(R.id.checkBoxDouble);
+        checkBoxMoveNet = findViewById(R.id.checkBoxMoveNet);
 
-        checkBoxDouble.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                imageViewShowTarget.setShowTwo(isChecked);
-            }
-        });
+        checkBoxDouble.setOnCheckedChangeListener((buttonView, isChecked) -> imageViewShowTarget.setShowTwo(isChecked));
 
         checkBoxShowSource = findViewById(R.id.checkBoxShowSource);
         textViewPreviewInfo = findViewById(R.id.textViewPreviewInfo);
@@ -119,7 +119,7 @@ public class MainActivity extends BaseTestActivity {
     @Override
     public void onCameraGranted() {
         initCamera();
-        CameraHelper.initAi();
+        CameraHelper.initAi(getApplicationContext());
     }
 
     private void initCamera() {
@@ -145,7 +145,13 @@ public class MainActivity extends BaseTestActivity {
 
                     }
 
-                    processPose1(image);//处理姿态识别方式1
+                    processPose1(image, checkBoxGray.isChecked(),
+                            checkBoxMirrorH.isChecked(),
+                            checkBoxMirrorV.isChecked(),
+                            getScale(), checkBoxShowSource.isChecked(), checkBoxDouble.isChecked(), checkBoxGrayInput.isChecked(),
+                            imageViewShowTarget.getWidth(),
+                            imageViewShowTarget.getHeight(), checkBoxMoveNet.isChecked()
+                    );//处理姿态识别方式1
                 }
             });
         }
@@ -183,17 +189,23 @@ public class MainActivity extends BaseTestActivity {
 
 
     /**
-     * 处理姿态识别
-     *
-     * @param image
+     * @param image        相机输入图
+     * @param gray         是否进行灰度处理
+     * @param mirrorH      是否处理水平镜像
+     * @param mirrorV      是否处理垂直镜像
+     * @param scale        缩放系数（缩放后传给AI）
+     * @param showSource   是否显示原图（不是缩放后的图）
+     * @param doubleModule 是否为双人模式
+     * @param inputGray    是否让Ai处理灰度图
+     * @param targetWidth  显示预览图的宽度
+     * @param targetHeight 显示预览图的高度
+     * @param moveNet      是否使用moveNet
      */
-    Mat sourceMat = null;
-
-    public void processPose1(Image image) {
+    public void processPose1(Image image, boolean gray, boolean mirrorH, boolean mirrorV, float scale, boolean showSource, boolean doubleModule, boolean inputGray, int targetWidth, int targetHeight, boolean moveNet) {
         if (CameraHelper.processIng) {
             return;
         }
-
+        Mat sourceMat;
 
         long startGetImg = System.currentTimeMillis();
 
@@ -202,34 +214,26 @@ public class MainActivity extends BaseTestActivity {
         } else {
             CameraHelper.camera2Frame.setImage(image);
         }
-        if (checkBoxGray.isChecked()) {//是否处理灰度
+        if (gray) {//是否处理灰度
             sourceMat = CameraHelper.camera2Frame.gray();
         } else {
             sourceMat = CameraHelper.camera2Frame.rgba();
         }
 
-//
-
         long costGetMat = System.currentTimeMillis() - startGetImg;
         Log.d(App.tag, "Mat-1 获取耗时:" + costGetMat);
 
-
-        if (checkBoxMirrorH.isChecked()) {//实处处理镜像
+        if (mirrorH) {//实处处理镜像
             Core.flip(sourceMat, sourceMat, 1);
         }
 
-        if (checkBoxMirrorV.isChecked()) {//垂直镜像
+        if (mirrorV) {//垂直镜像
             Core.flip(sourceMat, sourceMat, -1);
         }
 
-
         //targetWidth 可以自由控制
-        int targetWidth = imageViewShowTarget.getWidth();
-        int targetHeight = imageViewShowTarget.getHeight();
-
         CameraHelper.widthTarget = targetWidth;
         CameraHelper.heightTarget = targetHeight;
-
         if (targetWidth <= 0 || targetHeight <= 0) {
             return;
         }
@@ -247,8 +251,8 @@ public class MainActivity extends BaseTestActivity {
         Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
         long cropTime = System.currentTimeMillis() - startCrop;
         Log.d(App.tag, "最佳裁剪耗时：" + cropTime);
-        if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
-            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
+        if (showSource) {//要展示原图，而非缩放后的图片
+            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height(),Bitmap.Config.RGB_565);
             Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
         }
 
@@ -261,7 +265,7 @@ public class MainActivity extends BaseTestActivity {
         long aiFitStart = System.currentTimeMillis();
         //送入AI前缩放处理开始------------
         Mat dstMat = null;
-        if (null != seekBar && 0 != getScale() && 1 != getScale()) {//在这个做缩放处理
+        if (0 != scale && 1 != scale) {//在这个做缩放处理
             //这里还可以做Mat缓存等优化
             int dstWidth = (int) (bestMat.cols() * getScale());
             int dstHeight = (int) (bestMat.rows() * getScale());
@@ -274,82 +278,153 @@ public class MainActivity extends BaseTestActivity {
 
         long aiCostTime = System.currentTimeMillis() - aiFitStart;
         Log.d(App.tag, "AI裁剪耗时:" + (aiCostTime));
-
-//        //如果没有进行灰度处理，但是输入需要灰度
-        if (checkBoxGrayInput.isChecked() && !checkBoxGray.isChecked()) {
+        //========================到此为止dstMat 就是送入AI的Mat=======================================
+        //==========================================================================================
+//        //如果没有进行灰度处理，但是输入需要灰度（貌似没啥效果）
+        if (inputGray && gray) {
             Imgproc.cvtColor(dstMat, dstMat, Imgproc.COLOR_RGB2GRAY);
         }
-
         //rgb转yuv数组
 //        Imgproc.cvtColor(dstMat,dstMat,Imgproc.COLOR_YUV2RGB_NV21);
 //        byte [] bytes_data=new byte[(int)dstMat.total()];
 //        dstMat.get(0,0,bytes_data);
 
+        if (moveNet) {
+            //使用movenet
+            if (!doubleModule) {//单人模式
+                CameraHelper.widthSource = dstMat.width();
+                CameraHelper.heightSource = dstMat.height();
+                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                Utils.matToBitmap(dstMat, targetBitmap);
+                dstMat.release();
+                CameraHelper.processWithMoveNetSingle(CameraHelper.finalShowBitmap, targetBitmap, new AiPoseProcessCallBack() {
+                    @Override
+                    public void onSuccessMoveNetSingle(Bitmap bitmapSource, Bitmap bitmapInput, ArrayList<Person> persons) {
 
-        if (!checkBoxDouble.isChecked()) {//单人模式
+                        runOnUiThread(() -> {
 
-            long prepareStart = System.currentTimeMillis();
-            CameraHelper.widthSource = dstMat.width();
-            CameraHelper.heightSource = dstMat.height();
-            Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height());
-            Utils.matToBitmap(dstMat, targetBitmap);
-            dstMat.release();
-            //送入AI前缩放处理结束------------
-            //送入AI处理的图片永远需要缩放后的图片
-            InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
-            long prepareEnd = System.currentTimeMillis() - prepareStart;
-            Log.d(App.tag, "Ai准备耗时:" + prepareEnd);
-            long recStart = System.currentTimeMillis();
+                            CameraHelper.detectResult.clear();
+                            CameraHelper.detectResult.setShowSource(showSource);
+                            CameraHelper.detectResult.setBitmap(showSource ? bitmapSource : bitmapInput);
 
-            CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
+                            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_SINGLE);
 
-                @Override
-                public void onSuccess(Pose poseInfo, InputImage image1) {
+                            CameraHelper.myPoseInfo.setSourceWidth(bitmapInput.getWidth());
+                            CameraHelper.myPoseInfo.setSourceHeight(bitmapInput.getHeight());
 
-                    long recEnd=System.currentTimeMillis();
+                            CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
+                            CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
+
+                            CameraHelper.detectResult.setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(CameraHelper.detectResult.getBitmap(), persons, false));
+
+                            onDetectResult(CameraHelper.detectResult);
 
 
+                        });
 
-                    CameraHelper.myPoseInfo.setPose(poseInfo);
-                    CameraHelper.myPoseInfo.setSourceWidth(targetBitmap.getWidth());
-                    CameraHelper.myPoseInfo.setSourceHeight(targetBitmap.getHeight());
-
-                    CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
-                    CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
-
-                    if (checkBoxShowSource.isChecked()) {
-                        CameraHelper.detectResult.setBitmap(CameraHelper.finalShowBitmap);
-                    } else {
-                        CameraHelper.detectResult.setBitmap(targetBitmap);
                     }
-
-                    CameraHelper.detectResult.setPoseInfo(CameraHelper.myPoseInfo);
-                    onDetectResult(CameraHelper.detectResult);
-                }
-            });
+                });
 
 
-        } else if (checkBoxDouble.isChecked()) {//双人模式
+            } else {//双人模式
+                CameraHelper.widthSource = dstMat.width();
+                CameraHelper.heightSource = dstMat.height();
+                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(dstMat, targetBitmap);
+                dstMat.release();
+                CameraHelper.processWithMoveNetDouble(CameraHelper.finalShowBitmap, targetBitmap, new AiPoseProcessCallBack() {
+                    @Override
+                    public void onSuccessMoveNetSingle(Bitmap bitmapSource, Bitmap bitmapInput, ArrayList<Person> persons) {
 
-            Rect leftRect = new Rect(0, 0, dstMat.width() / 2, dstMat.height());
-            Mat leftMat = dstMat.submat(leftRect);
-            Bitmap leftBitmap = getLeftBitmap(leftMat.width(), leftMat.height());
-            Utils.matToBitmap(leftMat, leftBitmap);
-            leftMat.release();
+                        runOnUiThread(() -> {
 
-            Rect rightRect = new Rect(dstMat.width() / 2, 0, dstMat.width() / 2, dstMat.height());
-            Mat rightMat = dstMat.submat(rightRect);
-            Bitmap rightBitmap = getRightBitmap(rightMat.width(), rightMat.height());
-            Utils.matToBitmap(rightMat, rightBitmap);
-            rightMat.release();
+                            CameraHelper.detectResult.clear();
+                            CameraHelper.detectResult.setShowSource(showSource);
+                            CameraHelper.detectResult.setBitmap(showSource ? bitmapSource : bitmapInput);
 
-            Bitmap aitotalBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height());
-            Utils.matToBitmap(dstMat, aitotalBitmap);
-            dstMat.release();
+                            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_DOUBLE);
 
-            CameraHelper.process(CameraHelper.finalShowBitmap, aitotalBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
+                            CameraHelper.myPoseInfo.setSourceWidth(bitmapInput.getWidth());
+                            CameraHelper.myPoseInfo.setSourceHeight(bitmapInput.getHeight());
+
+                            CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
+                            CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
+
+                            CameraHelper.detectResult.setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(CameraHelper.detectResult.getBitmap(), persons, false));
+
+                            onDetectResult(CameraHelper.detectResult);
+
+                        });
+
+                    }
+                });
+
+
+            }
+
+        } else {
+            //默认的mp
+            if (!doubleModule) {//单人模式
+                long prepareStart = System.currentTimeMillis();
+                CameraHelper.widthSource = dstMat.width();
+                CameraHelper.heightSource = dstMat.height();
+                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                Utils.matToBitmap(dstMat, targetBitmap);
+                dstMat.release();
+                //送入AI前缩放处理结束------------
+                //送入AI处理的图片永远需要缩放后的图片
+                InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
+                long prepareEnd = System.currentTimeMillis() - prepareStart;
+                Log.d(App.tag, "Ai准备耗时:" + prepareEnd);
+                long recStart = System.currentTimeMillis();
+                CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
+
+                    @Override
+                    public void onSuccess(Pose poseInfo, InputImage image1) {
+                        long recEnd = System.currentTimeMillis();
+                        Log.d(App.tag, "Ai识别耗时:" + (recEnd - recStart));
+
+                        CameraHelper.detectResult.clear();
+                        CameraHelper.myPoseInfo.setPose(poseInfo);
+                        CameraHelper.myPoseInfo.setSourceWidth(targetBitmap.getWidth());
+                        CameraHelper.myPoseInfo.setSourceHeight(targetBitmap.getHeight());
+
+                        CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
+                        CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
+                        CameraHelper.detectResult.setShowSource(showSource);
+
+                        CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MP_SINGLE);
+
+                        if (showSource) {
+                            CameraHelper.detectResult.setBitmap(CameraHelper.finalShowBitmap);
+                        } else {
+                            CameraHelper.detectResult.setBitmap(targetBitmap);
+                        }
+
+                        CameraHelper.detectResult.setPoseInfo(CameraHelper.myPoseInfo);
+                        onDetectResult(CameraHelper.detectResult);
+                    }
+                });
+
+            } else if (doubleModule) {//双人模式
+                Rect leftRect = new Rect(0, 0, dstMat.width() / 2, dstMat.height());
+                Mat leftMat = dstMat.submat(leftRect);
+                Bitmap leftBitmap = getLeftBitmap(leftMat.width(), leftMat.height());
+                Utils.matToBitmap(leftMat, leftBitmap);
+                leftMat.release();
+
+                Rect rightRect = new Rect(dstMat.width() / 2, 0, dstMat.width() / 2, dstMat.height());
+                Mat rightMat = dstMat.submat(rightRect);
+                Bitmap rightBitmap = getRightBitmap(rightMat.width(), rightMat.height());
+                Utils.matToBitmap(rightMat, rightBitmap);
+                rightMat.release();
+
+                Bitmap aitotalBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                Utils.matToBitmap(dstMat, aitotalBitmap);
+                dstMat.release();
+                CameraHelper.process(CameraHelper.finalShowBitmap, aitotalBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
+            }
         }
-
     }
 
     /**
@@ -362,6 +437,8 @@ public class MainActivity extends BaseTestActivity {
 
             int targetWidth = imageViewShowTarget.getWidth() >> 1;
             int targetHeight = imageViewShowTarget.getHeight();
+
+            CameraHelper.detectResult.clear();
 
             CameraHelper.detectResultDouble.getLeftPoseInfo().setPose(poseLeft);
             CameraHelper.detectResultDouble.getLeftPoseInfo().setSourceWidth(imageLeft.getWidth());
@@ -380,6 +457,8 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.detectResultDouble.setBitmapTotal(bitmapTotal);
             CameraHelper.detectResultDouble.setSourceBitmapTotal(sourceBitmapTotal);
             CameraHelper.detectResultDouble.setShowSource(checkBoxShowSource.isChecked());
+
+            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MP_DOUBLE);
 
             onDetectResult(CameraHelper.detectResultDouble);
 

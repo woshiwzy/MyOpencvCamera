@@ -1,5 +1,6 @@
 package com.sand.apm.customzycamerademo;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.util.Log;
@@ -17,14 +18,19 @@ import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.MyPoseInfo;
-import com.sand.apm.customzycamerademo.lru.LurCacheMap;
-import com.sand.apm.customzycamerademo.util.YuvToRgbConverter;
+import com.sand.apm.customzycamerademo.util.LurCacheMap;
+import com.tensorflow.lite.data.Device;
+import com.tensorflow.lite.data.Person;
+import com.tensorflow.lite.ml.ModelType;
+import com.tensorflow.lite.ml.MoveNet;
+import com.tensorflow.lite.ml.MoveNetMultiPose;
+import com.tensorflow.lite.ml.Type;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
-import org.opencv.core.Size;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 
@@ -46,10 +52,15 @@ public class CameraHelper {
     public static Range rowRange = new Range(cameraHeight / 2 - cameraHeight / 4, cameraHeight / 2 + cameraHeight / 4);
     public static Range colRange = new Range(cameraWidth / 2 - cameraWidth / 4, cameraWidth / 2 + cameraWidth / 4);
 
-    public static PoseDetectorOptions options = null;
-    public static PoseDetector poseDetector = null;
+    private static PoseDetectorOptions options = null;
+    private static PoseDetector poseDetector = null;
+
     public static int frameCount = 0;
     public static Bitmap finalShowBitmap = null;
+
+    //=========movenet=============
+    private static MoveNet moveNet;
+    private static MoveNetMultiPose moveNetMultiPose;
 
     /**
      * 正在识别
@@ -66,29 +77,77 @@ public class CameraHelper {
      * @param targetHeight
      * @return
      */
-    public static Bitmap getCacheBitmap(int targetWidth, int targetHeight) {
-        return LurCacheMap.getBitmap(targetWidth,targetHeight);
+    public static Bitmap getCacheBitmap(int targetWidth, int targetHeight,Bitmap.Config config) {
+        return LurCacheMap.getBitmap(targetWidth, targetHeight,config);
     }
 
 
     /**
      * 初始化姿态识别器
      */
-    public static void initAi() {
+    public static void initAi(Context context) {
         // Base pose detector with streaming frames, when depending on the pose-detection sdk
         CameraHelper.options = new PoseDetectorOptions.Builder()
                 .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
                 .build();
         CameraHelper.poseDetector = PoseDetection.getClient(CameraHelper.options);
-
-
-// Accurate pose detector on static images, when depending on the pose-detection-accurate sdk
+        // Accurate pose detector on static images, when depending on the pose-detection-accurate sdk
 //        options =
 //                new AccuratePoseDetectorOptions.Builder()
 //                        .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
 //                        .build();
+        //movenet
+        moveNet = MoveNet.Companion.create(context, Device.CPU, ModelType.Thunder);
+        moveNetMultiPose = MoveNetMultiPose.Companion.create(context, Device.CPU, Type.Dynamic);
     }
 
+
+    /**
+     * 使用MoveNet的单人模式
+     *
+     * @param inputBitmap
+     * @param aiPoseProcessCallBack
+     */
+
+    private static ArrayList<Person> persons=new ArrayList<>();
+    public static void processWithMoveNetSingle(Bitmap bitmapSource, Bitmap inputBitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
+        if (null == moveNet) {
+            return;
+        }
+        CameraHelper.processIng = true;
+        long startProcess = System.currentTimeMillis();
+        List<Person> result = moveNet.estimatePoses(inputBitmap);
+        Person targetePerson = null;
+        persons.clear();
+        if (null != result && !result.isEmpty()) {
+            targetePerson = result.get(0);
+            persons.add(targetePerson);
+        }
+        long cost = (System.currentTimeMillis() - startProcess);
+        Log.d(App.tag, "Movenet 单人模型耗时:" + cost + " size:" + inputBitmap.getWidth() + "," + inputBitmap.getHeight());
+        CameraHelper.processIng = false;
+        if (null != aiPoseProcessCallBack) {
+            aiPoseProcessCallBack.onSuccessMoveNetSingle(bitmapSource, inputBitmap, persons);
+        }
+    }
+
+    public static void processWithMoveNetDouble(Bitmap bitmapSource, Bitmap inputBitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
+        if (null == moveNet) {
+            return;
+        }
+        CameraHelper.processIng = true;
+        long startProcess = System.currentTimeMillis();
+        List<Person> result = moveNetMultiPose.estimatePoses(inputBitmap);
+        persons.clear();
+        persons.addAll(result);
+
+        long cost = (System.currentTimeMillis() - startProcess);
+        Log.d(App.tag, "Movenet 多人模型耗时:" + cost + " size:" + inputBitmap.getWidth() + "," + inputBitmap.getHeight());
+        CameraHelper.processIng = false;
+        if (null != aiPoseProcessCallBack) {
+            aiPoseProcessCallBack.onSuccessMoveNetSingle(bitmapSource, inputBitmap, persons);
+        }
+    }
 
     /**
      * google识别姿态
@@ -138,7 +197,6 @@ public class CameraHelper {
         @Override
         public void onComplete(@NonNull Task<Pose> task) {
             Log.d(App.tag, "onComplete:" + task.getResult());
-
             if (task == tleft) {
                 leftPose = task.getResult();
             } else if (task == tRight) {
@@ -149,7 +207,7 @@ public class CameraHelper {
                 Log.d(App.tag, "成功了");
 
                 if (null != aiPoseProcessCallBackDouble) {
-                    aiPoseProcessCallBackDouble.onSuccessDouble(finalShowBitmap,totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
+                    aiPoseProcessCallBackDouble.onSuccessDouble(finalShowBitmap, totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
                 }
 
                 leftPose = null;
@@ -175,7 +233,7 @@ public class CameraHelper {
     private static AiPoseProcessCallBack aiPoseProcessCallBackDouble;
     private static Bitmap totalBitmap2Doule = null;
 
-    public static void process(Bitmap souceTotalBitmap,Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public static void process(Bitmap souceTotalBitmap, Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
 
         try {
 
@@ -184,8 +242,8 @@ public class CameraHelper {
             }
             processIng = true;
             aiPoseProcessCallBackDouble = aiPoseProcessCallBack;
-            timageLeft=imageLeft;
-            timageRight=imageRight;
+            timageLeft = imageLeft;
+            timageRight = imageRight;
 
             InputImage timageLeft = InputImage.fromBitmap(imageLeft, 0);
             InputImage timageRight = InputImage.fromBitmap(imageRight, 0);

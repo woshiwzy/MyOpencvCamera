@@ -23,6 +23,7 @@ import com.sand.apm.customzycamerademo.custom.BaseDetectResult;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.OnImageCallBackListener;
 import com.sand.apm.customzycamerademo.custom.PoseImageView;
+import com.sand.apm.customzycamerademo.util.SoundPlayUtils;
 import com.sand.apm.customzycamerademo.util.VisualizationUtils;
 import com.tensorflow.lite.data.BodyPart;
 import com.tensorflow.lite.data.KeyPoint;
@@ -65,6 +66,7 @@ public class MainActivity extends BaseTestActivity {
             texteViewCountInfo.post(()->{
                 texteViewCountInfo.setText("计数:"+ count);
             });
+            SoundPlayUtils.play(1);//引体成功声音
         }
     });
 

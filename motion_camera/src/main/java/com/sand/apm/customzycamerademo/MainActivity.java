@@ -1,28 +1,36 @@
 package com.sand.apm.customzycamerademo;
 
 import android.graphics.Bitmap;
+import android.graphics.PointF;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.pose.Pose;
+import com.jf.lib.pose.JfPoseInfo;
+import com.jf.lib.pose.JfPoseKeyPoint;
+import com.jf.lib.pose.JfPoseSkeleton;
 import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.BaseDetectResult;
-import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
-import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
 import com.sand.apm.customzycamerademo.custom.OnImageCallBackListener;
 import com.sand.apm.customzycamerademo.custom.PoseImageView;
 import com.sand.apm.customzycamerademo.util.VisualizationUtils;
+import com.tensorflow.lite.data.BodyPart;
+import com.tensorflow.lite.data.KeyPoint;
 import com.tensorflow.lite.data.Person;
+import com.zy.sport.eu.ropeskip.EuRopeSkip;
+import com.zy.sport.eu.ropeskip.EuRopeSkipCallback;
+import com.zy.sport.eu.ropeskip.EuRopeSkipParam;
+import com.zy.sport.eu.ropeskip.EuRopeSkipResult;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -30,8 +38,10 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoWriter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseTestActivity {
 
@@ -40,8 +50,23 @@ public class MainActivity extends BaseTestActivity {
     public TextView textViewFps, textViewPhotoInfo, textViewScaleLabel, textViewPreviewInfo, textViewCameraOutputInfo;
     public CheckBox checkBoxMirrorH, checkBoxMirrorV, checkBoxGray, checkBoxShowSource, checkBoxGrayInput, checkBoxDouble, checkBoxMoveNet;
     public long lastProcessTime = 0, lastPhotoTime = 0;
-    private SeekBar seekBar;
     private int photoCount = 0;
+    private SeekBar seekBar;
+    private CameraHelper cameraHelper;
+    private Button buttonClose;
+    private TextView texteViewCountInfo;
+    private int count=0;
+
+    private JfPoseInfo poseInfo = new JfPoseInfo();
+    private EuRopeSkip euRopeSkip=new EuRopeSkip(new EuRopeSkipCallback() {
+        @Override
+        public void onRopeSkipComplete(EuRopeSkipResult result) {
+            count++;
+            texteViewCountInfo.post(()->{
+                texteViewCountInfo.setText("计数:"+ count);
+            });
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +74,10 @@ public class MainActivity extends BaseTestActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
-
+        texteViewCountInfo=findViewById(R.id.texteViewCountInfo);
+        buttonClose = findViewById(R.id.buttonClose);
+        buttonClose.setOnClickListener(v -> finish());
+        euRopeSkip.setRopeSkipParam(new EuRopeSkipParam());
 
         textViewScaleLabel = findViewById(R.id.textViewScaleLabel);
         textViewFps = findViewById(R.id.textViewFps);
@@ -69,33 +97,31 @@ public class MainActivity extends BaseTestActivity {
         textViewPhotoInfo = findViewById(R.id.textViewPhotoInfo);
         textViewCameraOutputInfo = findViewById(R.id.textViewCameraOutputInfo);
 
-
         imageViewShowTarget.post(() -> {
             textViewPreviewInfo.setText("预览View大小:" + imageViewShowTarget.getWidth() + "X" + imageViewShowTarget.getHeight());
         });
 
         findViewById(R.id.button240).setOnClickListener(view -> {
-            CameraHelper.camera2DataGeter.setResolution(320, 240);//240X320
+            cameraHelper.setResolution(320, 240);
         });
 
         findViewById(R.id.button480).setOnClickListener(view -> { //480X640
-            CameraHelper.camera2DataGeter.setResolution(640, 480);
+            cameraHelper.setResolution(640, 480);
         });
 
-        findViewById(R.id.button1280).setOnClickListener(view -> CameraHelper.camera2DataGeter.setResolution(1280, 720));
+        findViewById(R.id.button1280).setOnClickListener(view -> {
+            cameraHelper.setResolution(1280, 720);
+        });
 
         findViewById(R.id.button1080).setOnClickListener(view -> {
-            CameraHelper.camera2DataGeter.setResolution(1920, 1080);//1080X1920
+            cameraHelper.setResolution(1920, 1080);
         });
 
-        findViewById(R.id.button2160).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CameraHelper.camera2DataGeter.setResolution(3840, 2160);
-            }
-        });
+        findViewById(R.id.button2160).setOnClickListener(v -> cameraHelper.setResolution(3840, 2160));
 
-        findViewById(R.id.buttonSwitchCamera).setOnClickListener(view -> CameraHelper.camera2DataGeter.toogleCamera());
+        findViewById(R.id.buttonSwitchCamera).setOnClickListener(view -> {
+            cameraHelper.toogleCamera();
+        });
 
         seekBar = findViewById(R.id.seekBarScale);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -119,15 +145,12 @@ public class MainActivity extends BaseTestActivity {
     @Override
     public void onCameraGranted() {
         initCamera();
-        CameraHelper.initAi(getApplicationContext());
     }
 
     private void initCamera() {
-
-        if (null == CameraHelper.camera2DataGeter) {
-            CameraHelper.camera2DataGeter = new Camera2DataGeter(this, CameraDataGeterBase.CAMERA_ID_FRONT, CameraHelper.cameraWidth, CameraHelper.cameraHeight);
-            CameraHelper.camera2DataGeter.configOrientation(getResources().getConfiguration());
-            CameraHelper.camera2DataGeter.setOnImageCallBackListener(new OnImageCallBackListener() {
+        if (null == cameraHelper) {
+            cameraHelper = new CameraHelper(this);
+            cameraHelper.initCamera(new OnImageCallBackListener() {
                 @Override
                 public void onImageCatch(Image image) {
 
@@ -142,49 +165,37 @@ public class MainActivity extends BaseTestActivity {
                         });
                         photoCount = 0;
                         lastPhotoTime = now;
-
                     }
 
-                    processPose1(image, checkBoxGray.isChecked(),
+                    processPose(image, checkBoxGray.isChecked(),
                             checkBoxMirrorH.isChecked(),
                             checkBoxMirrorV.isChecked(),
                             getScale(), checkBoxShowSource.isChecked(), checkBoxDouble.isChecked(), checkBoxGrayInput.isChecked(),
                             imageViewShowTarget.getWidth(),
                             imageViewShowTarget.getHeight(), checkBoxMoveNet.isChecked()
                     );//处理姿态识别方式1
+
                 }
             });
         }
-
-
-        if (null != CameraHelper.camera2DataGeter) {
-            //3.打开相机
-            CameraHelper.camera2DataGeter.enableView();
-        }
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        initCamera();
-
+        cameraHelper.enablePreview();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (null != CameraHelper.camera2DataGeter) {
-            CameraHelper.camera2DataGeter.disableView();
-        }
+        cameraHelper.disablePreview();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (null != CameraHelper.camera2DataGeter) {
-            CameraHelper.camera2DataGeter.disconnectCamera();
-        }
+        cameraHelper.disconnectCamera();
     }
 
 
@@ -201,28 +212,15 @@ public class MainActivity extends BaseTestActivity {
      * @param targetHeight 显示预览图的高度
      * @param moveNet      是否使用moveNet
      */
-    public void processPose1(Image image, boolean gray, boolean mirrorH, boolean mirrorV, float scale, boolean showSource, boolean doubleModule, boolean inputGray, int targetWidth, int targetHeight, boolean moveNet) {
-        if (CameraHelper.processIng) {
+    public void processPose(Image image, boolean gray, boolean mirrorH, boolean mirrorV, float scale, boolean showSource, boolean doubleModule, boolean inputGray, int targetWidth, int targetHeight, boolean moveNet) {
+        if (cameraHelper.isProcessIng()) {
             return;
         }
-        Mat sourceMat;
 
         long startGetImg = System.currentTimeMillis();
-
-        if (null == CameraHelper.camera2Frame) {
-            CameraHelper.camera2Frame = new Camera2DataGeter.JavaCamera2Frame(image);
-        } else {
-            CameraHelper.camera2Frame.setImage(image);
-        }
-        if (gray) {//是否处理灰度
-            sourceMat = CameraHelper.camera2Frame.gray();
-        } else {
-            sourceMat = CameraHelper.camera2Frame.rgba();
-        }
-
+        Mat sourceMat = cameraHelper.getSourceMat(gray, image);
         long costGetMat = System.currentTimeMillis() - startGetImg;
         Log.d(App.tag, "Mat-1 获取耗时:" + costGetMat);
-
         if (mirrorH) {//实处处理镜像
             Core.flip(sourceMat, sourceMat, 1);
         }
@@ -230,10 +228,9 @@ public class MainActivity extends BaseTestActivity {
         if (mirrorV) {//垂直镜像
             Core.flip(sourceMat, sourceMat, -1);
         }
-
         //targetWidth 可以自由控制
-        CameraHelper.widthTarget = targetWidth;
-        CameraHelper.heightTarget = targetHeight;
+        cameraHelper.setWidthHeightTarget(targetWidth, targetHeight);
+
         if (targetWidth <= 0 || targetHeight <= 0) {
             return;
         }
@@ -248,19 +245,13 @@ public class MainActivity extends BaseTestActivity {
 
         long startCrop = System.currentTimeMillis();
         //将图像按照目标显示View的大小做一个最佳调整
-        Mat bestMat = CameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
+        Mat bestMat = cameraHelper.fitMat2Target(sourceMat, targetWidth, targetHeight);
         long cropTime = System.currentTimeMillis() - startCrop;
         Log.d(App.tag, "最佳裁剪耗时：" + cropTime);
         if (showSource) {//要展示原图，而非缩放后的图片
-            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height(),Bitmap.Config.RGB_565);
-            Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
+            CameraHelper.sourceBigBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(bestMat, CameraHelper.sourceBigBitmap);//得到原始的最佳图像
         }
-
-//        if (checkBoxShowSource.isChecked()) {//要展示原图，而非缩放后的图片
-//            CameraHelper.finalShowBitmap = CameraHelper.getCacheBitmap(bestMat.width(), bestMat.height());
-//            Utils.matToBitmap(bestMat, CameraHelper.finalShowBitmap);//得到原始的最佳图像
-//        }
-
 
         long aiFitStart = System.currentTimeMillis();
         //送入AI前缩放处理开始------------
@@ -292,139 +283,181 @@ public class MainActivity extends BaseTestActivity {
         if (moveNet) {
             //使用movenet
             if (!doubleModule) {//单人模式
-                CameraHelper.widthSource = dstMat.width();
-                CameraHelper.heightSource = dstMat.height();
-                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                cameraHelper.setWidthHeightSource(dstMat.width(), dstMat.height());
+                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(dstMat, targetBitmap);
                 dstMat.release();
-                CameraHelper.processWithMoveNetSingle(CameraHelper.finalShowBitmap, targetBitmap, new AiPoseProcessCallBack() {
+                cameraHelper.processWithMoveNetSingle(CameraHelper.sourceBigBitmap, targetBitmap, new AiPoseProcessCallBack() {
                     @Override
                     public void onSuccessMoveNetSingle(Bitmap bitmapSource, Bitmap bitmapInput, ArrayList<Person> persons) {
 
                         runOnUiThread(() -> {
-
-                            CameraHelper.detectResult.clear();
-                            CameraHelper.detectResult.setShowSource(showSource);
-                            CameraHelper.detectResult.setBitmap(showSource ? bitmapSource : bitmapInput);
-
-                            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_SINGLE);
-
-                            CameraHelper.myPoseInfo.setSourceWidth(bitmapInput.getWidth());
-                            CameraHelper.myPoseInfo.setSourceHeight(bitmapInput.getHeight());
-
-                            CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
-                            CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
-
-                            CameraHelper.detectResult.setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(CameraHelper.detectResult.getBitmap(), persons, false));
-
-                            onDetectResult(CameraHelper.detectResult);
-
-
+                            cameraHelper.getDetectResult().clear();
+                            cameraHelper.getDetectResult().setShowSource(showSource);
+                            cameraHelper.getDetectResult().setBitmap(showSource ? bitmapSource : bitmapInput);
+                            cameraHelper.getDetectResult().setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_SINGLE);
+                            cameraHelper.getDetectResult().getPoseInfo().setDimenInfo(bitmapInput.getWidth(), bitmapInput.getHeight(), targetWidth, targetHeight);
+                            cameraHelper.getDetectResult().setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(cameraHelper.getDetectResult().getBitmap(), persons, false));
+                            onDetectResult(cameraHelper.getDetectResult());
                         });
 
                     }
                 });
-
 
             } else {//双人模式
-                CameraHelper.widthSource = dstMat.width();
-                CameraHelper.heightSource = dstMat.height();
-                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.ARGB_8888);
+                cameraHelper.setWidthHeightSource(dstMat.width(), dstMat.height());
+                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(), Bitmap.Config.ARGB_8888);
                 Utils.matToBitmap(dstMat, targetBitmap);
                 dstMat.release();
-                CameraHelper.processWithMoveNetDouble(CameraHelper.finalShowBitmap, targetBitmap, new AiPoseProcessCallBack() {
+                CameraHelper.processWithMoveNetDouble(CameraHelper.sourceBigBitmap, targetBitmap, new AiPoseProcessCallBack() {
                     @Override
                     public void onSuccessMoveNetSingle(Bitmap bitmapSource, Bitmap bitmapInput, ArrayList<Person> persons) {
-
                         runOnUiThread(() -> {
 
-                            CameraHelper.detectResult.clear();
-                            CameraHelper.detectResult.setShowSource(showSource);
-                            CameraHelper.detectResult.setBitmap(showSource ? bitmapSource : bitmapInput);
+                            String imageId=String.valueOf(System.currentTimeMillis());
+                            poseInfo.setKey(imageId);
+                            poseInfo.setImageWidth(bitmapInput.getWidth());
+                            poseInfo.setImageHeight(bitmapInput.getHeight());
+                            poseInfo.setPoseBoxing(null);
+                            poseInfo.setFrom("");
+                            poseInfo.setPlayer("");
+                            poseInfo.getSkeletons().clear();
+                            // 骨骼处理
+                            for (Person person : persons) {
+                                if (person.getScore() < 0.14) continue;
+                                JfPoseSkeleton skeleton = new JfPoseSkeleton();
+                                skeleton.setKey(imageId);
+                                skeleton.setPlayer(String.valueOf(person.getId()));
+                                skeleton.setImageWidth(bitmapInput.getWidth());
+                                skeleton.setImageHeight(bitmapInput.getHeight());
+                                skeleton.setFrom("");
+                                fillKeyPoints(skeleton, person.getKeyPoints());
+                                poseInfo.getSkeletons().add(skeleton);
+                            }
 
-                            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_DOUBLE);
+                            if(null!=euRopeSkip){
+                                euRopeSkip.onProcessor(poseInfo);
+                            }
 
-                            CameraHelper.myPoseInfo.setSourceWidth(bitmapInput.getWidth());
-                            CameraHelper.myPoseInfo.setSourceHeight(bitmapInput.getHeight());
-
-                            CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
-                            CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
-
-                            CameraHelper.detectResult.setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(CameraHelper.detectResult.getBitmap(), persons, false));
-
-                            onDetectResult(CameraHelper.detectResult);
-
+                            cameraHelper.getDetectResult().clear();
+                            cameraHelper.getDetectResult().setShowSource(showSource);
+                            cameraHelper.getDetectResult().setBitmap(showSource ? bitmapSource : bitmapInput);
+                            cameraHelper.getDetectResult().setSourceType(BaseDetectResult.SOURCE_TYPE_MOVE_NET_DOUBLE);
+                            cameraHelper.getDetectResult().getPoseInfo().setDimenInfo(bitmapInput.getWidth(), bitmapInput.getHeight(), targetWidth, targetHeight);
+                            cameraHelper.getDetectResult().setBitmap(VisualizationUtils.INSTANCE.drawBodyKeypoints(cameraHelper.getDetectResult().getBitmap(), persons, false));
+                            onDetectResult(cameraHelper.getDetectResult());
                         });
-
                     }
                 });
-
-
             }
-
         } else {
             //默认的mp
             if (!doubleModule) {//单人模式
                 long prepareStart = System.currentTimeMillis();
-                CameraHelper.widthSource = dstMat.width();
-                CameraHelper.heightSource = dstMat.height();
-                Bitmap targetBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                cameraHelper.setWidthHeightSource(dstMat.width(), dstMat.height());
+                Bitmap targetBitmap = cameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(dstMat, targetBitmap);
                 dstMat.release();
                 //送入AI前缩放处理结束------------
                 //送入AI处理的图片永远需要缩放后的图片
-                InputImage inputImage = InputImage.fromBitmap(targetBitmap, 0);
                 long prepareEnd = System.currentTimeMillis() - prepareStart;
                 Log.d(App.tag, "Ai准备耗时:" + prepareEnd);
                 long recStart = System.currentTimeMillis();
-                CameraHelper.process(inputImage, new AiPoseProcessCallBack() {
+                cameraHelper.process(CameraHelper.sourceBigBitmap, targetBitmap, new AiPoseProcessCallBack() {
 
                     @Override
-                    public void onSuccess(Pose poseInfo, InputImage image1) {
+                    public void onSuccess(Pose pose, Bitmap bitmapSourceBig, Bitmap aiInput) {
                         long recEnd = System.currentTimeMillis();
                         Log.d(App.tag, "Ai识别耗时:" + (recEnd - recStart));
 
-                        CameraHelper.detectResult.clear();
-                        CameraHelper.myPoseInfo.setPose(poseInfo);
-                        CameraHelper.myPoseInfo.setSourceWidth(targetBitmap.getWidth());
-                        CameraHelper.myPoseInfo.setSourceHeight(targetBitmap.getHeight());
+                        cameraHelper.getDetectResult().clear();
+                        cameraHelper.getDetectResult().getPoseInfo().setPose(pose);
+                        cameraHelper.getDetectResult().setShowSource(showSource);
+                        cameraHelper.getDetectResult().getPoseInfo().setDimenInfo(aiInput.getWidth(), aiInput.getHeight(), targetWidth, targetHeight);
+                        cameraHelper.getDetectResult().setSourceType(BaseDetectResult.SOURCE_TYPE_MP_SINGLE);
+                        cameraHelper.getDetectResult().setBitmap(showSource ? bitmapSourceBig : aiInput);
 
-                        CameraHelper.myPoseInfo.setTargetWidth(targetWidth);
-                        CameraHelper.myPoseInfo.setTargetHeight(targetHeight);
-                        CameraHelper.detectResult.setShowSource(showSource);
-
-                        CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MP_SINGLE);
-
-                        if (showSource) {
-                            CameraHelper.detectResult.setBitmap(CameraHelper.finalShowBitmap);
-                        } else {
-                            CameraHelper.detectResult.setBitmap(targetBitmap);
-                        }
-
-                        CameraHelper.detectResult.setPoseInfo(CameraHelper.myPoseInfo);
-                        onDetectResult(CameraHelper.detectResult);
+                        onDetectResult(cameraHelper.getDetectResult());
                     }
                 });
 
             } else if (doubleModule) {//双人模式
                 Rect leftRect = new Rect(0, 0, dstMat.width() / 2, dstMat.height());
                 Mat leftMat = dstMat.submat(leftRect);
-                Bitmap leftBitmap = getLeftBitmap(leftMat.width(), leftMat.height());
+                Bitmap leftBitmap = CameraHelper.getLeftBitmap(leftMat.width(), leftMat.height());
                 Utils.matToBitmap(leftMat, leftBitmap);
                 leftMat.release();
 
                 Rect rightRect = new Rect(dstMat.width() / 2, 0, dstMat.width() / 2, dstMat.height());
                 Mat rightMat = dstMat.submat(rightRect);
-                Bitmap rightBitmap = getRightBitmap(rightMat.width(), rightMat.height());
+                Bitmap rightBitmap = CameraHelper.getRightBitmap(rightMat.width(), rightMat.height());
                 Utils.matToBitmap(rightMat, rightBitmap);
                 rightMat.release();
 
-                Bitmap aitotalBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(),Bitmap.Config.RGB_565);
+                Bitmap aitotalBitmap = CameraHelper.getCacheBitmap(dstMat.width(), dstMat.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(dstMat, aitotalBitmap);
                 dstMat.release();
-                CameraHelper.process(CameraHelper.finalShowBitmap, aitotalBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
+
+                cameraHelper.process(CameraHelper.sourceBigBitmap, aitotalBitmap, leftBitmap, rightBitmap, aiPoseProcessCallBack);
             }
         }
+    }
+
+
+
+    // 填充骨骼点
+    protected final boolean fillKeyPoints(JfPoseSkeleton skeleton, List<KeyPoint> list) {
+        if (list == null || list.isEmpty()) return false;
+        for (KeyPoint kp : list) {
+            PointF p = kp.getCoordinate();
+            float score = kp.getScore();
+            String name = kp.getBodyPart().name();
+            if (name.equalsIgnoreCase(BodyPart.NOSE.name())) {
+                skeleton.setNose(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_EYE.name())) {
+                skeleton.setLEye(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_EYE.name())) {
+                skeleton.setREye(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_EAR.name())) {
+                skeleton.setREar(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_EAR.name())) {
+                skeleton.setLEar(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_SHOULDER.name())) {
+                skeleton.setLShoulder(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_SHOULDER.name())) {
+                skeleton.setRShoulder(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_ELBOW.name())) {
+                skeleton.setLElbow(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_ELBOW.name())) {
+                skeleton.setRElbow(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_WRIST.name())) {
+                skeleton.setLWrist(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_WRIST.name())) {
+                skeleton.setRWrist(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_HIP.name())) {
+                skeleton.setLHip(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_HIP.name())) {
+                skeleton.setRHip(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_KNEE.name())) {
+                skeleton.setLKnee(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_KNEE.name())) {
+                skeleton.setRKnee(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.LEFT_ANKLE.name())) {
+                skeleton.setLAnkle(toJfPoseKeyPoint(p.x, p.y, score));
+            } else if (name.equalsIgnoreCase(BodyPart.RIGHT_ANKLE.name())) {
+                skeleton.setRAnkle(toJfPoseKeyPoint(p.x, p.y, score));
+            }
+        }
+
+        // 预测下巴点
+//        skeleton.setChin(predictChin(skeleton));
+
+        return true;
+    }
+
+
+    protected JfPoseKeyPoint toJfPoseKeyPoint(float x, float y, float score) {
+        return new JfPoseKeyPoint(x, y, score);
     }
 
     /**
@@ -438,30 +471,18 @@ public class MainActivity extends BaseTestActivity {
             int targetWidth = imageViewShowTarget.getWidth() >> 1;
             int targetHeight = imageViewShowTarget.getHeight();
 
-            CameraHelper.detectResult.clear();
-
-            CameraHelper.detectResultDouble.getLeftPoseInfo().setPose(poseLeft);
-            CameraHelper.detectResultDouble.getLeftPoseInfo().setSourceWidth(imageLeft.getWidth());
-            CameraHelper.detectResultDouble.getLeftPoseInfo().setSourceHeight(imageLeft.getHeight());
-            CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetWidth(targetWidth);
-            CameraHelper.detectResultDouble.getLeftPoseInfo().setTargetHeight(targetHeight);
-
+            cameraHelper.getDetectResult().clear();
+            cameraHelper.getDetectResultDouble().getLeftPoseInfo().setPose(poseLeft);
+            cameraHelper.getDetectResultDouble().getLeftPoseInfo().setDimenInfo(imageLeft.getWidth(), imageLeft.getHeight(), targetWidth, targetHeight);
             //===========================================================================================
-            CameraHelper.detectResultDouble.getRightPoseInfo().setPose(poseRight);
-            CameraHelper.detectResultDouble.getRightPoseInfo().setSourceWidth(imageRight.getWidth());
-            CameraHelper.detectResultDouble.getRightPoseInfo().setSourceHeight(imageRight.getHeight());
-            CameraHelper.detectResultDouble.getRightPoseInfo().setTargetWidth(targetWidth);
-            CameraHelper.detectResultDouble.getRightPoseInfo().setTargetHeight(targetHeight);
-
+            cameraHelper.getDetectResultDouble().getRightPoseInfo().setPose(poseRight);
+            cameraHelper.getDetectResultDouble().getRightPoseInfo().setDimenInfo(imageRight.getWidth(), imageRight.getHeight(), targetWidth, targetHeight);
             //============================================================================================
-            CameraHelper.detectResultDouble.setBitmapTotal(bitmapTotal);
-            CameraHelper.detectResultDouble.setSourceBitmapTotal(sourceBitmapTotal);
-            CameraHelper.detectResultDouble.setShowSource(checkBoxShowSource.isChecked());
-
-            CameraHelper.detectResult.setSourceType(BaseDetectResult.SOURCE_TYPE_MP_DOUBLE);
-
-            onDetectResult(CameraHelper.detectResultDouble);
-
+            cameraHelper.getDetectResultDouble().setBitmapTotal(bitmapTotal);
+            cameraHelper.getDetectResultDouble().setSourceBitmapTotal(sourceBitmapTotal);
+            cameraHelper.getDetectResultDouble().setShowSource(checkBoxShowSource.isChecked());
+            cameraHelper.getDetectResultDouble().setSourceType(BaseDetectResult.SOURCE_TYPE_MP_DOUBLE);
+            onDetectResult(cameraHelper.getDetectResultDouble());
         }
     };
 
@@ -482,16 +503,13 @@ public class MainActivity extends BaseTestActivity {
             CameraHelper.frameCount++;
             if (delta >= 1000) {
                 int fps = CameraHelper.frameCount;
-
                 String fpsAndPixs = null;
                 if (!result.isDouble()) {
-
                     fpsAndPixs = "AI消耗分辨率:" + CameraHelper.widthSource + "x" + CameraHelper.heightSource + "\n处理速度fps: " +
                             fps + "\n显示的图像大小:" + result.getBitmap().getWidth() + "X" + result.getBitmap().getHeight();
 //                String fpsAndPixs = "处理速度: " + fps + "fps";
 
                 } else {
-
                     fpsAndPixs = "AI消耗分辨率:" + result.getBitmapTotal().getWidth() + "x" + result.getBitmapTotal().getHeight() + "\n处理速度fps: " +
                             fps + "\n显示的图像大小:2X(" + result.getLeftPoseInfo().getTargetWidth() + "x" + result.getLeftPoseInfo().getTargetHeight() + ")";
 //                String fpsAndPixs = "处理速度: " + fps + "fps";
@@ -503,39 +521,8 @@ public class MainActivity extends BaseTestActivity {
                 CameraHelper.frameCount = 0;
             }
             imageViewShowTarget.setDetectResult(result);
-
-
         });
     }
 
-
-    private Bitmap leftBitmap;
-
-    private Bitmap getLeftBitmap(int width, int height) {
-        if (null == leftBitmap || leftBitmap.getWidth() != width || leftBitmap.getHeight() != height) {
-            if (null != leftBitmap) {
-                leftBitmap.recycle();
-                leftBitmap = null;
-            }
-            leftBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-        }
-
-        return leftBitmap;
-    }
-
-
-    private Bitmap rightBitmap;
-
-    private Bitmap getRightBitmap(int width, int height) {
-        if (null == rightBitmap || rightBitmap.getWidth() != width || rightBitmap.getHeight() != height) {
-            if (null != rightBitmap) {
-                rightBitmap.recycle();
-                rightBitmap = null;
-            }
-            rightBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-        }
-
-        return rightBitmap;
-    }
 
 }

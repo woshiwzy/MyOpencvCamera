@@ -23,6 +23,16 @@ public class MyPoseInfo {
     public MyPoseInfo() {
     }
 
+
+    public void setDimenInfo(int sourceWidth,int sourceHeight,int targetWidth,int targetHeight){
+        this.sourceWidth=sourceWidth;
+        this.sourceHeight=sourceHeight;
+        this.targetWidth=targetWidth;
+        this.targetHeight=targetHeight;
+    }
+
+
+
     public int getTargetWidth() {
         return targetWidth;
     }

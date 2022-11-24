@@ -27,6 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="50dp"
             android:orientation="horizontal">
 
             <TextView
@@ -59,6 +60,12 @@
             android:layout_height="@dimen/input_item_height"
             android:gravity="top|left"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonClose"
+                android:text="关闭应用"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/buttonSwitchCamera"
@@ -104,14 +111,14 @@
                 android:checked="false"
                 android:text="上下镜像" />
 
-
             <CheckBox
                 android:id="@+id/checkBoxShowSource"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/input_item_height"
                 android:layout_marginRight="20dp"
                 android:checked="false"
-                android:text="相机原图显示" />
+                android:text="原画"
+                android:textColor="#ff0000" />
 
             <CheckBox
                 android:id="@+id/checkBoxDouble"
@@ -215,5 +222,15 @@
             android:textSize="@dimen/info_text_size" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/texteViewCountInfo"
+        android:layout_width="wrap_content"
+        android:minWidth="100dp"
+        android:layout_alignParentBottom="true"
+        android:textSize="30sp"
+        android:text="计数"
+        android:textColor="@android:color/holo_red_dark"
+        android:layout_alignParentLeft="true"
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>

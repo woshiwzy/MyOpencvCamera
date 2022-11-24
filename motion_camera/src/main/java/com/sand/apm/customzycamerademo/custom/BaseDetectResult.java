@@ -25,7 +25,7 @@ public class BaseDetectResult {
 
 
     public void clear() {
-        setPoseInfo(null);
+        poseInfo.setPose(null);
         setLeftPoseInfo(null);
         setRightPoseInfo(null);
     }
@@ -59,9 +59,6 @@ public class BaseDetectResult {
         return poseInfo;
     }
 
-    public void setPoseInfo(MyPoseInfo poseInfo) {
-        this.poseInfo = poseInfo;
-    }
 
     public boolean isDouble() {
         return isDouble;

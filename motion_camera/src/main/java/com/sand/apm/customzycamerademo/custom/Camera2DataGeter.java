@@ -34,7 +34,6 @@ import java.util.List;
 public class Camera2DataGeter extends CameraDataGeterBase {
 
     private static final String LOGTAG = App.tag;
-
     private ImageReader mImageReader;
     private int mPreviewFormat = ImageFormat.YUV_420_888;
 
@@ -46,18 +45,13 @@ public class Camera2DataGeter extends CameraDataGeterBase {
 
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler;
-
     public static boolean isOpencvInitSuccess = false;
-
 
     static {
         isOpencvInitSuccess = OpenCVLoader.initDebug();
         Log.e(LOGTAG, "isinit success:" + isOpencvInitSuccess);
     }
-
-
     private boolean isPortrait;
-
     private OnImageCallBackListener onImageCallBackListener;
 
     public Camera2DataGeter(Context context, int cameraId, int defaultConnectWidth, int defaultConnectHeight) {

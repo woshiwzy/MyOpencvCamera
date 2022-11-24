@@ -9,6 +9,10 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.jf.lib.pose.JfPoseInfo;
+import com.jf.lib.pose.JfPoseKeyPoint;
+import com.jf.lib.pose.JfPoseSkeleton;
+
 import androidx.annotation.Nullable;
 
 /**
@@ -112,7 +116,7 @@ public class SportOverlay extends View {
 
     }
 
-    protected void drawBody(Canvas canvas,JfPoseSkeleton body) {
+    protected void drawBody(Canvas canvas, JfPoseSkeleton body) {
 
         // 眼睛
         drawCircle(canvas, body.getLEye());

@@ -10,10 +10,10 @@ import android.util.AttributeSet;
 
 import com.google.mlkit.vision.pose.Pose;
 import com.google.mlkit.vision.pose.PoseLandmark;
-import com.sand.apm.customzycamerademo.pose.JfPoseBoxing;
-import com.sand.apm.customzycamerademo.pose.JfPoseInfo;
-import com.sand.apm.customzycamerademo.pose.JfPoseKeyPoint;
-import com.sand.apm.customzycamerademo.pose.JfPoseSkeleton;
+import com.jf.lib.pose.JfPoseBoxing;
+import com.jf.lib.pose.JfPoseInfo;
+import com.jf.lib.pose.JfPoseKeyPoint;
+import com.jf.lib.pose.JfPoseSkeleton;
 
 import java.util.Iterator;
 import java.util.List;

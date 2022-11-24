@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class AiPoseProcessCallBack {
 
-    public void onSuccess(Pose pose, InputImage image){
+    public void onSuccess(Pose pose,Bitmap bitmapSourceBig, Bitmap aiInput){
 
     }
 
@@ -29,7 +29,7 @@ public class AiPoseProcessCallBack {
     }
 
 
-    public void onFail(InputImage image){
+    public void onFail(Bitmap image){
 
     }
 

@@ -16,8 +16,9 @@ import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions;
 import com.sand.apm.customzycamerademo.custom.AiPoseProcessCallBack;
 import com.sand.apm.customzycamerademo.custom.Camera2DataGeter;
+import com.sand.apm.customzycamerademo.custom.CameraDataGeterBase;
 import com.sand.apm.customzycamerademo.custom.DetectResult;
-import com.sand.apm.customzycamerademo.custom.MyPoseInfo;
+import com.sand.apm.customzycamerademo.custom.OnImageCallBackListener;
 import com.sand.apm.customzycamerademo.util.LurCacheMap;
 import com.tensorflow.lite.data.Device;
 import com.tensorflow.lite.data.Person;
@@ -31,6 +32,11 @@ import org.opencv.core.Range;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import androidx.annotation.NonNull;
 
@@ -44,8 +50,8 @@ public class CameraHelper {
     /**
      * //相机图片获取器
      */
-    public static Camera2DataGeter camera2DataGeter;
-    public static Camera2DataGeter.JavaCamera2Frame camera2Frame;
+    private Camera2DataGeter camera2DataGeter;
+    private static Camera2DataGeter.JavaCamera2Frame camera2Frame;
     public static int widthSource, heightSource, widthTarget, heightTarget;
     public static int cameraWidth = 1920, cameraHeight = 1080;
 
@@ -56,19 +62,121 @@ public class CameraHelper {
     private static PoseDetector poseDetector = null;
 
     public static int frameCount = 0;
-    public static Bitmap finalShowBitmap = null;
+    public static Bitmap sourceBigBitmap = null;//相机输出的原画质(可能裁剪)
 
     //=========movenet=============
     private static MoveNet moveNet;
     private static MoveNetMultiPose moveNetMultiPose;
+//    private static Executors executors = null;
+
+    private static  ExecutorService executeService =null ;
+    static {
+        executeService=Executors.newCachedThreadPool();
+    }
 
     /**
      * 正在识别
      */
-    public static boolean processIng = false;
-    public static MyPoseInfo myPoseInfo = new MyPoseInfo();
-    public static DetectResult detectResult = new DetectResult(false);
-    public static DetectResult detectResultDouble = new DetectResult(true);
+    private static boolean processIng = false;
+    private static DetectResult detectResult = new DetectResult(false);
+    private static DetectResult detectResultDouble = new DetectResult(true);
+
+    private Context context;
+
+    public CameraHelper(Context context) {
+        this.context = context;
+    }
+
+    public boolean isProcessIng() {
+        return processIng;
+    }
+
+
+    public void toogleCamera() {
+        camera2DataGeter.toogleCamera();
+    }
+
+
+    public void setResolution(int widthSource, int heightSource) {
+        camera2DataGeter.setResolution(widthSource, heightSource);
+    }
+
+    public Camera2DataGeter getCamera2DataGeter() {
+        return camera2DataGeter;
+    }
+
+
+    public Mat getSourceMat(boolean isGray, Image image) {
+        if (isGray) {//是否处理灰度
+            return getCamera2Frame(image).gray();
+        } else {
+            return getCamera2Frame(image).rgba();
+        }
+    }
+
+
+    public void setWidthHeightSource(int widthSource, int heightSource) {
+        CameraHelper.widthSource = widthSource;
+        CameraHelper.heightSource = heightSource;
+    }
+
+    public void setWidthHeightTarget(int widthTarget, int heightTarget) {
+        CameraHelper.widthTarget = widthTarget;
+        CameraHelper.heightTarget = heightTarget;
+    }
+
+    public int getHeightSource() {
+        return heightSource;
+    }
+
+    public void setHeightSource(int heightSource) {
+        CameraHelper.heightSource = heightSource;
+    }
+
+    public static int getWidthTarget() {
+        return widthTarget;
+    }
+
+    public static void setWidthTarget(int widthTarget) {
+        CameraHelper.widthTarget = widthTarget;
+    }
+
+    public static int getHeightTarget() {
+        return heightTarget;
+    }
+
+    public static void setHeightTarget(int heightTarget) {
+        CameraHelper.heightTarget = heightTarget;
+    }
+
+    public void enablePreview() {
+        if (null != camera2DataGeter) {
+            camera2DataGeter.enableView();
+        }
+    }
+
+    public void disablePreview() {
+        if (null != camera2DataGeter) {
+            camera2DataGeter.disableView();
+        }
+    }
+
+    public void disconnectCamera() {
+        if (null != camera2DataGeter) {
+            camera2DataGeter.disconnectCamera();
+        }
+    }
+
+    public void initCamera(OnImageCallBackListener onImageCallBackListener) {
+        if (null == camera2DataGeter) {
+            camera2DataGeter = new Camera2DataGeter(this.context, CameraDataGeterBase.CAMERA_ID_FRONT, CameraHelper.cameraWidth, CameraHelper.cameraHeight);
+            camera2DataGeter.configOrientation(this.context.getResources().getConfiguration());
+            camera2DataGeter.setOnImageCallBackListener(onImageCallBackListener);
+        }
+
+        initAi();
+    }
+
 
     /**
      * 获取缓存
@@ -77,15 +185,15 @@ public class CameraHelper {
      * @param targetHeight
      * @return
      */
-    public static Bitmap getCacheBitmap(int targetWidth, int targetHeight,Bitmap.Config config) {
-        return LurCacheMap.getBitmap(targetWidth, targetHeight,config);
+    public static Bitmap getCacheBitmap(int targetWidth, int targetHeight, Bitmap.Config config) {
+        return LurCacheMap.getBitmap(targetWidth, targetHeight, config);
     }
 
 
     /**
      * 初始化姿态识别器
      */
-    public static void initAi(Context context) {
+    public void initAi() {
         // Base pose detector with streaming frames, when depending on the pose-detection sdk
         CameraHelper.options = new PoseDetectorOptions.Builder()
                 .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
@@ -99,6 +207,8 @@ public class CameraHelper {
         //movenet
         moveNet = MoveNet.Companion.create(context, Device.CPU, ModelType.Thunder);
         moveNetMultiPose = MoveNetMultiPose.Companion.create(context, Device.CPU, Type.Dynamic);
+
+
     }
 
 
@@ -109,14 +219,34 @@ public class CameraHelper {
      * @param aiPoseProcessCallBack
      */
 
-    private static ArrayList<Person> persons=new ArrayList<>();
-    public static void processWithMoveNetSingle(Bitmap bitmapSource, Bitmap inputBitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    private static ArrayList<Person> persons = new ArrayList<>();
+
+    public void processWithMoveNetSingle(Bitmap bitmapSource, Bitmap inputBitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
         if (null == moveNet) {
             return;
         }
         CameraHelper.processIng = true;
+
+//        Future<List<Person>> futerTask = executeService.submit(new Callable<List<Person>>() {
+//
+//            @Override
+//            public List<Person> call() throws Exception {
+//                List<Person> result = moveNet.estimatePoses(inputBitmap);
+//                return result;
+//            }
+//        });
+
+
         long startProcess = System.currentTimeMillis();
         List<Person> result = moveNet.estimatePoses(inputBitmap);
+//        List<Person> result = null;
+//        try {
+//            result = futerTask.get();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         Person targetePerson = null;
         persons.clear();
         if (null != result && !result.isEmpty()) {
@@ -152,19 +282,20 @@ public class CameraHelper {
     /**
      * google识别姿态
      *
-     * @param image
+     * @param bitmapSource
+     * @param bitmap
      * @param aiPoseProcessCallBack
      */
-    public static void process(InputImage image, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public void process(Bitmap bitmapSource, Bitmap bitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
         CameraHelper.processIng = true;
-        CameraHelper.poseDetector.process(image).addOnSuccessListener(pose -> {
+        CameraHelper.poseDetector.process(InputImage.fromBitmap(bitmap, 0)).addOnSuccessListener(pose -> {
             if (null != aiPoseProcessCallBack) {
-                aiPoseProcessCallBack.onSuccess(pose, image);
+                aiPoseProcessCallBack.onSuccess(pose, bitmapSource, bitmap);
             }
             CameraHelper.processIng = false;
         }).addOnFailureListener(e -> {
             if (null != aiPoseProcessCallBack) {
-                aiPoseProcessCallBack.onFail(image);
+                aiPoseProcessCallBack.onFail(bitmap);
             }
             CameraHelper.processIng = false;
         }).addOnCompleteListener(new OnCompleteListener<Pose>() {
@@ -207,7 +338,7 @@ public class CameraHelper {
                 Log.d(App.tag, "成功了");
 
                 if (null != aiPoseProcessCallBackDouble) {
-                    aiPoseProcessCallBackDouble.onSuccessDouble(finalShowBitmap, totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
+                    aiPoseProcessCallBackDouble.onSuccessDouble(sourceBigBitmap, totalBitmap2Doule, leftPose, timageLeft, rightPose, timageRight);
                 }
 
                 leftPose = null;
@@ -233,7 +364,7 @@ public class CameraHelper {
     private static AiPoseProcessCallBack aiPoseProcessCallBackDouble;
     private static Bitmap totalBitmap2Doule = null;
 
-    public static void process(Bitmap souceTotalBitmap, Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
+    public void process(Bitmap souceTotalBitmap, Bitmap totalBitmap, Bitmap imageLeft, Bitmap imageRight, AiPoseProcessCallBack aiPoseProcessCallBack) {
 
         try {
 
@@ -349,17 +480,67 @@ public class CameraHelper {
         return targetMat;
     }
 
+    private Camera2DataGeter.JavaCamera2Frame getCamera2Frame(Image image) {
+        if (null == camera2Frame) {
+            camera2Frame = new Camera2DataGeter.JavaCamera2Frame(image);
+        } else {
+            camera2Frame.setImage(image);
+        }
+        return camera2Frame;
+    }
 
     /**
      * 直接处理相机的Image
      *
-     * @param cameraImage
-     * @param degree
+     * @param bitmapSource
+     * @param bitmap
      * @param aiPoseProcessCallBack
      */
-    public static void processInputImage(Image cameraImage, int degree, AiPoseProcessCallBack aiPoseProcessCallBack) {
-        InputImage inputImage = InputImage.fromMediaImage(cameraImage, degree);
-        CameraHelper.process(inputImage, aiPoseProcessCallBack);
+    public void processInputImage(Bitmap bitmapSource, Bitmap bitmap, AiPoseProcessCallBack aiPoseProcessCallBack) {
+        process(bitmapSource, bitmap, aiPoseProcessCallBack);
     }
+
+    public DetectResult getDetectResult() {
+        return detectResult;
+    }
+
+
+    public DetectResult getDetectResultDouble() {
+        return detectResultDouble;
+    }
+
+    public static void setDetectResultDouble(DetectResult detectResultDouble) {
+        CameraHelper.detectResultDouble = detectResultDouble;
+    }
+
+    private static Bitmap leftBitmap;
+
+    public static Bitmap getLeftBitmap(int width, int height) {
+        if (null == leftBitmap || leftBitmap.getWidth() != width || leftBitmap.getHeight() != height) {
+            if (null != leftBitmap) {
+                leftBitmap.recycle();
+                leftBitmap = null;
+            }
+            leftBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        }
+
+        return leftBitmap;
+    }
+
+
+    private static Bitmap rightBitmap;
+
+    public static Bitmap getRightBitmap(int width, int height) {
+        if (null == rightBitmap || rightBitmap.getWidth() != width || rightBitmap.getHeight() != height) {
+            if (null != rightBitmap) {
+                rightBitmap.recycle();
+                rightBitmap = null;
+            }
+            rightBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        }
+
+        return rightBitmap;
+    }
+
 
 }
